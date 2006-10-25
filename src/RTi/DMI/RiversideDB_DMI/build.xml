@@ -1,0 +1,914 @@
+<!--
+================================================================================
+Ant build.xml file for creating the RiversideDB_DMI files
+================================================================================
+2002-09-04	J. Thomas Sapienza, RTi	Initial Version
+2002-10-15	JTS, RTi		Changed paths from jdk_1.1.8 and
+					jdk_1.4.0 to jdk_118 and jdk_140
+2002-12-09	JTS, RTi		SelectRiversideDBJDialog.java is
+					Swing-dependent so it was removed from
+					the 1.1.8 compile.
+2003-10-06	JTS, RTi		Default compiler is now 1.4.2.
+2004-11-23	Luiz Teixeira, Rti	Add 8 RiversideDB*.java classes to the
+					include list of classes to compile.
+2004-11-23	Luiz Teixeira, Rti	Add 7 RiversideDB***JFrame.java classes
+					to the include list of classes to
+					compile.
+2004-11-23	Luiz Teixeira, Rti	Added RiversideDB_EditorBase_JFrame.java
+2004-12-09	Luiz Teixeira, RTi	Added RiversideDB_TreeBase_JTree.java
+2004-12-13 	Luiz Teixeira, RTi	Replaced the original RiversideDB_Refen-
+					        ceTable_JFrame class into:
+					RiversideDB_ReferenceTable_EditorBase_
+					        JFrame and
+					RiversideDB_ReferenceTable_*_JFrame
+					where * is:
+						DataDimension
+						DataSource
+						DataType
+						DataUnits
+						ImportType
+						MeasCreateMethod
+						MeasQualityFlag
+						MeasReductionType
+						MeasTimeScale
+						MeasTransProtocol
+						MessageLog
+						Scenario
+						SHEFType
+						TableLayout
+2004-12-20 Luiz Teixeira, RTi		Replaced
+					RiversideDB_ReferenceTable_EditorBase_
+					JFrame by RiversideDB_ReferenceTable_Abs
+					tract_JFrame.
+2004-12-21 Luiz Teixeira, RTi		Removed the entry for  
+  					RiversideDB_Worksheet_JDialog.java,().
+  					This class is not used anymore. From
+  						now on, the editor for the Props
+  						table is instantiated in the
+  						same way as the ReferenceTables.
+2004-12-21 Luiz Teixeira, RTi		Removed the entry for  
+  					SelectRiversideDBJDialog.java.
+  					This class is not used anywhere.
+2006-01-17	JTS, RTi				Moved LoginJDialog to this package from the 
+									RiverTrakAssistant package.
+================================================================================
+-->
+
+<project name="libRiversideDB_DMIJava" default="compile" basedir="..\..\..\..">
+
+<description>
+	Build file for the RiversideDB_DMI library.
+</description>
+
+<!--
+================================================================================
+	Global Build Properties
+================================================================================
+-->
+<property name="package" value="RTi/DMI/RiversideDB_DMI"/>
+<property name="src" location="src"/>
+<!-- the next property ("build") should not have a trailing / on the path.
+     ie, it can be "classes", but not "classes/".  Otherwise, alternate version
+     compilation won't work. -->
+<property name="build" location="classes"/>
+
+<property name="latest_version" value="JDK 1.4.2"/>
+
+<!--
+================================================================================
+	Classpath and other path components
+================================================================================
+-->
+<path id="swing">
+	<pathelement location="I:\develop\bin\swingall.jar"/>
+</path>
+
+<!--
+================================================================================
+INIT
+	Initialization of environment variables for using JDK 1.4.2
+================================================================================
+-->
+<target name="init_142"
+	description="Set-up of the environment variables for a JDK 1.4.2 build">
+	<property name="jdk_home" location="i:\develop\jdk_142"/>
+	<property name="build_subversion" value="_142"/>
+	<property name="includes"
+		value="	${package}\RiversideDB_Area.java,
+			${package}\LoginJDialog.java,
+			${package}\RiversideDB_AutoUpdateProduct.java,
+			${package}\RiversideDB_AutoUpdateProductMeasType.java,
+			${package}\RiversideDB_DataDimension.java,
+			${package}\RiversideDB_DataSource.java,
+			${package}\RiversideDB_DataType.java,
+			${package}\RiversideDB_DataUnits.java,
+			${package}\RiversideDB_DBGroup.java,
+			${package}\RiversideDB_DBUser.java,
+			${package}\RiversideDB_DBUserDBGroupRelation.java,
+			${package}\RiversideDB_DBUserMeasLocGroupRelation.java,
+			${package}\RiversideDB_ExportConf.java,
+			${package}\RiversideDB_ExportConf_CellRenderer.java,
+			${package}\RiversideDB_ExportConf_TableModel.java,
+			${package}\RiversideDB_ExportProduct.java,
+			${package}\RiversideDB_ExportType.java,
+			${package}\RiversideDB_Geoloc.java,
+			${package}\RiversideDB_ImportConf.java,
+			${package}\RiversideDB_ImportConf_CellRenderer.java,
+			${package}\RiversideDB_ImportConf_TableModel.java,
+			${package}\RiversideDB_ImportProduct.java,
+			${package}\RiversideDB_ImportType.java,
+			${package}\RiversideDB_MeasCreateMethod.java,
+			${package}\RiversideDB_MeasLoc.java,
+			${package}\RiversideDB_MeasLocGroup.java,
+			${package}\RiversideDB_MeasLocType.java,
+			${package}\RiversideDB_MeasQualityFlag.java,
+			${package}\RiversideDB_MeasReducGridWeight.java,
+			${package}\RiversideDB_MeasReducRelation.java,
+			${package}\RiversideDB_MeasReduction.java,
+			${package}\RiversideDB_MeasReductionType.java,
+			${package}\RiversideDB_MeasScenario.java,
+			${package}\RiversideDB_MeasScenarioRelation.java,
+			${package}\RiversideDB_MeasTimeScale.java,
+			${package}\RiversideDB_MeasTransProtocol.java,
+			${package}\RiversideDB_MeasType.java,
+			${package}\RiversideDB_MeasTypeStats.java,
+			${package}\RiversideDB_MeasTypeStatus.java,
+			${package}\RiversideDB_MessageLog.java,
+			${package}\RiversideDB_Operation.java,
+			${package}\RiversideDB_OperationStateRelation.java,
+			${package}\RiversideDB_ProductGroup.java,
+			${package}\RiversideDB_ProductType.java,
+			${package}\RiversideDB_Props.java,
+			${package}\RiversideDB_RatingTable.java,
+			${package}\RiversideDB_RatingTable_CellRenderer.java,
+			${package}\RiversideDB_RatingTable_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_CellRenderer.java,
+
+			${package}\RiversideDB_Revision.java,
+			${package}\RiversideDB_Scenario.java,
+			${package}\RiversideDB_SHEFType.java,
+			${package}\RiversideDB_StageDischargeRating.java,
+			${package}\RiversideDB_State.java,
+			${package}\RiversideDB_StateGroup.java,
+			${package}\RiversideDB_Station.java,
+			${package}\RiversideDB_TableLayout.java,
+			${package}\RiversideDB_Permissions_JDialog.java,
+			${package}\RiversideDB_Tables.java,
+			${package}\RiversideDB_TSDateValueToMinute.java,
+			${package}\RiversideDB_TSProduct.java,
+			${package}\RiversideDB_TSProductManager_JFrame.java,
+			${package}\RiversideDB_TSProductProps.java,
+			${package}\RiversideDB_Version.java,
+			${package}\RiversideDB_State_CellRenderer.java,
+			${package}\RiversideDB_State_TableModel.java,
+			${package}\RiversideDB_StationWeights_CellRenderer.java,
+			${package}\RiversideDB_StationWeights_TableModel.java,
+			${package}\RiversideDB_DMI.java,
+
+			${package}\RiversideDB_WindowManager.java,
+
+			${package}\RiversideDB_Util.java,
+
+			${package}\RiversideDB_System_JPanel.java,
+			${package}\RiversideDB_System_JTabbedPane.java,
+
+			${package}\RiversideDB_TreeBase_JTree.java,
+			${package}\RiversideDB_Import_JTree.java,
+			${package}\RiversideDB_Export_JTree.java,
+			${package}\RiversideDB_MeasLoc_JTree.java,
+
+			${package}\RiversideDB_System_Listener.java,
+
+			${package}\RiversideDB_EditorBase_JFrame.java,
+			${package}\RiversideDB_Export_JFrame.java,
+			${package}\RiversideDB_Import_JFrame.java,
+			${package}\RiversideDB_Location_JFrame.java,
+			${package}\RiversideDB_Reduction_JFrame.java,
+			${package}\RiversideDB_ProductGroup_JFrame.java,
+			${package}\RiversideDB_MeasLocGroup_JFrame.java,
+			${package}\RiversideDB_TS_JFrame.java,
+			
+			${package}\RiversideDB_ReferenceTable_Abstract_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_DataDimension_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_DataType_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_DataSource_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_DataUnits_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_ImportType_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_MeasCreateMethod_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_MeasQualityFlag_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_MeasReductionType_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_MeasTimeScale_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_MeasTransProtocol_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_MessageLog_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_Scenario_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_SHEFType_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_TableLayout_TableModel.java,
+			${package}\RiversideDB_ReferenceTable_Props_TableModel.java,
+
+			${package}\RiversideDB_ReferenceTable_Abstract_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_DataDimension_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_DataSource_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_DataType_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_DataUnits_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_DataUnits_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_ImportType_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_MeasCreateMethod_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_MeasQualityFlag_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_MeasReductionType_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_MeasTimeScale_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_MeasTransProtocol_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_MessageLog_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_Scenario_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_SHEFType_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_TableLayout_JFrame.java,
+			${package}\RiversideDB_ReferenceTable_Props_JFrame.java
+			"/>
+
+	<property name="compiler" value="modern"/>
+	<property name="executable" value="${jdk_home}\bin\javac"/>
+	<property name="jre_home" location="i:\develop\jdk_142"/>
+
+	<property name="blessed_dir"
+		location="i:\develop\classes${build_subversion}"/>
+	<property name="blessed_javadoc_dir"
+		location="i:\develop\javadoc${build_subversion}"/>
+
+	<path id="classpath">
+		<pathelement location="${build}${build_subversion}"/>
+		<pathelement location="${jdk_home}\lib\classes.zip"/>
+		<path refid="swing"/>
+		<dirset dir="${blessed_dir}">
+			<exclude name="${blessed_dir}\RTi\TS\**"/>
+		</dirset>
+		<pathelement location="i:\develop\dmi\sql2000\lib"/>
+	</path>
+</target>
+
+<!--
+================================================================================
+INIT
+	Initialization of environment variables for using JDK 1.4.0
+================================================================================
+-->
+<target name="init_140"
+	description="Set-up of the environment variables for a JDK 1.4.0 build">
+	<property name="jdk_home" location="i:\develop\jdk_140"/>
+	<property name="build_subversion" value="_140"/>
+	<property name="includes"
+		value="	${package}\RiversideDB_Area.java,
+			${package}\RiversideDB_AutoUpdateProduct.java,
+			${package}\RiversideDB_AutoUpdateProductMeasType.java,
+			${package}\RiversideDB_DataDimension.java,
+			${package}\RiversideDB_DataSource.java,
+			${package}\RiversideDB_DataType.java,
+			${package}\RiversideDB_DataUnits.java,
+			${package}\RiversideDB_DBGroup.java,
+			${package}\RiversideDB_DBUser.java,
+			${package}\RiversideDB_DBUserDBGroupRelation.java,
+			${package}\RiversideDB_DBUserMeasLocGroupRelation.java,
+			${package}\RiversideDB_ExportConf.java,
+			${package}\RiversideDB_ExportConf_CellRenderer.java,
+			${package}\RiversideDB_ExportConf_TableModel.java,
+			${package}\RiversideDB_ExportProduct.java,
+			${package}\RiversideDB_ExportType.java,
+			${package}\RiversideDB_Geoloc.java,
+			${package}\RiversideDB_ImportConf.java,
+			${package}\RiversideDB_ImportConf_CellRenderer.java,
+			${package}\RiversideDB_ImportConf_TableModel.java,
+			${package}\RiversideDB_ImportProduct.java,
+			${package}\RiversideDB_ImportType.java,
+			${package}\RiversideDB_MeasCreateMethod.java,
+			${package}\RiversideDB_MeasLoc.java,
+			${package}\RiversideDB_MeasLocGroup.java,
+			${package}\RiversideDB_MeasLocType.java,
+			${package}\RiversideDB_MeasQualityFlag.java,
+			${package}\RiversideDB_MeasReducGridWeight.java,
+			${package}\RiversideDB_MeasReducRelation.java,
+			${package}\RiversideDB_MeasReduction.java,
+			${package}\RiversideDB_MeasReductionType.java,
+			${package}\RiversideDB_MeasScenario.java,
+			${package}\RiversideDB_MeasScenarioRelation.java,
+			${package}\RiversideDB_MeasTimeScale.java,
+			${package}\RiversideDB_MeasTransProtocol.java,
+			${package}\RiversideDB_MeasType.java,
+			${package}\RiversideDB_MeasTypeStats.java,
+			${package}\RiversideDB_MeasTypeStatus.java,
+			${package}\RiversideDB_MessageLog.java,
+			${package}\RiversideDB_ProductGroup.java,
+			${package}\RiversideDB_ProductType.java,
+			${package}\RiversideDB_Props.java,
+			${package}\RiversideDB_Props_CellRenderer.java,
+			${package}\RiversideDB_Props_TableModel.java,
+			${package}\RiversideDB_RatingTable.java,
+			${package}\RiversideDB_RatingTable_CellRenderer.java,
+			${package}\RiversideDB_RatingTable_TableModel.java,
+			${package}\RiversideDB_Revision.java,
+			${package}\RiversideDB_Scenario.java,
+			${package}\RiversideDB_SHEFType.java,
+			${package}\RiversideDB_StageDischargeRating.java,
+			${package}\RiversideDB_State.java,
+			${package}\RiversideDB_StateGroup.java,
+			${package}\RiversideDB_Station.java,
+			${package}\RiversideDB_TableLayout.java,
+			${package}\RiversideDB_Tables.java,
+			${package}\RiversideDB_TSDateValueToMinute.java,
+			${package}\RiversideDB_TSProduct.java,
+			${package}\RiversideDB_TSProductProps.java,
+			${package}\RiversideDB_Version.java,
+			${package}\RiversideDB_StationWeights_CellRenderer.java,
+			${package}\RiversideDB_StationWeights_TableModel.java,
+			${package}\RiversideDB_DMI.java,
+			${package}\SelectRiversideDBJDialog.java
+			"/>
+
+	<property name="compiler" value="modern"/>
+	<property name="executable" value="${jdk_home}\bin\javac"/>
+	<property name="jre_home" location="i:\develop\jdk_140"/>
+
+	<property name="blessed_dir"
+		location="i:\develop\classes${build_subversion}"/>
+	<property name="blessed_javadoc_dir"
+		location="i:\develop\javadoc${build_subversion}"/>
+
+	<path id="classpath">
+		<pathelement location="${build}${build_subversion}"/>
+		<pathelement location="${jdk_home}\lib\classes.zip"/>
+		<path refid="swing"/>
+		<dirset dir="${blessed_dir}">
+			<exclude name="${blessed_dir}\RTi\TS\**"/>
+		</dirset>
+		<pathelement location="i:\develop\dmi\sql2000\lib"/>
+	</path>
+</target>
+
+<!--
+================================================================================
+INIT
+	Initialization of environment variables for using JDK 1.1.8
+================================================================================
+-->
+<target name="init_118"
+	description="Set-up of the environment variables for a JDK 1.1.8 build">
+	<property name="jdk_home" location="i:\develop\jdk_118"/>
+	<property name="build_subversion" value="_118"/>
+
+	<property name="includes"
+		value="	${package}\RiversideDB_Area.java,
+			${package}\RiversideDB_DataDimension.java,
+			${package}\RiversideDB_DataSource.java,
+			${package}\RiversideDB_DataType.java,
+			${package}\RiversideDB_DataUnits.java,
+			${package}\RiversideDB_ExportConf.java,
+			${package}\RiversideDB_ExportProduct.java,
+			${package}\RiversideDB_ExportType.java,
+			${package}\RiversideDB_Geoloc.java,
+			${package}\RiversideDB_ImportConf.java,
+			${package}\RiversideDB_ImportProduct.java,
+			${package}\RiversideDB_ImportType.java,
+			${package}\RiversideDB_MeasCreateMethod.java,
+			${package}\RiversideDB_MeasLoc.java,
+			${package}\RiversideDB_MeasLocType.java,
+			${package}\RiversideDB_MeasQualityFlag.java,
+			${package}\RiversideDB_MeasReducGridWeight.java,
+			${package}\RiversideDB_MeasReducRelation.java,
+			${package}\RiversideDB_MeasReduction.java,
+			${package}\RiversideDB_MeasReductionType.java,
+			${package}\RiversideDB_MeasScenario.java,
+			${package}\RiversideDB_MeasScenarioRelation.java,
+			${package}\RiversideDB_MeasTimeScale.java,
+			${package}\RiversideDB_MeasTransProtocol.java,
+			${package}\RiversideDB_MeasType.java,
+			${package}\RiversideDB_MeasTypeStats.java,
+			${package}\RiversideDB_MeasTypeStatus.java,
+			${package}\RiversideDB_MessageLog.java,
+			${package}\RiversideDB_Props.java,
+			${package}\RiversideDB_RatingTable.java,
+			${package}\RiversideDB_RatingTable_CellRenderer.java,
+			${package}\RiversideDB_RatingTable_TableModel.java,
+			${package}\RiversideDB_Revision.java,
+			${package}\RiversideDB_Scenario.java,
+			${package}\RiversideDB_SHEFType.java,
+			${package}\RiversideDB_StageDischargeRating.java,
+			${package}\RiversideDB_State.java,
+			${package}\RiversideDB_StateGroup.java,
+			${package}\RiversideDB_Station.java,
+			${package}\RiversideDB_TableLayout.java,
+			${package}\RiversideDB_Tables.java,
+			${package}\RiversideDB_TSDateValueToMinute.java,
+			${package}\RiversideDB_Version.java,
+			${package}\RiversideDB_DMI.java
+			"/>
+
+	<property name="compiler" value="classic"/>
+	<property name="executable" value="${jdk_home}\bin\javac"/>
+	<property name="jre_home" location="j:\crdss\JRE"/>
+
+	<property name="blessed_dir"
+		location="i:\develop\classes${build_subversion}"/>
+	<property name="blessed_javadoc_dir"
+		location="i:\develop\javadoc${build_subversion}"/>
+
+	<path id="classpath">
+		<pathelement location="${build}${build_subversion}"/>
+		<pathelement location="${jdk_home}\lib\classes.zip"/>
+		<path refid="swing"/>
+		<pathelement location="${blessed_dir}"/>
+	</path>
+</target>
+
+
+<!--
+================================================================================
+COMPILE
+	Generic routine to compile for a given version
+================================================================================
+-->
+<target name="compile_generic"
+	description="Generic target for compiling source code">
+
+	<tstamp/>
+	<mkdir dir="${build}${build_subversion}"/>
+
+	<!-- Compile the java code from ${src} into ${build} -->
+	<javac srcdir="${src}"
+		fork="yes"
+		includes="${includes}"
+		destdir="${build}${build_subversion}"
+		verbose="false"
+		debug="on"
+		deprecation="true"
+		executable="${executable}"
+		compiler="${compiler}">
+		<classpath refid="classpath"/>
+	</javac>
+</target>
+
+<!--
+================================================================================
+COMPILE
+	[Default Target]
+	This is the default target.  This is executed when ant is run without
+	any other arguments.  When a new JDk version is used and a target built
+	for it, the 'depends' argument in this target should be changed to point
+	to the new target.
+================================================================================
+-->
+<target name="compile"
+	depends="142"
+	description="Compile target for the latest java version"/>
+
+<!--
+================================================================================
+COMPILE
+	Version 1.4.2 Compile
+================================================================================
+-->
+<target name="142"
+	depends="init_142, compile_generic"
+	description="Compile target for JDK 1.4.2"/>
+
+<!--
+================================================================================
+COMPILE
+	Version 1.4.0 Compile
+================================================================================
+-->
+<target name="140"
+	depends="init_140, compile_generic"
+	description="Compile target for JDK 1.4.0"/>
+
+<!--
+================================================================================
+COMPILE
+	Version 1.1.8 Compile
+================================================================================
+-->
+<target name="118"
+	depends="init_118, compile_generic"
+	description="Compile target for JDK 1.1.8"/>
+
+<!--
+================================================================================
+JAVADOC
+	Generic target for handling javadocing for a given version
+================================================================================
+-->
+<target name="javadoc_generic"
+	description="Target for creating Javadocs">
+	<javadoc
+		destdir="${basedir}\javadoc${build_subversion}">
+		<classpath refid="classpath"/>
+		<fileset dir="${src}"
+			includes="${includes}"/>
+	</javadoc>
+</target>
+
+<!--
+================================================================================
+JAVADOC
+	Latest version Javadoc.  When a new JDK is added, the 'depends'
+	argument should be updated to point to the new target.
+================================================================================
+-->
+<target name="javadoc"
+	depends="javadoc_142"
+	description="Target for creating Javadocs for latest JDK"/>
+
+<!--
+================================================================================
+JAVADOC
+	Javadoc for JDK 1.4.2
+================================================================================
+-->
+<target name="javadoc_142"
+	depends="init_142, javadoc_generic"
+	description="Target for creating Javadocs for 1.4.2"/>
+
+<!--
+================================================================================
+JAVADOC
+	Javadoc for JDK 1.4.0
+================================================================================
+-->
+<target name="javadoc_140"
+	depends="init_140, javadoc_generic"
+	description="Target for creating Javadocs for 1.4.0"/>
+
+<!--
+================================================================================
+JAVADOC
+	Javadoc for JDK 1.1.8
+================================================================================
+-->
+<target name="javadoc_118"
+	depends="init_118, javadoc_generic"
+	description="Target for creating Javadocs for 1.1.8"/>
+
+<!--
+================================================================================
+CLEAN_BLESSED
+	Generic target for cleaning the blessed directories
+===============================================================================
+-->
+<target name="clean_blessed_generic"
+	description="Generic target for deleting blessed class files">
+	<delete>
+		<fileset dir="${blessed_dir}\${package}"
+			 includes="*.class"/>
+	</delete>
+</target>
+
+<!--
+================================================================================
+CLEAN_BLESSED
+	Latest version clean.  When a new JDk is added, the 'depends' argument
+	should be updated to point to the new target.
+================================================================================
+-->
+<target name="clean_blessed"
+	depends="clean_blessed_142"
+	description="Target for deleting the latest version's class files"/>
+
+<!--
+================================================================================
+CLEAN_BLESSED
+	Version 1.4.2 clean
+================================================================================
+-->
+<target name="clean_blessed_142"
+	depends="init_142, clean_blessed_generic"
+	description="Target for deleting JDK 1.4.2 class files"/>
+
+<!--
+================================================================================
+CLEAN_BLESSED
+	Version 1.4.0 clean
+================================================================================
+-->
+<target name="clean_blessed_140"
+	depends="init_140, clean_blessed_generic"
+	description="Target for deleting JDK 1.4.0 class files"/>
+
+<!--
+================================================================================
+CLEAN_BLESSED
+	Version 1.1.8 clean
+================================================================================
+-->
+<target name="clean_blessed_118"
+	depends="init_118, clean_blessed_generic"
+	description="Target for deleting JDK 1.1.8 class files"/>
+
+
+<!--
+================================================================================
+CLEAN
+	Generic target for doing a clean for a given version
+================================================================================
+-->
+<target name="clean_generic"
+	description="Generic target for deleting class files">
+	<!-- Delete the ${build} tree -->
+	<delete dir="${build}${build_subversion}"/>
+	<delete dir="javadoc{build}${build_subversion}"/>
+</target>
+
+<!--
+================================================================================
+CLEAN
+	Latest version clean.  When a new JDk is added, the 'depends' argument
+	should be updated to point to the new target.
+================================================================================
+-->
+<target name="clean"
+	depends="clean_142"
+	description="Target for deleting the latest version's class files"/>
+
+<!--
+================================================================================
+CLEAN
+	Version 1.4.2 clean
+================================================================================
+-->
+<target name="clean_142"
+	depends="init_142, clean_generic"
+	description="Target for deleting JDK 1.4.2 class files"/>
+
+<!--
+================================================================================
+CLEAN
+	Version 1.4.0 clean
+================================================================================
+-->
+<target name="clean_140"
+	depends="init_140, clean_generic"
+	description="Target for deleting JDK 1.4.0 class files"/>
+
+<!--
+================================================================================
+CLEAN
+	Version 1.1.8 clean
+================================================================================
+-->
+<target name="clean_118"
+	depends="init_118, clean_generic"
+	description="Target for deleting JDK 1.1.8 class files"/>
+
+<!--
+================================================================================
+INSTALL
+	Generic target for doing an install for a given version
+================================================================================
+-->
+<target name="install_generic"
+	description="Generic target for installing class files">
+	<delete>
+		<fileset
+			dir="${blessed_dir}\${package}"
+			includes="**/*.class"/>
+	</delete>
+
+	<copy todir="${blessed_dir}\${package}"
+		overwrite="yes">
+		<fileset dir="${build}${build_subversion}\${package}">
+			<include name="*.class"/>
+		</fileset>
+	</copy>
+</target>
+
+<!--
+================================================================================
+INSTALL
+	Latest version install.  When a new JDK version is used, the 'depends'
+	argument should be updated to point to the new target.
+================================================================================
+-->
+<target name="install"
+	depends="install_142"
+	description="Target for installing the latest version's classes"/>
+
+<!--
+================================================================================
+INSTALL
+	Version 1.4.2 install
+================================================================================
+-->
+<target name="install_142"
+	depends="init_142, clean_blessed_142, install_generic"
+	description="Target for installing JDk 1.4.2 classes"/>
+
+<!--
+================================================================================
+INSTALL
+	Version 1.4.0 install
+================================================================================
+-->
+<target name="install_140"
+	depends="init_140, clean_blessed_140, install_generic"
+	description="Target for installing JDk 1.4.0 classes"/>
+
+<!--
+================================================================================
+INSTALL
+	Version 1.1.8 install
+================================================================================
+-->
+<target name="install_118"
+	depends="init_118, clean_blessed_118, install_generic"
+	description="Target for installing JDk 1.1.8 classes"/>
+
+<!--
+================================================================================
+INSTALL JAVADOC
+	Generic target for doing a Javadoc install for a given version
+================================================================================
+-->
+<target name="install_javadoc_generic"
+	description="Target for installing javadoc files">
+	<copy todir="${blessed_javadoc_dir}"
+		overwrite="yes">
+		<fileset dir="${basedir}\javadoc${build_subversion}">
+			<include name="RTi\**"/>
+		</fileset>
+	</copy>
+</target>
+
+<!--
+================================================================================
+INSTALL JAVADOC
+	Latest version Javadoc install.  When a new JDK is used, the 'depends'
+	arguments should be changed to point to the new target.
+================================================================================
+-->
+<target name="install_javadoc"
+	depends="install_javadoc_142"
+	description="Target for installing latest javadoc files"/>
+
+<!--
+================================================================================
+INSTALL JAVADOC
+	Target for installing JDK 1.4.2 Javadocs
+================================================================================
+-->
+<target name="install_javadoc_142"
+	depends="init_142, install_javadoc_generic"
+	description="Target for installing JDK 1.4.2 files"/>
+
+<!--
+================================================================================
+INSTALL JAVADOC
+	Target for installing JDK 1.4.0 Javadocs
+================================================================================
+-->
+<target name="install_javadoc_140"
+	depends="init_140, install_javadoc_generic"
+	description="Target for installing JDK 1.4.0 files"/>
+
+<!--
+================================================================================
+INSTALL JAVADOC
+	Target for installing JDK 1.1.8 Javadocs
+================================================================================
+-->
+<target name="install_javadoc_118"
+	depends="init_118, install_javadoc_generic"
+	description="Target for installing JDK 1.1.8 files"/>
+
+<!--
+================================================================================
+RUN
+	Generic target for handling runs for a given version
+================================================================================
+-->
+<target name="run_generic"
+	description="Generic target for running the class">
+	<java classname="RTi.DMI.RiversideDB_DMI.RiversideDB_DMI"
+		fork="true"
+		dir="${jre_home}\bin">
+		<jvmarg value="-mx128m"/>
+		<jvmarg value="-Djava.compiler=NONE"/>
+		<classpath refid="classpath"/>
+	</java>
+</target>
+
+<!--
+================================================================================
+RUN
+	Target for running the latest JDK version.  When a new JDK is used,
+	the 'depends' argument should be changed to point to the new target.
+================================================================================
+-->
+<target name="run"
+	depends="run_142"
+	description="Target for running with the latest classes"/>
+
+<!--
+================================================================================
+RUN
+	Target for running the program with JDK 1.4.2
+================================================================================
+-->
+<target name="run_142"
+	depends="init_142, run_generic"
+	description="Target for running with JDK 1.4.2 classes"/>
+
+<!--
+================================================================================
+RUN
+	Target for running the program with JDK 1.4.0
+================================================================================
+-->
+<target name="run_140"
+	depends="init_140, run_generic"
+	description="Target for running with JDK 1.4.0 classes"/>
+
+<!--
+================================================================================
+RUN
+	Target for running the program with JDK 1.1.8
+================================================================================
+-->
+<target name="run_118"
+	depends="init_118, run_generic"
+	description="Target for running with JDK 1.1.8 classes"/>
+
+<!--
+================================================================================
+FULL
+	Target for doing a full run for the latest JDK version.  When a new JDK
+	is used, the 'depends' argument should be changed to point to the new
+	target.
+================================================================================
+-->
+<target name="full"
+	depends="full_142"
+	description="Cleans, builds, javadocs and installs the latest JDK"/>
+
+<!--
+================================================================================
+FULL
+	Target for doing a full run for JDK 1.4.2
+================================================================================
+-->
+<target name="full_142"
+	depends="init_142, clean_142, 142, javadoc_142, install_142,
+		install_javadoc_142"
+	description="Cleans, builds, javadocs and installs JDK 1.4.2"/>
+
+<!--
+================================================================================
+FULL
+	Target for doing a full run for JDK 1.4.0
+================================================================================
+-->
+<target name="full_140"
+	depends="init_140, clean_140, 140, javadoc_140, install_140,
+		install_javadoc_140"
+	description="Cleans, builds, javadocs and installs JDK 1.4.0"/>
+
+<!--
+================================================================================
+FULL
+	Target for doing a full run for JDK 1.1.8
+================================================================================
+-->
+<target name="full_118"
+	depends="init_118, clean_118, 118, javadoc_118, install_118,
+		install_javadoc_118"
+	description="Cleans, builds, javadocs, and installs JDK 1.1.8"/>
+
+<!--
+================================================================================
+HELP
+	Help
+================================================================================
+-->
+<target name="help"
+	description="Help on the targets that can be run in this build file">
+<echo>
+Valid targets are:
+[default]           - compiles with ${latest_version}
+140                 - compiles with JDK 1.4.0
+118                 - compiles with JDK 1.1.8
+javadoc             - creates javadoc documentation for ${latest_version}
+javadoc_140         - creates javadoc documentation for JDK 1.4.0
+javadoc_118         - creates javadoc documentation for JDK 1.1.8
+install             - copies ${latest_version} classes to blessed dir
+install_140         - copies JDK 1.4.0 classes to blessed dir
+install_118         - copies JDK 1.1.8 classes to blessed dir
+install_javadoc     - installs the ${latest_version} javadocs
+install_javadoc_140 - installs the JDK 1.4.0 javadocs
+install_javadoc_118 - installs the JDK 1.1.8 javadocs
+clean               - deletes ${latest_version} classes directory
+clean_140           - deletes JDK 1.4.0 classes directory
+clean_118           - deletes JDK 1.1.8 classes directory
+run                 - runs ${latest_version} ...
+run_140             - runs JDK 1.4.0 ...
+run_118             - runs JDK 1.1.8 ...
+full                - cleans, builds, javadocs and installs ${latest_version}
+full_140            - cleans, builds, javadocs and installs JDK 1.4.0
+full_118            - cleans, builds, javadocs and installs JDK 1.1.8
+</echo>
+</target>
+
+</project>
