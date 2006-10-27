@@ -92,7 +92,8 @@
 	<property name="command_file"    value="Regression.RiversideDB_DMI" />
 	
 	<!--================ Dependencies ==================-->
-	<property name="RTi_jar"	  value="${ext.dir}${sep}RTi_142.jar" />
+	<property name="RTi_jar"	  
+		value="${ext.dir}${sep}RTi_Common${sep}RTi_142.jar" />
 
 	<!-- =========== Compiler Properties ===============-->
 	<property name="compiler" value="modern" />
