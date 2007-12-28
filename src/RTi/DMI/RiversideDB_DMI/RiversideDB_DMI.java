@@ -373,7 +373,6 @@ import RTi.Util.IO.Prop;
 import RTi.Util.String.StringUtil;
 
 import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeInterval;
 
 /**
 The RiversideDB_DMI provides an interface to the RiversideDB database.
@@ -485,12 +484,21 @@ following design elements:
 protected final static long _VERSION_020601_20020625 = 2060120020625L;
 
 /**
-Table layout having fields MeasType_num, Date_Time, Revision_num, Val,
-Quality_flag.
+Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag.
 */
 protected final int TABLE_LAYOUT_DATE_VALUE_TO_MINUTE = 100;
 
-// REVISIT (JTS - 2003-06-18)
+/**
+Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Duration, Quality_flag.
+*/
+protected final int TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION = 102;
+
+/**
+Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, Duration, Creation_Time.
+*/
+protected final int TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION = 105;
+
+// TODO (JTS - 2003-06-18)
 // Remove all the _D_XXXXX methods -- they are easier to do simply as
 // creating the SQL in the methods (e.g., "dmiDelete('DELETE * FROM XXXX');")
 
@@ -765,8 +773,12 @@ protected final int _W_DATATESTRESULT = 5101;
 protected final int _S_SEVERITYTYPES = 5200;
 
 /**
-Vector of RiversideDB_Tables, which are referenced when reading and writing 
-time series.
+Vector of RiversideDB_TableLayout, which are referenced when reading and writing time series.
+*/
+private Vector _RiversideDB_TableLayout_Vector = new Vector();
+
+/**
+Vector of RiversideDB_Tables, which are referenced when reading and writing time series.
 */
 private Vector _RiversideDB_Tables_Vector = new Vector();
 
@@ -3934,10 +3946,8 @@ specified TSProduct_num.<p>
 */
 public int deleteTSProductPropsForTSProduct_num(int tsproduct_num) 
 throws Exception {
-	DMIDeleteStatement del = new DMIDeleteStatement(this);
 		
-	String sql = "DELETE FROM TSProductProps WHERE "
-		+ "TSProductProps.TSProduct_num = " + tsproduct_num;
+	String sql = "DELETE FROM TSProductProps WHERE TSProductProps.TSProduct_num = " + tsproduct_num;
 	return dmiDelete(sql);
 }
 
@@ -4655,7 +4665,7 @@ throws Exception {
 
 	if (rs.next()) {
 		int index = 1;
-		int i = rs.getInt(index++);
+		rs.getInt(index++);
 		String s = rs.getString(index++);
 		if (!rs.wasNull()) {
 			last = s;
@@ -5232,17 +5242,19 @@ throws Exception {
 	return (RiversideDB_Geoloc)v.elementAt(0);
 }
 
+// TODO - evaluate issues that occur when global data are edited in the
+// RiversideDB Administrator or other tools.
 /**
 Read global data that should be kept in memory to increase performance.
 This is called from the DMI.open() base class method.
-REVISIT - evaluate issues that occur when global data are edited in the
-RiversideDB Administrator.
 @throws Exception thrown in readTablesList()
 */
 public void readGlobalData () 
 throws Exception {
 	// Read the Tables table.
 	_RiversideDB_Tables_Vector = readTablesList ();
+    // Read the table layout table
+    _RiversideDB_TableLayout_Vector = readTableLayoutList ();
 }
 
 /**
@@ -6923,8 +6935,7 @@ only read header information).
 @exception if there is an error reading the time series.
 */
 public TS readTimeSeries (String tsident_string, DateTime req_date1,
-			  DateTime req_date2, String req_units,
-			  boolean read_data )
+			  DateTime req_date2, String req_units, boolean read_data )
 throws Exception
 {	// Read a time series from the database.
 	// IMPORTANT - BECAUSE WE CAN'T GET THE LAST RECORD FROM A ResultSet
@@ -6940,14 +6951,11 @@ throws Exception
 	
 	boolean isMeasType_num_boolean = false;// True if TSID is a MeasType_num
 	if (StringUtil.isLong(tsident_string)) {
-		// If the TSIdentString is a long value, assume that it's a 
-		// MeasType_num that was passed in.
-		mt = readMeasTypeForMeasType_num(
-			(new Long(tsident_string)).longValue());
+		// If the TSIdentString is a long value, assume that it's a MeasType_num that was passed in.
+		mt = readMeasTypeForMeasType_num((new Long(tsident_string)).longValue());
 		if (mt == null) {
 			Message.printWarning(2, routine,
-				"Unable to read time series: no MeasType for "
-				+ "MeasType_num \"" + tsident_string + "\".");
+				"Unable to read time series: no MeasType for MeasType_num \"" + tsident_string + "\".");
 			return null;
 		}
 		isMeasType_num_boolean = true;
@@ -6955,74 +6963,60 @@ throws Exception
 	else {
 		mt = readMeasTypeForTSIdent(tsident_string);
 		if (mt == null) {
-			Message.printWarning(2, routine,
-				"Unable to read time series:  no MeasType for "
-				+ "\"" + tsident_string + "\"");
+			Message.printWarning(2, routine,"Unable to read time series:  no MeasType for \"" + tsident_string + "\"");
 			return null;
 		}
 	}
 	
 	// Determine the table and format to read from...
-	int pos = RiversideDB_Tables.indexOf (
-			_RiversideDB_Tables_Vector, mt.getTable_num1() );
+	int pos = RiversideDB_Tables.indexOf ( _RiversideDB_Tables_Vector, mt.getTable_num1() );
 
 	if ( pos < 0 ) {
-		Message.printWarning ( 2, routine,
-		"Unable to read time series:  no Tables record for table number"
+		Message.printWarning ( 2, routine, "Unable to read time series:  no Tables record for table number"
 		+ mt.getTable_num1() );
 		return null;
 	}
 	// Based on the table format, call the appropriate read method...
-	RiversideDB_Tables t = (RiversideDB_Tables)
-			_RiversideDB_Tables_Vector.elementAt(pos);
+	RiversideDB_Tables t = (RiversideDB_Tables)_RiversideDB_Tables_Vector.elementAt(pos);
 	long table_layout = t.getTableLayout_num();
-	// First define the time series to be returned, based on the MeasType
-	// interval base and multiplier...
+	// First define the time series to be returned, based on the MeasType interval base and multiplier...
 	TS ts = null;
-	if (	mt._Time_step_base.equalsIgnoreCase("Min") ||
-		mt._Time_step_base.equalsIgnoreCase("Minute") ) {
+	if ( mt._Time_step_base.equalsIgnoreCase("Min") || mt._Time_step_base.equalsIgnoreCase("Minute") ) {
 		ts = new MinuteTS ();
-		ts.setDataInterval ( TimeInterval.MINUTE,
-			(int)mt.getTime_step_mult());
+		ts.setDataInterval ( TimeInterval.MINUTE,(int)mt.getTime_step_mult());
 	}
 	else if ( mt._Time_step_base.equalsIgnoreCase("Hour") ) {
 		ts = new HourTS ();
-		ts.setDataInterval ( TimeInterval.HOUR,
-			(int)mt.getTime_step_mult());
+		ts.setDataInterval ( TimeInterval.HOUR,(int)mt.getTime_step_mult());
 	}
 	else if ( mt._Time_step_base.equalsIgnoreCase("Day") ) {
 		ts = new DayTS ();
-		ts.setDataInterval ( TimeInterval.DAY,
-			(int)mt.getTime_step_mult());
+		ts.setDataInterval ( TimeInterval.DAY,(int)mt.getTime_step_mult());
 	}
 	else if ( mt._Time_step_base.equalsIgnoreCase("Month") ) {
 		ts = new MonthTS ();
-		ts.setDataInterval ( TimeInterval.MONTH,
-			(int)mt.getTime_step_mult());
+		ts.setDataInterval ( TimeInterval.MONTH,(int)mt.getTime_step_mult());
 	}
 	else if ( mt._Time_step_base.equalsIgnoreCase("Year") ) {
 		ts = new YearTS ();
-		ts.setDataInterval ( TimeInterval.YEAR,
-			(int)mt.getTime_step_mult());
+		ts.setDataInterval ( TimeInterval.YEAR,(int)mt.getTime_step_mult());
 	}
-	else if (mt._Time_step_base.equalsIgnoreCase("Irreg") ||
-		mt._Time_step_base.equalsIgnoreCase("Irregular") ) {
+	else if (mt._Time_step_base.equalsIgnoreCase("Irreg") || mt._Time_step_base.equalsIgnoreCase("Irregular") ) {
 		ts = new IrregularTS ();
 	}
-	else {	Message.printWarning ( 2, routine,
-		"Time step " + mt._Time_step_base + " is not supported." );
-		return null;
+	else {
+        String message = "Time step " + mt._Time_step_base + " is not supported.";
+        Message.printWarning ( 2, routine, message );
+		throw new Exception ( message );
 	}
 	if ( isMeasType_num_boolean ) {
-		// If a MeasType_num was used to identify the time series, set
-		// the TSID to a new string.
+		// If a MeasType_num was used to identify the time series, set the TSID to a new string.
 		ts.setIdentifier ( mt.toTSIdent() ); 
 	}
-	else {	// If a full TSID was used to identify the time series, use
-		// the original string because it may have specific meaning to
-		// the calling code.
-		// REVISIT SAM 2006-10-12 
-		// Need to evaluate if the above can be used in all cases but
+	else {
+        // If a full TSID was used to identify the time series, use
+		// the original string because it may have specific meaning to the calling code.
+		// TODO SAM 2006-10-12 Need to evaluate if the above can be used in all cases but
 		// do not have tests in place to check right now.
 		ts.setIdentifier ( tsident_string ); 
 	}
@@ -7036,7 +7030,7 @@ throws Exception
 	if ( req_date2 != null ) {
 		ts.setDate2 ( req_date2 );
 	}
-	// REVISIT - problem here - in order to read the header and get the
+	// TODO - problem here - in order to read the header and get the
 	// dates, we really need to get the dates from somewhere.  Currently
 	// RiversideDB does not store the most current period dates in the
 	// database - this needs to be corrected.
@@ -7044,34 +7038,35 @@ throws Exception
 		return ts;
 	}
 	// Read the data...
-	// The layout numbers are fixed.  Use the following to get the data
-	// records...
+	// The layout numbers are static.  Use the following to get the data records...
 	DMISelectStatement q = new DMISelectStatement ( this );
 	String ts_table = t.getTable_name();
 	q.addTable ( ts_table );
 	q.addWhereClause ( ts_table + ".MeasType_num=" + mt.getMeasType_num() );
-	if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE ) {
+	if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE ||
+            table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ||
+            table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
 		q.addField ( ts_table + ".Date_Time" );
 		q.addField ( ts_table + ".Val" );
-		//q.addField ( ts_table + ".Quality_flag" );
+        q.addField ( ts_table + ".Quality_flag" );
+        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
+            q.addField ( ts_table + ".Duration" );
+        }
 		q.addOrderByClause ( ts_table + ".Date_Time" );
+        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+            q.addField ( ts_table + ".Creation_Time" );
+            q.addOrderByClause ( ts_table + ".Creation_Time" );
+        }
 		if ( req_date1 != null ) {
-			q.addWhereClause (
-				ts_table +
-				".Date_Time >= " + DMIUtil.formatDateTime( this,
-				req_date1));
+			q.addWhereClause ( ts_table + ".Date_Time >= " + DMIUtil.formatDateTime( this, req_date1));
 		}
 		if ( req_date2 != null ) {
-			q.addWhereClause (
-				ts_table + ".Date_Time <= " +
-				DMIUtil.formatDateTime( this,
-					req_date2));
+			q.addWhereClause ( ts_table + ".Date_Time <= " + DMIUtil.formatDateTime( this, req_date2));
 		}
 		// Submit the query...
 		ResultSet rs = dmiSelect ( q );
-		// Convert the data to a Vector of records so we can get the
-		// first and last dates to allocate memory...
-		Vector v = toTSDateValueToMinuteList ( rs );
+		// Convert the data to a Vector of records so we can get the first and last dates to allocate memory...
+		Vector v = toTSDateValueToMinuteList ( table_layout, rs );
 		closeResultSet(rs);
 		int size = 0;
 		if ( v != null ) {
@@ -7079,20 +7074,20 @@ throws Exception
 		}
 		if ( size == 0 ) {
 			// Return the TS because there are no data to set dates.
-			// The header will be complete other than dates but no
-			// data will be filled in...
+			// The header will be complete other than dates but no data will be filled in...
 			return ts;
 		}
 		RiversideDB_TSDateValueToMinute data = null;
 
 		if ( (req_date1 != null) && (req_date2 != null) ) {
 			// Allocate the memory regardless of whether there was
-			// data.  If no data have been found then missing data
-			// will be initialized...
+			// data.  If no data have been found then missing data will be initialized...
 			ts.setDate1(req_date1);
 			ts.setDate1Original(req_date1);
 			ts.setDate2(req_date2);
 			ts.setDate2Original(req_date2);
+            // All the minute data has flags.
+            ts.hasDataFlags(true, 4);
 			ts.allocateDataSpace();
 		}
 		else if ( size > 0 ) {
@@ -7101,35 +7096,42 @@ throws Exception
 			ts.setDate1(new DateTime(data._Date_Time));
 			ts.setDate1Original(new DateTime(data._Date_Time));
 
-			data = (RiversideDB_TSDateValueToMinute)
-					v.elementAt(size - 1);
+			data = (RiversideDB_TSDateValueToMinute)v.elementAt(size - 1);
 			ts.setDate2(new DateTime(data._Date_Time));
 			ts.setDate2Original(new DateTime(data._Date_Time));
+			// All the minute data has flags.
+            ts.hasDataFlags(true, 4);
 			ts.allocateDataSpace();
 		}
 		// The date needs to be the correct precision so assign from
-		// the TS start date (the precision is adjusted when dates
-		// are set)...
+		// the TS start date (the precision is adjusted when dates are set)...
 		DateTime date = new DateTime ( ts.getDate1() );
-	
 		for ( int i = 0; i < size; i++ ) {
 			// Loop through and assign the data...
 			data = (RiversideDB_TSDateValueToMinute)v.elementAt(i);
 			// Set the date rather than declaring a new instance
 			// to increase performance... data._Date_Time is a
-			// Date so cannot be used directly in code that needs
-			// a DateTime instance...
+			// Date so cannot be used directly in code that needs a DateTime instance...
 			date.setDate ( data._Date_Time );
 			// For now ignore the revision number and quality...
 			if ( !DMIUtil.isMissing(data._Val) ) {
-				ts.setDataValue ( date, data._Val );
-			}
+                if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE ||
+                        table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+                    // Has flag but no duration.
+                    ts.setDataValue ( date, data._Val, data._Quality_flag, 0 );
+                }
+                else if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
+                    // Also need to set the duration and quality flag...
+                    ts.setDataValue ( date, data._Val, data._Quality_flag, data._Duration );
+                }
+            }
 		}
 	}
-	else {	Message.printWarning ( 2, routine,
-		"RiversideDB TableLayout " + table_layout +
-		" is not supported." );
-		return null;
+	else {
+        String message = "RiversideDB TableLayout " + table_layout + " is not supported.";
+        Message.printWarning ( 2, routine, message );
+        throw new Exception ( message );
+        // FIXME SAM 2007-12-21 Need to look up the table number from the table format table and not hard-code numbers.
 	}
 	return ts;
 }
@@ -7137,8 +7139,7 @@ throws Exception
 /**
 Unsupported.
 */
-public TS readTimeSeries(TS req_ts, String fname, DateTime date1, 
-DateTime date2, String req_units, boolean read_data)
+public TS readTimeSeries(TS req_ts, String fname, DateTime date1, DateTime date2, String req_units, boolean read_data)
 throws Exception {
 	return null;
 }
@@ -7146,8 +7147,7 @@ throws Exception {
 /**
 Unsupported.
 */
-public Vector readTimeSeriesList(String fname, DateTime date1, DateTime date2,
-String req_units, boolean read_data)
+public Vector readTimeSeriesList(String fname, DateTime date1, DateTime date2, String req_units, boolean read_data)
 throws Exception {
 	return null;
 }
@@ -7160,7 +7160,6 @@ DateTime date2, String req_units, boolean read_data)
 throws Exception {
 	return null;
 }
-
 
 /**
 Read all TSProduct records.
@@ -7547,6 +7546,7 @@ Converts a ResultSet into a Vector of Contacts.
 @return a Vector of Contacts.
 @throws Exception if an error occurs.
 */
+/* TODO SAM Evaluate whether needed
 private Vector toContactList(ResultSet rs) 
 throws Exception {
 	Vector v = new Vector();
@@ -7605,6 +7605,7 @@ throws Exception {
 	}
 	return v;
 }
+*/
 
 /**
 Convert a ResultSet to a Vector of RiversideDB_DataDimension.
@@ -7811,7 +7812,6 @@ private Vector toDataTestFunctionList(ResultSet rs)
 throws Exception {
 	Vector v = new Vector();
 	int index = 1;
-	String[] sa;
 	String s;
 	int i;
 	DataTestFunctionDataModel data = null;
@@ -9702,7 +9702,6 @@ throws Exception {
 	String Variable;
 	String Val;
 	String Description;
-	long l;
 	// For now assume that there are no multi-record properties.  Use the
 	// Contents part of the properties for the description.
 	while ( rs.next() ) {
@@ -9710,7 +9709,7 @@ throws Exception {
 		Variable = null;
 		Val = "";
 		Description = "";
-		l = rs.getLong(index++);	// Prop_num, Ignored
+		rs.getLong(index++);	// Prop_num, Ignored
 		s = rs.getString(index++);
 		if ( !rs.wasNull() ) {
 			Variable = s.trim();
@@ -9719,7 +9718,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			Val = s.trim();
 		}
-		l = rs.getLong(index++);	// Seq, Ignored
+		rs.getLong(index++);	// Seq, Ignored
 		s = rs.getString(index++);
 		if ( !rs.wasNull() ) {
 			Description = s.trim();
@@ -10221,10 +10220,11 @@ throws Exception {
 
 /**
 Convert a ResultSet to a Vector of RiversideDB_Tables.
+@param table_format Indicate the time series table format.
 @param rs ResultSet from a Tables table query.
 @throws Exception if an error occurs
 */
-private	Vector toTSDateValueToMinuteList ( ResultSet rs ) 
+private	Vector toTSDateValueToMinuteList ( long table_layout, ResultSet rs ) 
 throws Exception {
 	if ( rs == null ) {
 		return null;
@@ -10233,6 +10233,8 @@ throws Exception {
 	int index = 1;
 	Date dt;
 	double d;
+    String s;
+    int i;
 	RiversideDB_TSDateValueToMinute data = null;
 	while ( rs.next() ) {
 		data = new RiversideDB_TSDateValueToMinute();
@@ -10245,6 +10247,26 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data._Val = d;
 		}
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data._Quality_flag = s;
+        }
+        else {
+            data._Quality_flag = "";
+        }
+        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
+            i = rs.getInt ( index++ );
+            if ( !rs.wasNull() ) {
+                data._Duration = i;
+            }
+        }
+        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+            // Add the creation time.
+            dt = rs.getTimestamp ( index++ );
+            if ( !rs.wasNull() ) {
+                data._Date_Time = dt;
+            }
+        }
 		v.addElement(data);
 	}
 	return v;
@@ -11518,14 +11540,11 @@ Writes a record to the MeasType table
 Object's MeasType_num is missing, a new record will be inserted.  Otherwise,
 an existing record will be updated.
 @return null if an existing record was updated.  Otherwise it returns a 
-new RiversideDB_MeasType object with the new MeasType_num (from the 
-new record) in it.
+new RiversideDB_MeasType object with the new MeasType_num (from the new record) in it.
 @throws Exception if an error occurs
 */
 public RiversideDB_MeasType writeMeasType(RiversideDB_MeasType r) 
 throws Exception {
-	String routine = "writeMeasType";
-	int retval;
 
 	DMIWriteStatement w = new DMIWriteStatement ( this );
 	buildSQL ( w, _W_MEASTYPE );
