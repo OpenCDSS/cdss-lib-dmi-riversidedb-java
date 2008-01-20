@@ -7093,18 +7093,31 @@ throws Exception
 		else if ( size > 0 ) {
 			// Set the date from the records...
 			data = (RiversideDB_TSDateValueToMinute)v.elementAt(0);
-			ts.setDate1(new DateTime(data._Date_Time));
-			ts.setDate1Original(new DateTime(data._Date_Time));
+			if ( ts instanceof IrregularTS ) {
+			    // Set the precision to minute since it is unlikely that data values need
+			    // to be recorded to the second
+			    ts.setDate1(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
+			    ts.setDate1Original(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
+			}
+			else {
+			    // Precision will be set consistent with the time series interval when dates are set.
+			    ts.setDate1(new DateTime(data._Date_Time));
+			    ts.setDate1Original(new DateTime(data._Date_Time));
+			}
 
 			data = (RiversideDB_TSDateValueToMinute)v.elementAt(size - 1);
-			ts.setDate2(new DateTime(data._Date_Time));
-			ts.setDate2Original(new DateTime(data._Date_Time));
+			if ( ts instanceof IrregularTS ) {
+			    ts.setDate2(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
+			    ts.setDate2Original(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
+			}
+			else {
+	            ts.setDate2(new DateTime(data._Date_Time));
+	            ts.setDate2Original(new DateTime(data._Date_Time));
+			}
 			// All the minute data has flags.
             ts.hasDataFlags(true, 4);
 			ts.allocateDataSpace();
 		}
-		// The date needs to be the correct precision so assign from
-		// the TS start date (the precision is adjusted when dates are set)...
 		DateTime date = new DateTime ( ts.getDate1() );
 		for ( int i = 0; i < size; i++ ) {
 			// Loop through and assign the data...
