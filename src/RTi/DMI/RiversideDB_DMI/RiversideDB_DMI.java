@@ -10277,7 +10277,7 @@ throws Exception {
             // Add the creation time.
             dt = rs.getTimestamp ( index++ );
             if ( !rs.wasNull() ) {
-                data._Date_Time = dt;
+                data._Creation_Time = dt;
             }
         }
 		v.addElement(data);
