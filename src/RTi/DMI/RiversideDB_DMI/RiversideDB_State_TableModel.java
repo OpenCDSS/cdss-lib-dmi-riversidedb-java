@@ -18,10 +18,6 @@ import java.util.Vector;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.GUI.JWorksheet_TableModelListener;
 
-import RTi.Util.Message.Message;
-
-import RTi.Util.String.StringUtil;
-
 /**
 This table model displays state data.  
 */

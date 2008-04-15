@@ -41,7 +41,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.lang.Thread;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -375,11 +374,11 @@ protected boolean init_translationTable()
 
 		//set Translator so can be know throughout the
 		//entire application!!!!!!!!!
-		lg.setTranslator( lg );
+		LanguageTranslator.setTranslator( lg );
 
 		//set it in StringUtil so that it is known to it.
 		if ( lg != null ) {
-			lg.setTranslator( lg );
+		    LanguageTranslator.setTranslator( lg );
 		}
 		else {
 			valid_trans__file = false;
@@ -448,10 +447,10 @@ public void keyPressed ( KeyEvent event )
 {
 	int code = event.getKeyCode();
 
-	if ( code == event.VK_SHIFT ) {
+	if ( code == KeyEvent.VK_SHIFT ) {
 		JGUIUtil.setShiftDown ( true );
 	}
-	else if ( code == event.VK_CONTROL ) {
+	else if ( code == KeyEvent.VK_CONTROL ) {
 		JGUIUtil.setControlDown ( true );
 	}
 }
@@ -464,16 +463,16 @@ public void keyReleased ( KeyEvent event )
 {
 	int code = event.getKeyCode();
 
-	if ( code == event.VK_ENTER ) {
+	if ( code == KeyEvent.VK_ENTER ) {
 	}
-	else if ( code == event.VK_DELETE ) {
+	else if ( code == KeyEvent.VK_DELETE ) {
 		// Clear an expression (need to determine which list it
 		// comes from but for now assume expressions)...
 	}
-	else if ( code == event.VK_SHIFT ) {
+	else if ( code == KeyEvent.VK_SHIFT ) {
 		JGUIUtil.setShiftDown ( false );
 	}
-	else if ( code == event.VK_CONTROL ) {
+	else if ( code == KeyEvent.VK_CONTROL ) {
 		JGUIUtil.setControlDown ( false );
 	}
 }

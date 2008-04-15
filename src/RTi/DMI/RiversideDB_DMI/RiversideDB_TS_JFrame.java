@@ -124,59 +124,41 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
-import  java.awt.AWTEvent;
 import  java.awt.Color;
-import  java.awt.Component;
-import  java.awt.Dimension;
-import  java.awt.Font;
-import  java.awt.GridLayout;
 import  java.awt.GridBagConstraints;
 import  java.awt.GridBagLayout;
 import  java.awt.Insets;
-import  java.awt.Image;
 import  java.awt.event.ActionEvent;
 import  java.awt.event.ActionListener;
 import  java.awt.event.ItemEvent;
 import  java.awt.event.ItemListener;
 import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
-import  java.net.URL;
 import  java.util.Vector;
 
-import 	javax.swing.ImageIcon;
 import 	javax.swing.JCheckBox;
 import 	javax.swing.JFrame;
 import 	javax.swing.JLabel;
-import 	javax.swing.JList;
 import 	javax.swing.JOptionPane;
 import 	javax.swing.JPanel;
 import 	javax.swing.JTabbedPane;
 import 	javax.swing.JTextField;
-import 	javax.swing.UIManager;
 
-import  RTi.TS.TS;
 import  RTi.TS.TSIdent;
 
 import  RTi.Util.GUI.JGUIUtil;
 import  RTi.Util.GUI.ResponseJDialog;
-import  RTi.Util.GUI.ResponseJDialog;
 import  RTi.Util.GUI.SimpleJButton;
 import  RTi.Util.GUI.SimpleJComboBox;
-import  RTi.Util.GUI.SimpleJTree;
 import 	RTi.Util.IO.DataUnits;
-import 	RTi.Util.IO.DataUnitsConversion;
 import  RTi.Util.IO.IOUtil;
-import  RTi.Util.IO.PropList;
 import	RTi.Util.Message.Message;
 import  RTi.Util.String.StringUtil;
 import  RTi.Util.Time.TimeInterval;
-import  RTi.Util.Time.TimeUtil;
 
-import 	RTi.DMI.DMI;
 import 	RTi.DMI.DMIUtil;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataSource;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataType;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataUnits;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasLoc;
@@ -184,7 +166,6 @@ import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasTransProtocol;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasType;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_Scenario;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_Tables;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasLoc_JTree;
 
 /**
 RiversideDB_MeasType_JFrame.
@@ -378,7 +359,6 @@ private boolean __bln_new_object = false;
 private JPanel __main_JPanel = null;
 private JPanel __top_TS_info_JPanel = null;
 private JPanel __tabbedInfo_JPanel = null;
-private JPanel __bottom_close_JPanel = null;
 
 //Tabbed pane itself
 private JTabbedPane __info_JTabbedPane = null;
@@ -396,7 +376,6 @@ private SimpleJButton __apply_JButton = null;
 private String __preselected_TSID_string = null;
 
 //components for top panel for TS
-private JLabel __TS_title_JLabel = null;
 private JTextField __TS_location_JTextField = null;
 private SimpleJComboBox __TS_dataType_JComboBox = null;
 private JTextField __TS_subDataType_JTextField = null;
@@ -1212,7 +1191,6 @@ public void closeGUI() {
 		}
 	}
 
-	boolean blnClose = true;
 	if( blnUpdated)  {
 		if( __gui_RTi_MeasType.isDirty() ) {
 
@@ -1274,7 +1252,6 @@ be filled in before a save can occur.)
 have a value.
 */
 protected void checkRequiredInput() throws Exception {
-	String routine = __class + ".checkRequiredInput";
 
 	StringBuffer buffer = new StringBuffer();
 
@@ -1928,12 +1905,10 @@ protected void finalize() throws Throwable
  	__main_JPanel = null;
  	__top_TS_info_JPanel = null;
  	__tabbedInfo_JPanel = null;
- 	__bottom_close_JPanel = null;
  	__info_JTabbedPane = null;
  	__close_JButton = null;
  	__cancel_JButton = null;
  	__apply_JButton = null;
- 	__TS_title_JLabel = null;
  	__TS_location_JTextField = null;
  	__TS_dataType_JComboBox = null;
  	__TS_subDataType_JTextField = null;
@@ -2121,8 +2096,7 @@ protected Vector setup_tables_vect() {
 		if ( name_desc.length() > 40 )  {
 			name_desc = name_desc.substring(0,40) + "... ";
 		}
-		String tstemplate = "";
-		tstemplate=rt.getIsTSTemplate();
+		//tstemplate=rt.getIsTSTemplate();
 
 		if ( with_template ) {
 
@@ -2163,7 +2137,7 @@ existing MeasType node on the JTree with the new changes.</li>
 */
 protected void update_database( ) throws Exception
 {
-	String routine = __class + ".update_database", mssg;
+	String routine = __class + ".update_database";
 
 	//holds messages from __dirty_vect
 	StringBuffer b = new StringBuffer();
@@ -2261,12 +2235,10 @@ protected void update_database( ) throws Exception
 	else { //update existing node on tree
 
 		//update Node on tree to reflect any changes in name
-		String gui_name = null;
  		__TS_tsid_JTextField.setText( update_tsid_field() );
 
 		//update tree
- 		updateMeasTypeNode( __gui_RTi_MeasType,
- 				    __db_RTi_MeasType );
+ 		updateMeasTypeNode( __gui_RTi_MeasType, __db_RTi_MeasType );
 	}
 
 	//empty out dirty vector
@@ -2662,12 +2634,11 @@ protected void update_GUI_fields( ) {
 
 	//NOW work on TABs
 	///////// TS TAB 1 and TS Tab 2 //////////
-	boolean with_template = false;
-	try {
-		with_template = __dmi.isDatabaseVersionAtLeast( 20800 );
-	}
-	catch ( Exception e ) { Message.printWarning( 2, routine, e );
-	}	
+	//try {
+	//	with_template = __dmi.isDatabaseVersionAtLeast( 20800 );
+	//}
+	//catch ( Exception e ) { Message.printWarning( 2, routine, e );
+	//}	
 
 	///////// TS TAB 1 //////////
 	//TABLE_NUM1
@@ -2870,7 +2841,7 @@ protected void update_GUI_fields( ) {
 	}
 
 	String isEditable = null;
-	if ( __dmi.isDatabaseVersionAtLeast(__dmi._VERSION_030000_20041001) ) {
+	if ( __dmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
 		isEditable = __db_RTi_MeasType.getIsEditable();
 	} else {
 		isEditable = __db_RTi_MeasType.getEditable();			
@@ -2902,7 +2873,6 @@ in the JTextFields and JComboBoxes in the GUI.
 @return String with tsid.
 */
 protected String update_tsid_field() {
-	String routine = __class + ".update_tsid_field";
 
 	String full_tsid= null;
 
@@ -3014,7 +2984,6 @@ in the database itself) </li></ul> </li></ul></ul>
 @exception Exception thrown if error occurs
 */
 public void verify_QA_QC_tab() throws Exception {
-	String routine = __class + ".verify_QA_QC_tab";
 
 	//get Min allowed - REQUIRED 
 	String gui_min_str = null;
@@ -3110,7 +3079,7 @@ public void verify_QA_QC_tab() throws Exception {
 	}
 
 	String db_editable = "N";
-	if ( __dmi.isDatabaseVersionAtLeast(__dmi._VERSION_030000_20041001) ) {
+	if ( __dmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
 		db_editable = __db_RTi_MeasType.getIsEditable();
 	} else {
 		db_editable = __db_RTi_MeasType.getEditable();			
@@ -3127,7 +3096,7 @@ public void verify_QA_QC_tab() throws Exception {
 			+ gui_editable
 			+ "\"");
 		// Set in object
-		if ( __dmi.isDatabaseVersionAtLeast(__dmi._VERSION_030000_20041001) ) {
+		if ( __dmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
  			__gui_RTi_MeasType.setIsEditable( gui_editable );
  		} else {
  			__gui_RTi_MeasType.setEditable( gui_editable );
@@ -3151,7 +3120,6 @@ in the database itself) </li></ul> </li></ul></ul>
 @exception Exception thrown if error occurs
 */
 public void verify_transProt_tab() throws Exception {
-	String routine = __class + ".verify_transProt_tab";
 
 	String gui_transmit = null;
 	String db_transmit = null;
@@ -3190,7 +3158,6 @@ in the database itself) </li></ul> </li></ul></ul>
 @exception Exception thrown if error occurs
 */
 public void verify_status_tab() throws Exception {
-	String routine = __class + ".verify_status_tab";
 //REVISIT - Under access this field is set to not accept null. Since this is currently 
 //          not used we need either to set to something or change the DB restriction to 
 //          accept null field.
@@ -3214,11 +3181,9 @@ in the database itself) </li></ul> </li></ul></ul>
 @exception Exception thrown if error occurs
 */
 public void verify_top_fields( ) throws Exception {
-	String routine = __class + ".verify_top_fields";
 
-	String db_name = null;
 	String db_desc = null;
-	TSIdent tsid = null;
+	/*
 	try {
 		tsid = __db_RTi_MeasType.toTSIdent();
 	}
@@ -3226,10 +3191,11 @@ public void verify_top_fields( ) throws Exception {
 		Message.printWarning( 2, routine, e );
 		tsid = null;
 	}
-	if ( tsid != null ) {
-		db_name = tsid.toString();
-	}
+	//if ( tsid != null ) {
+	//	db_name = tsid.toString();
+	//}
 	tsid = null;
+	*/
 	db_desc = __db_RTi_MeasType.getDescription().toUpperCase();
 
 	//Data Type - REQUIRED
@@ -3515,7 +3481,6 @@ in the database itself) </li></ul> </li></ul></ul>
 @exception Exception thrown if error occurs
 */
 public void verify_TS1_tab() throws Exception {
-	String routine = __class + ".verify_TS1_tab";
 
 	String gui_table_num1_str = null;
 	long gui_table_num1 = -999;
@@ -3585,7 +3550,6 @@ in the database itself) </li></ul> </li></ul></ul>
 @exception Exception thrown if error occurs
 */
 public void verify_TS2_tab() throws Exception {
-	String routine = __class + ".verify_TS2_tab";
 
 	//can be none!
 	String gui_table_num2_str = null;
@@ -3665,7 +3629,6 @@ public void actionPerformed (ActionEvent event) {
 	String routine = __class + ".actionPerformed";
 
 	try {
-	String command = event.getActionCommand();
 	Object source = event.getSource();
 	if ( source.equals( __apply_JButton ) ) {
 		boolean blnUpdated = true;
@@ -3820,7 +3783,6 @@ public void actionPerformed (ActionEvent event) {
 Respond to ItemEvents.
 */
 public void itemStateChanged ( ItemEvent event ) {
-	String routine = __class + ".itemStateChanged";
 
 	Object source = event.getItemSelectable();
 

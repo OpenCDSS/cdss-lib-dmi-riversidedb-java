@@ -43,7 +43,6 @@ package RTi.DMI.RiversideDB_DMI;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.lang.Thread;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -57,7 +56,6 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJMenuItem;
 import RTi.Util.GUI.SimpleJTree;
 import RTi.Util.GUI.SimpleJTree_Node;
-import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 
 /**
@@ -91,7 +89,6 @@ private SimpleJMenuItem __popup_DeleteReduction_JMenuItem         = null;
 private SimpleJMenuItem __popup_ReductionProperties_JMenuItem     = null;
 
 private SimpleJMenuItem __popup_ImportProductProperties_JMenuItem = null;
-private SimpleJMenuItem __popup_ExportProductProperties_JMenuItem = null;
 
 private String __measLoc_Areas_String               =                   "AREAS";
 private String __measLoc_StationsPoints_String 	    =         "STATIONS/POINTS";
@@ -115,8 +112,6 @@ private String __popup_ReductionProperties_String   =    "Reduction Properties";
 
 private String __popup_ImportProductProperties_String
 						  = "Import Product Properties";
-private String __popup_ExportProductProperties_String
-						  = "Export Product Properties";
 /**
 MeasLocGroup
 */
@@ -216,7 +211,7 @@ protected void createTree()
 
 	// Now add a popup menu to the tree.
 	__treeJPopupMenu = new JPopupMenu();
-	__treeJPopupMenu.setDefaultLightWeightPopupEnabled( false );
+	JPopupMenu.setDefaultLightWeightPopupEnabled( false );
 
 	// Menu items
 	// The items are added and removed from the POPUP menu
@@ -262,9 +257,6 @@ protected void createTree()
 
 	__popup_ImportProductProperties_JMenuItem = new SimpleJMenuItem(
 		__popup_ImportProductProperties_String, this );
-
-	__popup_ExportProductProperties_JMenuItem = new SimpleJMenuItem(
-		__popup_ExportProductProperties_String, this );
 
 	 __popup_AddLocationGroup_JMenuItem = new SimpleJMenuItem(
 		__popup_AddLocationGroup_String, this );
@@ -315,7 +307,6 @@ throws Throwable
 	__popup_ReductionProperties_JMenuItem     = null;
 
 	__popup_ImportProductProperties_JMenuItem = null;
-	__popup_ExportProductProperties_JMenuItem = null;
 
 	__popup_AddLocationGroup_JMenuItem        = null;
 	__popup_DeleteLocationGroup_JMenuItem     = null;
@@ -591,8 +582,6 @@ public void populateTree()
 				//with this MeasLoc
 				String measloc_id = null;
 				measloc_id = ml.getIdentifier();
-				long measloc_num = -999;
-				measloc_num = ml.getMeasLoc_num();
 				Vector mt_vect = null;
 				try {
 					mt_vect =__dmi.
@@ -774,7 +763,6 @@ public void actionPerformed (ActionEvent event)
 	String routine = __class + ".actionPerformed", mssg;
 
 	try {
-	String command = event.getActionCommand();
 	Object source = event.getSource();
 
 	// Add Station or area
@@ -788,7 +776,6 @@ public void actionPerformed (ActionEvent event)
 
 		// Get type (Area or Station) to use in title of the new
 		// MeasLoc_Location gui
-		String parent_str = null;
 		String type_new   = null;
 		String mlt_str    = null;
 		if ( source == __popup_AddArea_JMenuItem ) {
@@ -1500,7 +1487,7 @@ public void actionPerformed (ActionEvent event)
 		//now get parent, which will be MeasLocType object.
 		//In the tree, this is the "Group: AREA" or "Group: STATIONS/
 		//POINTS" node
-		SimpleJTree_Node parent_node = getParentOfNode( node );
+		//SimpleJTree_Node parent_node = getParentOfNode( node );
 
 		/*
 		//get parent of the MeasLocType node to get the MeasLocGroup
@@ -1593,7 +1580,7 @@ public void actionPerformed (ActionEvent event)
 		}
 		//now get parent which will be MeasLocType node (appears in
 		//tree as: "Group: AREA" or "Group: STATIONS/POINTS" )
-		SimpleJTree_Node parent_node = getParentOfNode( node );
+		//SimpleJTree_Node parent_node = getParentOfNode( node );
 
 		/*
 		//get parent of the MeasLocType node to get the MeasLocGroup
@@ -2232,7 +2219,7 @@ public void addMeasLocNode( String grandparent, RiversideDB_MeasLoc new_ml )
 	RiversideDB_MeasLocType mlt = null;
 	SimpleJTree_Node parent_node = null;
 	String type = null;
-	String full_type = null;
+	//String full_type = null;
 	for ( int i=0; i< num; i++ ) {
 		parent_node = (SimpleJTree_Node)arrChildren[i];
 		// Get data
@@ -2243,13 +2230,14 @@ public void addMeasLocNode( String grandparent, RiversideDB_MeasLoc new_ml )
 		// Get type.
 		type = mlt.getType();
 		mlt = null;
+		/*
 		if ( type.equalsIgnoreCase( "A" ) ) {
 			full_type = GRP_STRING + ": " + __measLoc_Areas_String;
 		}
 		else if ( type.equalsIgnoreCase( "P" ) ) {
-			full_type = GRP_STRING + ": "
-				+ __measLoc_StationsPoints_String;
+			full_type = GRP_STRING + ": " + __measLoc_StationsPoints_String;
 		}
+		*/
 
 		if ( type.equals( new_ml.getMeas_loc_type() ) ) {
 			// Found the correct node to attach new measloc to.
@@ -2264,7 +2252,6 @@ public void addMeasLocNode( String grandparent, RiversideDB_MeasLoc new_ml )
 		parent_node = null;
 		mlt = null;
 		type = null;
-		full_type = null;
 	}
 
 	expandNode( child_node );
@@ -2323,7 +2310,6 @@ public void addMeasTypeNode( RiversideDB_MeasType mt )
 	// it belongs to.
 	String measloc_name = mt.getMeasLoc_name();
 	String measloc_id = mt.getIdentifier();
-	long measloc_num = mt.getMeasLoc_num();
 
 	SimpleJTree_Node parent_node = findNodeByName(
 		ID_STRING + ": " + measloc_id + " - " + measloc_name );

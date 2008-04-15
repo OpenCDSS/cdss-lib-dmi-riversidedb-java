@@ -107,9 +107,7 @@
 package RTi.DMI.RiversideDB_DMI;
 
 import  java.awt.Color;
-import  java.awt.Component;
 import  java.awt.Dimension;
-import  java.awt.Font;
 import  java.awt.GridBagConstraints;
 import  java.awt.GridBagLayout;
 import  java.awt.Insets;
@@ -117,19 +115,13 @@ import  java.awt.event.ActionEvent;
 import  java.awt.event.ActionListener;
 import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
-import  java.text.SimpleDateFormat;
-import  java.util.Date;
 import  java.util.Vector;
 
 import 	javax.swing.BorderFactory;
 import 	javax.swing.border.Border;
-import 	javax.swing.border.TitledBorder;
 import 	javax.swing.DefaultListModel;
-import 	javax.swing.DefaultListSelectionModel;
 import 	javax.swing.event.ListSelectionEvent;
 import 	javax.swing.event.ListSelectionListener;
-import 	javax.swing.ImageIcon;
-import 	javax.swing.JComboBox;
 import 	javax.swing.JFrame;
 import 	javax.swing.JLabel;
 import 	javax.swing.JList;
@@ -139,33 +131,20 @@ import 	javax.swing.JScrollPane;
 import 	javax.swing.JTextField;
 import 	javax.swing.ListSelectionModel;
 
-import  RTi.TS.TS;
 import  RTi.TS.TSIdent;
 
 import  RTi.Util.GUI.JGUIUtil;
 import  RTi.Util.GUI.JWorksheet;
 import  RTi.Util.GUI.ResponseJDialog;
-import  RTi.Util.GUI.ResponseJDialog;
 import  RTi.Util.GUI.SimpleJButton;
 import  RTi.Util.GUI.SimpleJComboBox;
-import  RTi.Util.GUI.SimpleJMenuItem;
-import  RTi.Util.IO.IOUtil;
 import  RTi.Util.IO.PropList;
 import	RTi.Util.Message.Message;
 import  RTi.Util.String.StringUtil;
-import  RTi.Util.Time.DateTime;
-import  RTi.Util.Time.TimeUtil;
 
-import 	RTi.DMI.DMI;
 import 	RTi.DMI.DMIUtil;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataSource;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataType;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataUnits;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasCreateMethod;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasLoc;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasLocType;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasReduction;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasReducRelation;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasReductionType;
@@ -359,7 +338,6 @@ private RiversideDB_DMI __dmi = null;
 
 //Shared Layout parameters
 private Insets __insets = null;
-private GridBagLayout __gridbag = null;
 
 //indicated what the current action is-
 //ie, if a new Reduction Time Series (Meas Type) node is being added.
@@ -429,9 +407,8 @@ private SimpleJComboBox __props_5_changedatatype_JComboBox = null;
 private String __props_1_changeint_JLabel_string = "COMPUTE_UP_TO_CURRENT_TIME";
 private String __props_1_changeint_desc = "Compute data up to the current time.";
 private String __props_2_changeint_JLabel_string = "MAX_ALERT_DATA_AGE";
-private String __props_2_changeint_desc = "Interval to search " +
-"for available ALERT data.";
-private String __props_3_changeint_desc = "New data type designator for the output time series";
+private String __props_2_changeint_desc = "Interval to search for available ALERT data.";
+//private String __props_3_changeint_desc = "New data type designator for the output time series";
 private String __props_4_changeint_JLabel_string = "MAXMISSINGPERCENT";
 private String __props_4_changeint_desc = "Percentage of Missing input data values per output interval";
 
@@ -469,15 +446,11 @@ private JWorksheet __weights_JWorksheet = null;
 private PropList __worksheet_props = null;
 int [] __weights_worksheet_widths = null;
 
-private DefaultListModel __all_inputTS_map_ListModel = null;
-private DefaultListModel __inputTS_map_ListModel = null;
-
 //mapx INPUT TS
 private String __props_1_mapx_JLabel_string = "SET_MISSING_TO_ZERO";
 private String __props_1_mapx_desc = "True sets the MAPX value to ZERO.";
 //OBSOLETE private String __props_2_mapx_JLabel_string = "SAVE_TRANSFORMED_INPUT_TS";
-private String __props_2_mapx_desc = "Save intermediate input TS transformed "+
-"to output TS interval.";
+//private String __props_2_mapx_desc = "Save intermediate input TS transformed to output TS interval.";
 private SimpleJComboBox __props_1_mapx_JComboBox = null;
 private SimpleJComboBox __props_2_mapx_JComboBox = null;
 
@@ -511,15 +484,12 @@ private String __props_3_stagedischargerating_desc = "(See Documentation)";
 private SimpleJComboBox __props_3_stagedischargerating_JComboBox = null;
 
 //TOP PANEL -- info on selected TS (MeasType)
-private JLabel __title_JLabel = null;
-private JLabel __subtitle_JLabel = null;
 private JTextField __processor_JTextField = null;
 private SimpleJComboBox __order_JComboBox = null;
 private SimpleJComboBox __active_JComboBox = null;
 
 //Output TS
 private JTextField __outputTS_JTextField = null;
-private JLabel __propsValue_JLabel = null;
 
 //Items for types of Processes
 private String __proc_changedatatype_str = "CHANGEDATATYPE";
@@ -549,9 +519,8 @@ long __proc_stagedischargerating_order= 3; //or 103
 //MeasType object that is currently being used...
 RiversideDB_MeasType __db_RTi_MeasType = null;
 RiversideDB_MeasReduction __db_RTi_MeasReduction = null;
-private Vector __RTi_MeasReduction_vect = null;
+//private Vector __RTi_MeasReduction_vect = null;
 private Vector __RTi_MeasReductionType_vect = null;
-private Vector __db_RTi_MeasType_vect = null;
 private Vector __db_RTi_MeasReducRelation_vect = new Vector();
 
 //holds name and description of MeasReductionTypes
@@ -688,6 +657,7 @@ public RiversideDB_Reduction_JFrame(
 	//get the list of all MeasTypes for this MeasLoc
 	//long ml_num = -999;
 	//ml_num = __db_RTi_MeasType.getMeasLoc_num();
+	/*
 	try {
  		__db_RTi_MeasType_vect =
  		__dmi.readMeasTypeListforMeasLoc_num( __db_MeasLoc_num);
@@ -695,11 +665,12 @@ public RiversideDB_Reduction_JFrame(
 	catch ( Exception e ) {
 		Message.printWarning( 2, routine, e);
 	}
+	*/
 
 	//get all the MeasReduction objects
 	try {
 		//get MeasReduction objects vector
- 		__RTi_MeasReduction_vect = __dmi.readMeasReductionList();
+ 		//__RTi_MeasReduction_vect = __dmi.readMeasReductionList();
 	}
 	catch ( Exception e ) {
 		Message.printWarning( 2, routine, e );
@@ -724,10 +695,10 @@ public RiversideDB_Reduction_JFrame(
 	//for the MeasReduction object, either we are editing the 
 	//properties of a current MeasReduction or
 	//we are changing an UNKNOWN (or other type) to a REDUCTION Time Series.
-	int size = 0;
-	if ( __RTi_MeasReduction_vect != null ) {
-		size = __RTi_MeasReduction_vect.size();
-	}
+	//int size = 0;
+	//if ( __RTi_MeasReduction_vect != null ) {
+	//	size = __RTi_MeasReduction_vect.size();
+	//}
 	//if ( __db_RTi_MeasReduction. == null ) {}
 	//mark MeasType dirty if we are changing a node to be a reduction
 	if ( __bln_new_object ) {
@@ -782,7 +753,7 @@ public RiversideDB_Reduction_JFrame(
 		//should not have to set these manually - the object
 		//should set defaults when it is created.
  		__db_RTi_MeasReduction.setCreate_order( 4 );
- 		if ( __dmi.isDatabaseVersionAtLeast(__dmi._VERSION_030000_20041001) ) {
+ 		if ( __dmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
  			__db_RTi_MeasReduction.setIsActive( "Y" );
 		} else {
 			__db_RTi_MeasReduction.setActive  ( "Y" );		
@@ -867,9 +838,7 @@ protected JPanel assemble_inputTS_changedatatype_panel ( ) {
 	props_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
-	Border ts_titled_border=
-	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
+	Border ts_titled_border=BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
 	ts_panel.setBorder( ts_titled_border);
 
@@ -1181,7 +1150,6 @@ protected JPanel assemble_inputTS_changedatatype_panel ( ) {
 	}
 
 	//clean up
-	border = null;
 	prop_1_vect = null;
 	prop_2_vect = null;
 	prop_3_vect = null;
@@ -1207,9 +1175,7 @@ protected JPanel assemble_inputTS_changeint_panel ( ) {
 	props_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
-	Border ts_titled_border=
-	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
+	Border ts_titled_border=BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
 	ts_panel.setBorder( ts_titled_border);
 
@@ -1483,14 +1449,12 @@ protected JPanel assemble_inputTS_changeint_panel ( ) {
 	}
 
 	//clean up
-	border = null;
 	prop_1_vect = null;
 	prop_2_vect = null;
 	prop_3_vect = null;
 
 	return panel;
 } //end assemble_inputTS_changeint_panel
-
 
 /**
 Assembles panel to display Input Time Series for time series
@@ -1509,9 +1473,7 @@ protected JPanel assemble_inputTS_fillfloodmonitor_panel ( ) {
 	props_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
-	Border ts_titled_border=
-	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
+	Border ts_titled_border=BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
 	ts_panel.setBorder( ts_titled_border);
 
@@ -1746,10 +1708,6 @@ protected JPanel assemble_inputTS_fillfloodmonitor_panel ( ) {
 		"panel for type: " + __proc_fillfloodmonitor_str );
 		Message.printWarning( 2, routine, e );
 	}
-
-	//clean up
-	border = null;
-
 	return panel;
 } //end assemble_inputTS_fillfloodmonitor_panel
 
@@ -1768,9 +1726,7 @@ protected JPanel assemble_inputTS_fillrepeat_panel ( ) {
 	ts_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
-	Border ts_titled_border=
-	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
+	Border ts_titled_border=BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
 	panel.setBorder( ts_titled_border);
 
@@ -1879,10 +1835,6 @@ protected JPanel assemble_inputTS_fillrepeat_panel ( ) {
 		"panel for type: " + __proc_fillrepeat_str );
 		Message.printWarning( 2, routine, e );
 	}
-
-	//clean up
-	border = null;
-
 	return panel;
 } //end assemble_inputTS_fillrepeat_panel
 
@@ -1904,9 +1856,7 @@ protected JPanel assemble_inputTS_map_panel ( ) {
 	props_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
-	Border ts_titled_border=
-	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
+	Border ts_titled_border=BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
 	ts_panel.setBorder( ts_titled_border);
 
@@ -2189,10 +2139,6 @@ protected JPanel assemble_inputTS_map_panel ( ) {
 		"panel for type: " + __proc_map_str );
 		Message.printWarning( 2, routine, e );
 	}
-
-	//clean up
-	border = null;
-
 	return panel;
 } //end assemble_inputTS_map_panel
 
@@ -2214,7 +2160,6 @@ protected JPanel assemble_inputTS_mapx_panel ( ) {
 	props_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
 	Border ts_titled_border=
 	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
@@ -2417,10 +2362,6 @@ protected JPanel assemble_inputTS_mapx_panel ( ) {
 		"panel for type: " + __proc_mapx_str );
 		Message.printWarning( 2, routine, e );
 	}
-
-	//clean up
-	border = null;
-
 	return panel;
 } //end assemble_inputTS_MAPX_panel
 
@@ -2442,9 +2383,7 @@ protected JPanel assemble_inputTS_mat_panel ( ) {
 	props_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
-	Border ts_titled_border=
-	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
+	Border ts_titled_border=BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
 	ts_panel.setBorder( ts_titled_border);
 
@@ -2747,13 +2686,8 @@ protected JPanel assemble_inputTS_mat_panel ( ) {
 		"panel for type: " + __proc_mat_str );
 		Message.printWarning( 2, routine, e );
 	}
-
-	//clean up
-	border = null;
-
 	return panel;
 } //end assemble_inputTS_MAT_panel
-
 
 /**
 Assembles panel to display Input Time Series for time series
@@ -2772,9 +2706,7 @@ protected JPanel assemble_inputTS_powerfunc_panel ( ) {
 	props_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
-	Border ts_titled_border=
-	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
+	Border ts_titled_border=BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
 	ts_panel.setBorder( ts_titled_border);
 
@@ -2881,13 +2813,8 @@ protected JPanel assemble_inputTS_powerfunc_panel ( ) {
 		"panel for type: " + __proc_powerfunc_str );
 		Message.printWarning( 2, routine, e );
 	}
-
-	//clean up
-	border = null;
-
 	return panel;
 } //end assemble_inputTS_powerfunc_panel
-
 
 /**
 Assembles panel to display Input Time Series for time series
@@ -2903,7 +2830,6 @@ protected JPanel assemble_inputTS_shapefile_panel ( ) {
 	ts_panel.setLayout( new GridBagLayout() );
 
 	//make border for all inputTS panels
-	Border border = BorderFactory.createLineBorder( Color.black );
 	Border ts_titled_border=
 	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
@@ -3015,13 +2941,8 @@ protected JPanel assemble_inputTS_shapefile_panel ( ) {
 		"panel for type: " + __proc_shapefile_str );
 		Message.printWarning( 2, routine, e );
 	}
-
-	//clean up
-	border = null;
-
 	return panel;
 } //end assemble_inputTS_shapefile_panel
-
 
 /**
 Assembles panel to display Input Time Series for time series
@@ -3040,7 +2961,6 @@ protected JPanel assemble_inputTS_stagedischargerating_panel ( ) {
 	props_panel.setLayout( new GridBagLayout() );
 
 	//make border for  inputTS panel and props panel
-	Border border = BorderFactory.createLineBorder( Color.black );
 	Border ts_titled_border=
 	BorderFactory.createTitledBorder( __inputTS_JPanel_string );
 
@@ -3052,7 +2972,6 @@ protected JPanel assemble_inputTS_stagedischargerating_panel ( ) {
 
 	//add titled border to panel
 	props_panel.setBorder( props_titled_border);
-
 
 	//label for left list (list of all inputTS possiblities)
 	JLabel all_inputTS_JLabel = new JLabel( __all_inputTS_JList_string + ":");
@@ -3284,9 +3203,6 @@ protected JPanel assemble_inputTS_stagedischargerating_panel ( ) {
 		"panel for type: " + __proc_stagedischargerating_str );
 		Message.printWarning( 2, routine, e );
 	}
-	//clean up
-	border = null;
-
 	return panel;
 } //end assemble_inputTS_stagedischargerating_panel
 
@@ -3437,9 +3353,7 @@ protected JPanel assemble_outputTS_panel ( ) {
 	panel.setLayout( new GridBagLayout() );
 
 	//add titled border
-	Border border = BorderFactory.createLineBorder( Color.black );
-	Border titled_border= BorderFactory.createTitledBorder(
-	"Output Time Series" );
+	Border titled_border= BorderFactory.createTitledBorder("Output Time Series" );
 
 	panel.setBorder( titled_border);
 
@@ -3476,10 +3390,6 @@ protected JPanel assemble_outputTS_panel ( ) {
 		"panel." );
 		Message.printWarning( 2, routine, e );
 	}
-
-	//clean up
-	border= null;
-
 	return panel;
 } //end assemble_outputTS_panel
 
@@ -3578,7 +3488,6 @@ public void closeGUI() {
 		}
 	}
 
-	boolean blnClose = true;
 	if( blnUpdated)  {
 		if(( __gui_RTi_MeasType.isDirty()) || 
  		__gui_RTi_MeasReduction.isDirty() )  {
@@ -3765,7 +3674,6 @@ passed in.
 @return String with Description of MeasReductionType
 */
 protected String getProcessorDescription( String proc_type ) {
-	String routine = __class + ".getProcessorDescription";
 	int size = 0;
 	if ( __RTi_MeasReductionType_vect != null ) {
 		size = __RTi_MeasReductionType_vect.size();
@@ -4065,8 +3973,6 @@ protected void move_right() {
 
 	//go through each item selected to make sure it is not
 	//already in the "Selected" list
-	RiversideDB_MeasType mt = null;
-	long mt_num = -999;
 	for ( int i=0; i< selTS_to_move.length; i++ ) {
 		if ( (String) selTS_to_move[i] == null ) {
 			continue;
@@ -4246,7 +4152,6 @@ protected void move_right() {
 			}
 		}
 	} //end loop
-	mt = null;
 }//end move_right
 
 /**
@@ -4452,12 +4357,11 @@ protected void update_database( ) throws Exception {
 	}
 	try {
 		//get MeasReduction objects vector
- 		__RTi_MeasReduction_vect = __dmi.readMeasReductionList();
+ 		//__RTi_MeasReduction_vect = __dmi.readMeasReductionList();
 	}
 	catch ( Exception e ) {
 		Message.printWarning( 2, routine, e );
 	}
-
 } //end update_database
 
 /**
@@ -4562,7 +4466,7 @@ protected void update_GUI_fields( ) {
 
 	//get the Active state
 	String act_str = null;
-	if ( __dmi.isDatabaseVersionAtLeast( __dmi._VERSION_030000_20041001) ) {
+	if ( __dmi.isDatabaseVersionAtLeast( RiversideDB_DMI._VERSION_030000_20041001) ) {
  		act_str = __db_RTi_MeasReduction.getIsActive();
 	} else {
 		act_str = __db_RTi_MeasReduction.getActive  ();	
@@ -4593,8 +4497,7 @@ protected void update_inputTS_panel( ) {
 	//input time series list depends on what is selected
 	//in the output TS list, and what type of processor
 	//is being used.
-	String sel_outputTS_str = null;
-	sel_outputTS_str = __outputTS_JTextField.getText();
+	//String sel_outputTS_str = __outputTS_JTextField.getText();
 
 	//We already have the MeasType object for the selected 
 	//output time series ( __db_RTi_MeasType)
@@ -4688,7 +4591,6 @@ protected void update_inputTS_panel( ) {
 			//then we need to get weights too
 			//convert to TSIDENT just to send to jWorksheet
 			TSIdent tsid= null; 
-			String tsid_str= null;
 			try {
 				tsid = rti_mt.toTSIdent();
 			}
@@ -4698,10 +4600,6 @@ protected void update_inputTS_panel( ) {
 	
 			double wt = -999;
 			wt = mrr.getWeight();
-			long omt_num = -999;
-			omt_num = mrr.getOutputMeasType_num();
-			long imt_num = -999;
-			imt_num = mrr.getInputMeasType_num();
 	
 			//add Vector with row data to worksheet Vector
 			//worksheet_vect.addElement(v);
@@ -4773,7 +4671,6 @@ protected void update_inputTS_panel( ) {
 		}
 
 		RiversideDB_MeasType mt = null;
-		String ts_str = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.
@@ -5098,7 +4995,6 @@ protected void update_inputTS_panel( ) {
 		}
 
 		RiversideDB_MeasType mt = null;
-		String ts_str = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.
@@ -5185,7 +5081,6 @@ protected void update_inputTS_panel( ) {
 			allTS_size = all_RTi_MeasType_vect.size();
 		}
 
-		String mt_name = null;
 		RiversideDB_MeasType mt = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
@@ -5235,7 +5130,6 @@ protected void update_inputTS_panel( ) {
  		__all_inputTS_ListModel.clear();
 		//now update list
 		RiversideDB_MeasType mt = null;
-		String ts_str = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.
@@ -5363,7 +5257,6 @@ protected void update_inputTS_panel( ) {
 		String inputInterval = inputTSid.getInterval();
 
 		RiversideDB_MeasType mt = null;
-		String ts_str = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.elementAt(i);
@@ -5478,7 +5371,6 @@ protected void update_inputTS_panel( ) {
  		__all_inputTS_ListModel.clear();
 		//now update list
 		RiversideDB_MeasType mt = null;
-		String ts_str = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.
@@ -5602,7 +5494,6 @@ protected void update_inputTS_panel( ) {
 		String inputInterval = inputTSid.getInterval();
 
 		RiversideDB_MeasType mt = null;
-		String ts_str = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.elementAt(i);
@@ -5694,7 +5585,6 @@ protected void update_inputTS_panel( ) {
 		}
 
 		RiversideDB_MeasType mt = null;
-		String ts_str = null;
 		TSIdent tsid = null;
 		//clear list
  		__all_inputTS_ListModel.clear();
@@ -5934,7 +5824,6 @@ remember, represents how the object is in the database itself) </li></ul>
 @exception Exception thrown if error encountered
 */
 public void verify_top_fields() throws Exception {
-	String routine = __class + ".verify_top_fields";
 
 	try {
 	//Processor field can't be changed.
@@ -5981,7 +5870,7 @@ public void verify_top_fields() throws Exception {
 	String gui_act = null;
 	gui_act = (String) __active_JComboBox.getSelected();
 	String db_act = null;
-	if ( __dmi.isDatabaseVersionAtLeast(__dmi._VERSION_030000_20041001) ) {
+	if ( __dmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
  		db_act = __db_RTi_MeasReduction.getIsActive().toUpperCase();
 	} else {
 		db_act = __db_RTi_MeasReduction.getActive().toUpperCase();	
@@ -6001,7 +5890,7 @@ public void verify_top_fields() throws Exception {
  		__dirty_vect.addElement(
 		"Change Active (Y/N) from \"" + db_act + 
 		"\" to \"" + gui_act + "\"");
-		if ( __dmi.isDatabaseVersionAtLeast(__dmi._VERSION_030000_20041001) ) {
+		if ( __dmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
  			__gui_RTi_MeasReduction.setIsActive( gui_act );
 		} else {	
 			__gui_RTi_MeasReduction.setActive  ( gui_act );
@@ -6032,11 +5921,8 @@ remember, represents how the object is in the database itself) </li></ul>
 time series field.
 */
 public void verify_outputTS_fields() throws Exception {
-	String routine = __class + ".verify_outputTS_fields";
-
 	//SHOULD not need to check this... it is uneditable.
-	String outputTS_str = null;
-	outputTS_str = __outputTS_JTextField.getText();
+	//outputTS_str = __outputTS_JTextField.getText();
 
 } //end verify_outputTS_fields
 
@@ -6141,10 +6027,10 @@ public void verify_inputTS_fields() throws Exception {
 	}
 
 	//get size of vector that contains Selected Input Time Series
-	int db_inputTS_size =0;
-	if ( db_inputTS_tsid_vect != null ) {
-		db_inputTS_size = db_inputTS_tsid_vect.size();
-	}
+	//int db_inputTS_size =0;
+	//if ( db_inputTS_tsid_vect != null ) {
+	//	db_inputTS_size = db_inputTS_tsid_vect.size();
+	//}
 
 	//holds the input Time series selected in the GUI
 	Object[] arr_gui_inputTS = null;
@@ -6160,7 +6046,7 @@ public void verify_inputTS_fields() throws Exception {
 	String gui_props_str =null;
 
 	//CHANGEDATATYPE
-	String inputTS_type = null;
+	//String inputTS_type = null;
 	if ( __processor_type.equalsIgnoreCase(
  	__proc_changedatatype_str ) ) {
 		//what we need to check for changes between the
@@ -6173,7 +6059,7 @@ public void verify_inputTS_fields() throws Exception {
 		"Verifying MeasReduction Properties for " + 
  		__proc_changedatatype_str + " process." );
 
-		inputTS_type = __proc_changedatatype_str;
+		//inputTS_type = __proc_changedatatype_str;
 
 		//Input Time Series in the "selected" list in GUI
 		arr_gui_inputTS=
@@ -6199,10 +6085,6 @@ public void verify_inputTS_fields() throws Exception {
 		}
 
 		//get properties
-		//String to hold new properties ( since the properties
-		//is ONE field in the data base that consists of 
-		//several potential properties:  (PROPNAME=PROPVALUE;)
-		String changed_props_str = null;
 		
 		String gui_prop_1 = null;
 		gui_prop_1 = (String) __props_1_changedatatype_JComboBox.
@@ -6347,7 +6229,7 @@ public void verify_inputTS_fields() throws Exception {
 		"Verifying MeasReduction Properties for " + 
  		__proc_changeint_str + " process." );
 
-		inputTS_type = __proc_changeint_str;
+		//inputTS_type = __proc_changeint_str;
 
 		arr_gui_inputTS=
  		__sel_inputTS_ListModel.toArray();
@@ -6371,10 +6253,6 @@ public void verify_inputTS_fields() throws Exception {
 		}
 
 		//get properties
-		//String to hold new properties ( since the properties
-		//is ONE field in the data base that consists of 
-		//several potential properties:  (PROPNAME=PROPVALUE;)
-		String changed_props_str = null;
 		
 		String gui_prop_1 = null;
 		gui_prop_1 = (String) __props_1_changeint_JComboBox.
@@ -6479,9 +6357,8 @@ public void verify_inputTS_fields() throws Exception {
 		"Verifying MeasReduction Properties for " + 
  		__proc_fillfloodmonitor_str + " process." );
 
-		inputTS_type = __proc_fillfloodmonitor_str;
-		arr_gui_inputTS=
- 		__sel_inputTS_ListModel.toArray();
+		//inputTS_type = __proc_fillfloodmonitor_str;
+		arr_gui_inputTS=__sel_inputTS_ListModel.toArray();
 
 		if ( arr_gui_inputTS.length <= 0 ) {
 			Message.printWarning( 1, routine, 
@@ -6501,10 +6378,6 @@ public void verify_inputTS_fields() throws Exception {
 		}
 
 		//get properties
-		//String to hold new properties ( since the properties
-		//is ONE field in the data base that consists of 
-		//several potential properties:  (PROPNAME=PROPVALUE;)
-		String changed_props_str = null;
 		
 		String gui_prop_1 = null;
 		gui_prop_1 = (String) __props_1_fillfloodmonitor_JComboBox.
@@ -6566,9 +6439,8 @@ public void verify_inputTS_fields() throws Exception {
 		"Verifying MeasReduction Properties for " + 
  		__proc_fillrepeat_str + " process." );
 
-		inputTS_type = __proc_fillrepeat_str;
-		arr_gui_inputTS=
- 		__sel_inputTS_ListModel.toArray();
+		//inputTS_type = __proc_fillrepeat_str;
+		arr_gui_inputTS=__sel_inputTS_ListModel.toArray();
 
 		if ( arr_gui_inputTS.length <= 0 ) {
 			Message.printWarning( 1, routine, 
@@ -6599,9 +6471,8 @@ public void verify_inputTS_fields() throws Exception {
 		"Verifying MeasReduction Properties for " + 
  		__proc_map_str + " process." );
 
-		inputTS_type = __proc_map_str;
-		//arr_gui_inputTS=
-		//_sel_inputTS_ListModel.toArray();
+		//inputTS_type = __proc_map_str;
+		//arr_gui_inputTS=_sel_inputTS_ListModel.toArray();
 		Vector data_vect = __weights_JWorksheet.getAllData();
 		gui_weight_vect.clear();
 		gui_inputTS_vect.clear();
@@ -6632,7 +6503,6 @@ public void verify_inputTS_fields() throws Exception {
 		//String to hold new properties ( since the properties
 		//is ONE field in the data base that consists of 
 		//several potential properties:  (PROPNAME=PROPVALUE;)
-		String changed_props_str = null;
 		
 		String gui_prop_1 = null;
 		gui_prop_1 = (String) __props_1_map_JComboBox.
@@ -6721,9 +6591,8 @@ public void verify_inputTS_fields() throws Exception {
 		"Verifying MeasReduction Properties for " + 
  		__proc_mapx_str + " process." );
 
-		inputTS_type = __proc_mapx_str;
-		arr_gui_inputTS=
- 		__sel_inputTS_ListModel.toArray();
+		//inputTS_type = __proc_mapx_str;
+		arr_gui_inputTS=__sel_inputTS_ListModel.toArray();
 
 		if ( arr_gui_inputTS.length <= 0 ) {
 			Message.printWarning( 1, routine, 
@@ -6743,10 +6612,6 @@ public void verify_inputTS_fields() throws Exception {
 		}
 
 		//get properties
-		//String to hold new properties ( since the properties
-		//is ONE field in the data base that consists of 
-		//several potential properties:  (PROPNAME=PROPVALUE;)
-		String changed_props_str = null;
 		
 		String gui_prop_1 = null;
 		gui_prop_1 = (String) __props_1_mapx_JComboBox.
@@ -6811,7 +6676,7 @@ public void verify_inputTS_fields() throws Exception {
 		"Verifying MeasReduction Properties for " + 
  		__proc_mat_str + " process." );
 
-		inputTS_type = __proc_mat_str;
+		//inputTS_type = __proc_mat_str;
 		//arr_gui_inputTS=
 		//_sel_inputTS_ListModel.toArray();
 		Vector data_vect = __weights_JWorksheet.getAllData();
@@ -6841,10 +6706,6 @@ public void verify_inputTS_fields() throws Exception {
 		}
 
 		//get properties
-		//String to hold new properties ( since the properties
-		//is ONE field in the data base that consists of 
-		//several potential properties:  (PROPNAME=PROPVALUE;)
-		String changed_props_str = null;
 		
 		String gui_prop_1 = null;
 		gui_prop_1 = (String) __props_1_mat_JComboBox.
@@ -6947,9 +6808,8 @@ public void verify_inputTS_fields() throws Exception {
 		"Verifying MeasReduction Properties for " + 
  		__proc_stagedischargerating_str + " process." );
 
-		inputTS_type = __proc_stagedischargerating_str;
-		arr_gui_inputTS=
- 		__sel_inputTS_ListModel.toArray();
+		//inputTS_type = __proc_stagedischargerating_str;
+		arr_gui_inputTS=__sel_inputTS_ListModel.toArray();
 
 		if ( arr_gui_inputTS.length <= 0 ) {
 			Message.printWarning( 1, routine, 
@@ -6969,10 +6829,6 @@ public void verify_inputTS_fields() throws Exception {
 		}
 
 		//get properties
-		//String to hold new properties ( since the properties
-		//is ONE field in the data base that consists of 
-		//several potential properties:  (PROPNAME=PROPVALUE;)
-		String changed_props_str = null;
 		
 		String gui_prop_1 = null;
 		gui_prop_1 = (String) __props_1_stagedischargerating_JComboBox.
@@ -7191,7 +7047,6 @@ public void actionPerformed (ActionEvent event) {
 	String routine = __class + ".actionPerformed";
 
 	try {
-	String command = event.getActionCommand();
 	Object source = event.getSource();
 	
 	if ( source.equals( __apply_JButton ) ) {
@@ -7408,8 +7263,6 @@ Action for the ListSelectionListeners.
 @param event  ListSelectionEvent to fire off the listener.
 */
 public void valueChanged( ListSelectionEvent event ) {
-	String routine = __class + ".valueChanged";
-	Object source = event.getSource();
 
 } //end valueChanged
 

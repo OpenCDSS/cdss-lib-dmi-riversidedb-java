@@ -775,7 +775,7 @@ protected final int _S_SEVERITYTYPES = 5200;
 /**
 Vector of RiversideDB_TableLayout, which are referenced when reading and writing time series.
 */
-private Vector _RiversideDB_TableLayout_Vector = new Vector();
+//private Vector _RiversideDB_TableLayout_Vector = new Vector();
 
 /**
 Vector of RiversideDB_Tables, which are referenced when reading and writing time series.
@@ -5254,7 +5254,7 @@ throws Exception {
 	// Read the Tables table.
 	_RiversideDB_Tables_Vector = readTablesList ();
     // Read the table layout table
-    _RiversideDB_TableLayout_Vector = readTableLayoutList ();
+    //_RiversideDB_TableLayout_Vector = readTableLayoutList ();
 }
 
 /**

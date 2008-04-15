@@ -72,11 +72,8 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.util.Vector;
 
-import RTi.Util.Message.Message;
-import RTi.DMI.DMIUtil;
-
 /**
-Table model used for displaying thw data editor for the table Props
+Table model used for displaying the data editor for the table Props
 This class extends from RiversideDB_ReferenceTable_Abstract_Props.
 */
 public class RiversideDB_ReferenceTable_Props_TableModel

@@ -21,16 +21,11 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.Date;
 import java.util.Vector;
 
-import RTi.DMI.DMI;
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
-
-import RTi.Util.Message.Message;
 
 /**
 Store data from the Tables table.

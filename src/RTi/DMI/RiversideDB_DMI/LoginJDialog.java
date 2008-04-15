@@ -55,7 +55,6 @@ import javax.swing.JTextField;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJButton;
 import RTi.Util.IO.Cipher;
-import RTi.Util.IO.LicenseManager;
 import RTi.Util.Message.Message;
 
 import RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
@@ -575,13 +574,13 @@ public void keyPressed ( KeyEvent event )
 	int code = event.getKeyCode();
 	
 	// Enter key is the same as OK
-	if ( code == event.VK_ENTER ) {
+	if ( code == KeyEvent.VK_ENTER ) {
 		// OK clicked
 		login();
 	}
 	
 	// Escape key is the same as Cancel
-	else if ( code == event.VK_ESCAPE ) {
+	else if ( code == KeyEvent.VK_ESCAPE ) {
 		// Cancel clicked
 		__response = LOGIN_CANCELLED;
 		response();

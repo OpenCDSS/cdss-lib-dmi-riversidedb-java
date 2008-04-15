@@ -72,11 +72,8 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.util.Vector;
 
-import RTi.Util.Message.Message;
-import RTi.DMI.DMIUtil;
-
 /**
-Table model used for displaying thw data editor for the table Scenario.
+Table model used for displaying the data editor for the table Scenario.
 This class extends from RiversideDB_ReferenceTable_Abstract_TableModel.
 */
 public class RiversideDB_ReferenceTable_Scenario_TableModel
@@ -257,7 +254,7 @@ protected Object getTableValueAt( int row, int column )
 		case COL_SCENARIO_SCENARIO_NUM:
 			return new Integer((int)s.getScenario_num());
 		case COL_SCENARIO_ACTIVE:
-			if ( _rdmi.isDatabaseVersionAtLeast(_rdmi._VERSION_030000_20041001) ) {
+			if ( _rdmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
  				return new Integer(s.getIsActive());
 			} else {
 				return new Integer(s.getActive());
@@ -318,7 +315,7 @@ protected Object setTableValueAt( Object value, int row, int column )
 			break;
 		case COL_SCENARIO_ACTIVE:
 			i = readInt(value);
-			if ( _rdmi.isDatabaseVersionAtLeast(_rdmi._VERSION_030000_20041001) ) {
+			if ( _rdmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
  				if (i != rs.getIsActive()) {
 					rs.setIsActive(i);
 					checkTableDirty(rs, rs0);

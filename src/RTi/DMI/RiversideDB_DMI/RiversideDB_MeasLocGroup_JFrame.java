@@ -61,12 +61,10 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -75,9 +73,6 @@ import java.io.File;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -93,17 +88,8 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.ResponseJDialog;
 import RTi.Util.GUI.SimpleFileFilter;
 import RTi.Util.GUI.SimpleJButton;
-import RTi.Util.GUI.SimpleJComboBox;
-import RTi.Util.GUI.SimpleJTree;
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
-import RTi.Util.String.StringUtil;
-import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeUtil;
-
-import RTi.DMI.DMI;
-import RTi.DMI.DMIUtil;
 
 /**
 RiversideDB_MeasLocGroup_JFrame.
@@ -563,12 +549,10 @@ be filled in before a save can occur.)
 have a value.
 */
 protected void checkRequiredInput() throws Exception
-{
-	String routine = __class + ".checkRequiredInput", mssg;
-
+{   String mssg;
 	StringBuffer buffer = new StringBuffer();
 
-	// Identifer
+	// Identifier
 	String id_str = null;
 	id_str = __id_JTextField.getText().trim();
 	if (( id_str == null ) || ( id_str.length() <= 0 ) ) {
@@ -674,8 +658,6 @@ public void closeGUI()
 			blnUpdated = false;
 		}
 	}
-
-	boolean blnClose = true;
 	
 	if( blnUpdated )  {
 		if ( ( __gui_RTi_MeasLocGroup.isDirty()         ) ||
@@ -1201,8 +1183,6 @@ protected void update_database() throws Exception {
 		this.setTitle( "RiverTrak® Assistant - " +
 		"Location Group - " + __gui_RTi_MeasLocGroup.getIdentifier()
 		);
-
-		int mlg_num = -999;
 		try {
 			new_MeasLocGroup =
  			__dmi.writeMeasLocGroup( __gui_RTi_MeasLocGroup );
@@ -1475,7 +1455,6 @@ public void verify_fields() throws Exception {
  	__gui_RTi_DBUserMeasLocGroupRelation_vect = new Vector();
 
 	RiversideDB_DBUser user = null;
-	Vector selDBUsers_vect = new Vector();
 	RiversideDB_DBUserMeasLocGroupRelation dbumlg = null;
 	for ( int i=0; i<numb_relations; i++ ) {
 		//for each User selected, get the DBUser object so we can
@@ -1486,7 +1465,6 @@ public void verify_fields() throws Exception {
 		}
 		catch ( Exception e ) {
 			Message.printWarning( 2, routine, e);
-			selDBUsers_vect = null;
 		}
 		if ( user == null ) {
 			continue;
@@ -1575,7 +1553,6 @@ public void actionPerformed (ActionEvent event)
 	String routine = __class + ".actionPerformed", mssg;
 
 	try {
-	String command = event.getActionCommand();
 	Object source  = event.getSource();
 
 	if ( source.equals( __browser_JButton ) ) {

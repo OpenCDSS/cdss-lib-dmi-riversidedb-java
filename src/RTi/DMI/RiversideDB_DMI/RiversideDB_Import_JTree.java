@@ -57,7 +57,6 @@ package RTi.DMI.RiversideDB_DMI;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.lang.Thread;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -70,7 +69,6 @@ import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleJMenuItem;
 import RTi.Util.GUI.SimpleJTree;
 import RTi.Util.GUI.SimpleJTree_Node;
-import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
 
 /**
@@ -173,7 +171,7 @@ protected void createTree()
 
 	// Now add a popup menu to the tree.
 	__treeJPopupMenu = new JPopupMenu();
-	__treeJPopupMenu.setDefaultLightWeightPopupEnabled( false );
+	JPopupMenu.setDefaultLightWeightPopupEnabled( false );
 
 	// Menu items: define properties, add new product, delete product
 	__popup_AddImportProduct_JMenuItem = new SimpleJMenuItem(
@@ -281,7 +279,6 @@ public void populateTree()
 
 	// ...
 	String grp  = null;
-	String prod = null;
 	SimpleJTree_Node grp_node   = null;
 	SimpleJTree_Node prod_node  = null;
 	RiversideDB_ProductGroup pg = null;
@@ -419,7 +416,6 @@ public void actionPerformed (ActionEvent event)
 	String routine = __class + ".actionPerformed";
 
 	try {
-	String command = event.getActionCommand();
 	Object source  = event.getSource();
 
 	if ( source == __popup_DeleteImportProduct_JMenuItem  ) {
@@ -590,7 +586,6 @@ public void actionPerformed (ActionEvent event)
 				JOptionPane.YES_NO_OPTION );
 
 			int[] arrDels = null;
-			boolean blnDeleted = true;
 			if ( confirm == JOptionPane.OK_OPTION ) {
 				try {
 				   arrDels = __dmi.
@@ -707,6 +702,7 @@ public void actionPerformed (ActionEvent event)
 		// Get the node selected, which should be the Group name
 		SimpleJTree_Node group_node = getSelectedNode();
 
+		/*
 		String stripped_grp = null;
 		String name = group_node.getName();
 		// Remove the string from the front of the group name: "GRP:"
@@ -714,6 +710,7 @@ public void actionPerformed (ActionEvent event)
 			true, 0, GRP_STRING, 0, GRP_STRING.length() ) ) {
 			stripped_grp = name.substring( GRP_STRING.length() +1 );
 		}
+		*/
 
 		// Get ProductGroup
 		RiversideDB_ProductGroup pg = (RiversideDB_ProductGroup)

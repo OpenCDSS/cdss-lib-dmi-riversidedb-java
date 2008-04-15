@@ -33,15 +33,9 @@ import  RTi.Util.GUI.JGUIUtil;
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.util.Vector;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import javax.swing.BorderFactory;
-import javax.swing.border.Border;
-
-import RTi.Util.Message.Message;
 
 /**
 Creates a RiversideDB JPanel component that contains a JTabbedPane currently
@@ -49,11 +43,6 @@ populated with three JTrees (Import, MeasLoc and Export).
 */
 public class RiversideDB_System_JPanel extends JPanel
 {
-
-/**
-Class name
-*/
-private static String __class = "RiversideDB_System_JPanel";
 
 /**
 Reference to the RiversideDB connection
@@ -112,8 +101,6 @@ Initialize the GUI.
 */
 private void initializeGUILayout ()
 {
-	String routine = __class + ".initializeGUILayout";
-
 	// JPanel to hold the JTabbedPane
 	this.setLayout ( new GridBagLayout() );
 	this.setBackground ( Color.white );

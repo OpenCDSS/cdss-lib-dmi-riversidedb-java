@@ -111,32 +111,22 @@
 package RTi.DMI.RiversideDB_DMI;
 
 import  java.awt.Color;
-import  java.awt.Component;
 import  java.awt.Dimension;
-import  java.awt.Font;
 import  java.awt.GridBagConstraints;
 import  java.awt.GridBagLayout;
-import  java.awt.GridLayout;
 import  java.awt.Insets;
-import  java.awt.Image;
 import  java.awt.event.ActionEvent;
 import  java.awt.event.ActionListener;
 import  java.awt.event.ItemEvent;
 import  java.awt.event.ItemListener;
 import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
-import  java.net.URL;
-import  java.text.SimpleDateFormat;
-import  java.util.Date;
 import  java.util.Vector;
 
 import 	javax.swing.BorderFactory;
 import 	javax.swing.border.Border;
 import 	javax.swing.border.TitledBorder;
 import 	javax.swing.DefaultComboBoxModel;
-import 	javax.swing.ImageIcon;
-import 	javax.swing.JCheckBox;
-import 	javax.swing.JCheckBoxMenuItem;
 import 	javax.swing.JComboBox;
 import 	javax.swing.JDialog;
 import 	javax.swing.JFrame;
@@ -146,25 +136,13 @@ import 	javax.swing.JPanel;
 import 	javax.swing.JScrollPane;
 import 	javax.swing.JTabbedPane;
 import 	javax.swing.JTextField;
-import 	javax.swing.UIManager;
-
-import 	RTi.GIS.GeoView.GeoViewJPanel;
-import 	RTi.GIS.GeoView.GeoLayer;
-import 	RTi.GIS.GeoView.GeoLayerView;
-import 	RTi.GIS.GeoView.GeoProjection;
-
-import  RTi.TS.TS;
-import  RTi.TS.TSIdent;
 
 import  RTi.Util.GUI.JGUIUtil;
 import  RTi.Util.GUI.JWorksheet;
-import  RTi.Util.GUI.JWorksheet;
-import  RTi.Util.GUI.ResponseJDialog;
 import  RTi.Util.GUI.ResponseJDialog;
 import  RTi.Util.GUI.SimpleJButton;
 import  RTi.Util.GUI.SimpleJComboBox;
 import 	RTi.Util.IO.DataUnits;
-import 	RTi.Util.IO.DataUnitsConversion;
 import  RTi.Util.IO.IOUtil;
 import  RTi.Util.IO.PropList;
 import	RTi.Util.Message.Message;
@@ -172,18 +150,13 @@ import  RTi.Util.String.StringUtil;
 import  RTi.Util.Time.DateTime;
 import  RTi.Util.Time.TimeUtil;
 
-import 	RTi.DMI.DMI;
 import 	RTi.DMI.DMIUtil;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataSource;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataType;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataUnits;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_Geoloc;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasLoc;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasLocGroup;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasLocType;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_MeasType;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_RatingTable;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_RatingTable_CellRenderer;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_RatingTable_TableModel;
@@ -422,7 +395,6 @@ private boolean __originallyNewObject = false;
 private JPanel __main_JPanel = null;
 private JPanel __top_station_info_JPanel = null;
 private JPanel __tabbedInfo_JPanel = null;
-private JPanel __bottom_close_JPanel = null;
 
 //Tabbed pane itself
 private JTabbedPane __info_JTabbedPane = null;
@@ -512,7 +484,6 @@ private String __preselected_ID_string = null;
 //Current Geoloc object
 //And Vectors of all of the objects
 RiversideDB_Geoloc __db_RTi_GeoLoc = null;
-private Vector __RTi_GeoLoc_vect = null;
 //MeasLoc object that is currently being used...
 RiversideDB_MeasLoc __db_RTi_MeasLoc = null;
 private Vector __RTi_MeasLoc_vect = null;
@@ -1616,7 +1587,6 @@ be filled in before a save can occur.)
 have a value.
 */
 protected void checkRequiredInput() throws Exception {
-	String routine = __class + ".checkRequiredInput";
 
 	String gui_id= null;
 	gui_id = __station_id_JTextField.getText();
@@ -1668,7 +1638,6 @@ protected void checkRequiredInput() throws Exception {
 Checks that JTextFields in the Ratings Tab have Numeric entries
 */
 protected StringBuffer checkRequiredInput_ratingTab() throws Exception {
-	String routine = __class + ".checkRequiredInput";
 
 	StringBuffer buffer = new StringBuffer();
 
@@ -2484,7 +2453,6 @@ protected void finalize() throws Throwable {
  	__main_JPanel = null;
  	__top_station_info_JPanel = null;
  	__tabbedInfo_JPanel = null;
- 	__bottom_close_JPanel = null;
  	__close_JButton = null;
  	__cancel_JButton = null;
  	__apply_JButton = null;
@@ -2502,7 +2470,6 @@ protected void finalize() throws Throwable {
  	__geog_tab_county_JTextField = null;
  	__geog_tab_elevation_JTextField = null;
  	__db_RTi_GeoLoc = null;
- 	__RTi_GeoLoc_vect = null;
  	__db_RTi_MeasLoc = null;
  	__RTi_MeasLoc_vect = null;
  	__info_JTabbedPane = null;
@@ -2633,9 +2600,7 @@ If null, sets default values.
 @param index Index of the StageDischargeRating object passed in above
 to use to find the correlcating JWorksheet.
 */
-protected void set_rating_tab_fields( RiversideDB_StageDischargeRating sdr,
-int index ) {
-	String routine = __class + ".set_rating_tab_fields";
+protected void set_rating_tab_fields( RiversideDB_StageDischargeRating sdr,int index ) {
 	if ( sdr != null ) {
 		//_previous_RTi_StageDischargeRating =
 		//new RiversideDB_StageDischargeRating( sdr );
@@ -2998,7 +2963,6 @@ Updates the Vector of RiversideDB_StageDischargeRating objects with new
 object's data.  Also updates the related JWorksheet (from RatingTable).
 */
 protected void update_previous_StageDischargeRating_obj( ) {
-	String routine = __class + ".update_previous_StageDischargeRating_obj";
 
 	double datum_elv = ( StringUtil.atod(
  	__rating_tab_datum_JTextField.getText() ) );
@@ -3746,7 +3710,6 @@ remember, represents how the object is in the database itself) </li></ul>
 @exception Exception if error encountered.
 */
 public void verify_area_tab() throws Exception {
-	String routine = __class + ".verify_area_tab";
 }//end verify_area_tab
 
 
@@ -4436,7 +4399,7 @@ public void verify_rating_tab() throws Exception {
 			}
 
 			//now go through the RatingTable objects
-			RiversideDB_RatingTable rt = null;
+			//RiversideDB_RatingTable rt = null;
 			Vector db_rt_v = null;
 			try {
 				db_rt_v = __dmi.
@@ -4445,7 +4408,7 @@ public void verify_rating_tab() throws Exception {
 			}
 			catch ( Exception e ){
 				Message.printWarning( 2, routine, e );
-				rt = new RiversideDB_RatingTable();
+				//rt = new RiversideDB_RatingTable();
 			}
 
 			Vector gui_rt_v =( (JWorksheet)
@@ -4563,7 +4526,6 @@ Currently not utilized.
 @exception Exception thrown if error encountered.
 */
 public void verify_station_tab() throws Exception {
-	String routine = __class + ".verify_station_tab";
 }//end verify_station_tab
 
 
@@ -4713,7 +4675,6 @@ The event handler manages action events.
 public void actionPerformed (ActionEvent event) {
 	String routine = __class + ".actionPerformed";
 
-	String command = event.getActionCommand();
 	Object source = event.getSource();
 	if ( source.equals( __apply_JButton ) ) {
 

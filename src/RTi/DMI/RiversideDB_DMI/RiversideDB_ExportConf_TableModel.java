@@ -16,10 +16,8 @@ package RTi.DMI.RiversideDB_DMI;
 
 import RTi.Util.GUI.JWorksheet;
 
-import java.util.Date;
 import java.util.Vector;
 
-import RTi.TS.TS;
 import RTi.TS.TSIdent;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
@@ -27,8 +25,6 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.IO.DataUnits;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.Message.Message;
-import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeInterval;
 
 //import RTi.DMI.RiversideDB_DataType;
 
@@ -497,7 +493,6 @@ public void updateWorksheet( ) {
 		RiversideDB_DataType dt =null;
 		String dim = "";
 		Vector du_vect = null;
-		boolean foundDT= false;
 		//use type to get DataType object
 		for ( int j=0; j<size_dt; j++ ) {
 			dt = (RiversideDB_DataType) __dataType_vect.

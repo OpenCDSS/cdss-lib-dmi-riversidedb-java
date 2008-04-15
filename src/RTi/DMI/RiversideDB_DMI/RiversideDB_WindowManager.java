@@ -1,5 +1,3 @@
-
-
 //------------------------------------------------------------------------------
 // RiversideDB_WindowManager - Manage the RiversideDB_System windows
 //------------------------------------------------------------------------------
@@ -39,7 +37,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-
+import java.awt.Frame;
 import javax.swing.JFrame;
 import java.util.Vector;
 
@@ -105,11 +103,6 @@ Reference to the DMI passed in by the main application.
 private RiversideDB_DMI __dmi = null;
 
 /**
-Reference to the main application JFrame.
-*/
-private JFrame __main = null;
-
-/**
 Constructor.
 @param dmi the DMI being used by the Assistant.
 @param main the JFrame of the Main assistant window.
@@ -120,7 +113,6 @@ public RiversideDB_WindowManager( RiversideDB_DMI dmi, JFrame main )
 
 	// Initialize instance members.
 	__dmi  = dmi;
-	__main = main;
 
 	// Initialize the windows indexes instance members
 	initialize();
@@ -259,7 +251,7 @@ public JFrame displayWindow( int winIndex, boolean editable, String title,
 						" Window already opened." );
 				}
 				win = getWindowInstanceWindow(winIndex, id);
-				win.setState(win.NORMAL);
+				win.setState(Frame.NORMAL);
 				win.toFront();
 				return win;
 			}
@@ -358,10 +350,9 @@ public JFrame displayWindow( int winIndex, boolean editable, String title,
 		// Single instance windows
 		if ( getWindowStatus(winIndex) == STATUS_OPEN ) {
 			win = getWindow(winIndex);
-			win.setState(win.NORMAL);
+			win.setState(Frame.NORMAL);
 			win.toFront();
-			Message.printStatus(2, routine,
-				" Window " + winIndex + " already opened." );
+			Message.printStatus(2, routine, " Window " + winIndex + " already opened." );
 			return win;
 		}
 
@@ -459,8 +450,6 @@ public void finalize()
 throws Throwable
 {
 	__dmi  = null;
-	__main = null;
-
 	super.finalize();
 }
 

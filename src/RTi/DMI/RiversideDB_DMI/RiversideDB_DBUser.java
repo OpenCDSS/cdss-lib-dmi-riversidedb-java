@@ -12,11 +12,8 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
-import RTi.DMI.DMI;
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
-
-import java.util.Date;
 
 /**
 class to store data from the DBUser table

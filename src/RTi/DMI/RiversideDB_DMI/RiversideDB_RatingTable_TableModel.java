@@ -17,16 +17,9 @@ package RTi.DMI.RiversideDB_DMI;
 
 import RTi.Util.GUI.JWorksheet;
 
-import java.util.Date;
 import java.util.Vector;
 
-import RTi.TS.TS;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-
-import RTi.Util.Message.Message;
-import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeInterval;
 
 /**
 This class is a table model for displaying data from RiversideDB_RatingTable_Table objects.

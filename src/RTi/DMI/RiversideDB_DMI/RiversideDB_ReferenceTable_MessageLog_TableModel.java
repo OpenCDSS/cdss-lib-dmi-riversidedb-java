@@ -66,15 +66,13 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Date;
 import java.util.Vector;
 
-import RTi.Util.Message.Message;
 import RTi.Util.Time.DateTime;
 import RTi.DMI.DMIUtil;
 
 /**
-Table model used for displaying thw data editor for the table MessageLog.
+Table model used for displaying the data editor for the table MessageLog.
 This class extends from RiversideDB_ReferenceTable_Abstract_TableModel.
 */
 public class RiversideDB_ReferenceTable_MessageLog_TableModel
@@ -297,7 +295,6 @@ protected Object setTableValueAt( Object value, int row, int column )
 		(RiversideDB_MessageLog)m.getOriginal();
 	String s;
 	int i;
-	Date d;
 	switch (column) {
 		case COL_MESSAGE_LOG_MESSAGE_NUM:
 			i = readInt(value);

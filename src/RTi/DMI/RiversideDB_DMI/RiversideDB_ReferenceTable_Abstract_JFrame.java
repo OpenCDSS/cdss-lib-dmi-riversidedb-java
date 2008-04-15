@@ -813,9 +813,7 @@ protected void saveClicked()
 	// were deleted, are not deleted from the database.
 	int size = _deletedRecords.size();
 	int deleteErrorCount = 0;
-	boolean del = false;
 	for (int i = 0; i < size; i++) {
-		del = false;
 		ddo = (DMIDataObject)_deletedRecords.elementAt(i);
 		if (ddo.getOriginal() != null) {
 			try {

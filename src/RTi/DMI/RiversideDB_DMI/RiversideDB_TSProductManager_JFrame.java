@@ -51,7 +51,6 @@ import RTi.Util.GUI.SimpleJComboBox;
 import RTi.Util.GUI.SimpleJMenuItem;
 import RTi.Util.GUI.TextResponseJDialog;
 
-import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.Prop;
 import RTi.Util.IO.PropList;
 
@@ -751,8 +750,7 @@ to be used internally.
 @param tspVector the Vector of time series products to process.  Cannot be 
 null.
 */
-private void processTSPVectorForList(DMI dmi, Vector tspVector) { 
-	String routine = CLASS + ".processTSPVectorForList";
+private void processTSPVectorForList(DMI dmi, Vector tspVector) {
 
 	int size = tspVector.size();
 

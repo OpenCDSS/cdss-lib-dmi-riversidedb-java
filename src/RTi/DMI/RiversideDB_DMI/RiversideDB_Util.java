@@ -423,14 +423,11 @@ See comment below.
 	Vector v = dmi.readProductGroupList();
 	
 	int size = v.size();
-	int pgGroupNum = 0;
-	int pgUserNum = 0;
 	RiversideDB_ProductGroup pg = null;
-	String p = null;
 	for (int i = 0; i < size; i++) {
 		pg = (RiversideDB_ProductGroup)v.elementAt(i);
-		pgGroupNum = pg.getDBGroup_num();
-		pgUserNum = pg.getDBUser_num();
+		//pgGroupNum = pg.getDBGroup_num();
+		//pgUserNum = pg.getDBUser_num();
 
 		groups.add("" + pg.getProductGroup_num()
 			+ " - " + pg.getIdentifier() + " - "

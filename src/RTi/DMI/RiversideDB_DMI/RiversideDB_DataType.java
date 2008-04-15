@@ -19,7 +19,6 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.util.Vector;
 
-import RTi.DMI.DMI;
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
 

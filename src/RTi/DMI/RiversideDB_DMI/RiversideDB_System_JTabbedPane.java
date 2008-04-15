@@ -21,15 +21,8 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.awt.Color;
-
-import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.border.Border;
 import javax.swing.JTabbedPane;
 
-import RTi.Util.GUI.SimpleJTree;
 import RTi.Util.Message.Message;
 
 import RTi.DMI.RiversideDB_DMI.RiversideDB_MeasLoc_JTree;

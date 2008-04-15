@@ -16,20 +16,9 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
-import RTi.DMI.DMIUtil;
-import RTi.Util.GUI.JWorksheet;
-import RTi.Util.Message.Message;
-
-import java.util.Date;
 import java.util.Vector;
 
-import RTi.TS.TS;
-
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-import RTi.Util.String.StringUtil;
-
-import RTi.Util.Time.DateTime;
-import RTi.Util.Time.TimeInterval;
 
 /**
 This class is a table model for displaying data for station weights.
@@ -182,7 +171,6 @@ public Object getValueAt(int row, int col) {
 	// for each column.  You can do a lot in here, I've done some really
 	// complicated stuff for some tables.  But for the most part,
 	// something simple like below will work
-	Vector v= null;
 	String [] arr = (String[])_data.elementAt(row);
 	switch (col) {
 		case  0:	return arr[0];
@@ -230,8 +218,6 @@ value.
 */ 
 public void setValueAt(Object value, int row, int col) {
 	String s;
-	double dval;
-	int ival;
 	switch (col) {
  		case  1: 
 			s = new String( (String) value );

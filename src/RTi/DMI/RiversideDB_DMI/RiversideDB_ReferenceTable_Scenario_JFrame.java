@@ -33,7 +33,6 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.awt.Color;
 import java.util.Vector;
-import javax.swing.JPanel;
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
 import RTi.Util.Message.Message;

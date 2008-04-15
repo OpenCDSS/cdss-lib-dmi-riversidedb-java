@@ -23,7 +23,6 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.Message.Message;
 
 import java.util.Vector;

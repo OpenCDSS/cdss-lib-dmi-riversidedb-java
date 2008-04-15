@@ -50,9 +50,6 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
-import  java.awt.Color;
-import  java.awt.Component;
-import  java.awt.Dimension;
 import  java.awt.GridBagConstraints;
 import  java.awt.GridBagLayout;
 import  java.awt.Insets;
@@ -62,7 +59,6 @@ import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
 import  java.util.Vector;
 
-import 	javax.swing.ImageIcon;
 import 	javax.swing.JCheckBox;
 import 	javax.swing.JFrame;
 import 	javax.swing.JLabel;
@@ -72,18 +68,10 @@ import 	javax.swing.JTextField;
 
 import  RTi.Util.GUI.JGUIUtil;
 import  RTi.Util.GUI.ResponseJDialog;
-import  RTi.Util.GUI.ResponseJDialog;
 import  RTi.Util.GUI.SimpleJButton;
 import  RTi.Util.GUI.SimpleJComboBox;
-import  RTi.Util.GUI.SimpleJMenuItem;
-import  RTi.Util.IO.IOUtil;
-import  RTi.Util.IO.PropList;
 import	RTi.Util.Message.Message;
-import  RTi.Util.String.StringUtil;
-import  RTi.Util.Time.DateTime;
-import  RTi.Util.Time.TimeUtil;
 
-import 	RTi.DMI.DMI;
 import 	RTi.DMI.DMIUtil;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
@@ -469,11 +457,10 @@ be filled in before a save can occur.)
 have a value.
 */
 protected void checkRequiredInput() throws Exception {
-	String routine = __class + ".checkRequiredInput";
 
 	StringBuffer buffer = new StringBuffer();
 
-	//identifer
+	//identifier
 	String id_str = null;
 	id_str = __id_JTextField.getText().trim();
 	if (( id_str == null ) || ( id_str.length() <= 0 ) ) {
@@ -568,7 +555,6 @@ public void closeGUI() {
 		}
 	}
 
-	boolean blnClose = true;
 	if( blnUpdated)  {
 		if( __gui_RTi_ProductGroup.isDirty() ) {
 			//prompt user if they want to save their
@@ -671,7 +657,6 @@ private void init_layout_GUI( ) {
 	JLabel name_JLabel = new JLabel ( "Name:");
  	__name_JTextField = new JTextField( 15 );
 	//Type JComboBox and JLabel
-	JLabel type_JLabel = new JLabel ( "Type:");
  	__type_JComboBox = new SimpleJComboBox( __productType_vect );
  	JGUIUtil.setEnabled(__type_JComboBox, false );
 
@@ -867,10 +852,8 @@ protected void update_database( ) throws Exception {
 
 		//update title for JFrame
 		this.setTitle( "RiverTrak® Assistant - " +
-		"Import Product Group - " + __gui_RTi_ProductGroup.
-		getIdentifier() );
+		"Import Product Group - " + __gui_RTi_ProductGroup.getIdentifier() );
 
-		int pg_num = -999;
 		try {
 			//pg_num = 
  			__dmi.writeProductGroup( __gui_RTi_ProductGroup );
@@ -956,7 +939,6 @@ to the data in the ProductGroup object.</li></ul>
 
 */
 protected void update_GUI_fields( ) {
-	String routine = __class + ".update_GUI_fields";
 
 	//check to see which buttons should be enabled
 	if ( ! __canWriteProductGroup ) {
@@ -1012,8 +994,7 @@ remember, represents how the object is in the database itself) </li></ul>
 </li></ul></ul>
 */
 public void verify_fields() throws Exception {
-	String routine = __class + ".verify_fields";
-	
+
 	//ID
 	String gui_id = null;
 	String db_id = null;
@@ -1092,7 +1073,6 @@ public void actionPerformed (ActionEvent event) {
 	String routine = __class + ".actionPerformed";
 
 	try {
-	String command = event.getActionCommand();
 	Object source = event.getSource();
 	
 	if ( source.equals( __apply_JButton ) ) {

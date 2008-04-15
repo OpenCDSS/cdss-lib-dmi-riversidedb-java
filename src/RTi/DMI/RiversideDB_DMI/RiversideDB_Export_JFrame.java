@@ -122,8 +122,6 @@ import  java.awt.Dimension;
 import  java.awt.Font;
 import  java.awt.GridBagConstraints;
 import  java.awt.GridBagLayout;
-import  java.awt.GridLayout;
-import  java.awt.Image;
 import  java.awt.Insets;
 import  java.awt.event.ActionEvent;
 import  java.awt.event.ActionListener;
@@ -140,11 +138,7 @@ import 	javax.swing.border.Border;
 import 	javax.swing.border.TitledBorder;
 import 	javax.swing.ButtonGroup;
 import 	javax.swing.DefaultListModel;
-import 	javax.swing.event.ListSelectionEvent;
-import 	javax.swing.event.ListSelectionListener;
-import 	javax.swing.ImageIcon;
 import 	javax.swing.JCheckBox;
-import 	javax.swing.JComboBox;
 import 	javax.swing.JFileChooser;
 import 	javax.swing.JFrame;
 import 	javax.swing.JLabel;
@@ -155,11 +149,8 @@ import 	javax.swing.JRadioButton;
 import 	javax.swing.JScrollPane;
 import 	javax.swing.JTabbedPane;
 import 	javax.swing.JTextField;
-import 	javax.swing.ListModel;
 import 	javax.swing.ListSelectionModel;
-import 	javax.swing.UIManager;
 
-import  RTi.TS.TS;
 import  RTi.TS.TSIdent;
 
 import  RTi.Util.GUI.JFileChooserFactory;
@@ -167,24 +158,16 @@ import RTi.Util.GUI.JComboBoxResponseJDialog;
 import  RTi.Util.GUI.JGUIUtil;
 import  RTi.Util.GUI.JWorksheet;
 import  RTi.Util.GUI.ResponseJDialog;
-import  RTi.Util.GUI.ResponseJDialog;
 import  RTi.Util.GUI.SimpleJButton;
 import  RTi.Util.GUI.SimpleJComboBox;
-import 	RTi.Util.IO.DataUnits;
-import 	RTi.Util.IO.DataUnitsConversion;
-import  RTi.Util.IO.IOUtil;
 import  RTi.Util.IO.PropList;
 import	RTi.Util.Message.Message;
 import  RTi.Util.String.StringUtil;
 import  RTi.Util.Time.DateTime;
-import  RTi.Util.Time.TimeInterval;
 import  RTi.Util.Time.TimeUtil;
 
-import 	RTi.DMI.DMI;
 import 	RTi.DMI.DMIUtil;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataDimension;
-import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataUnits;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUserMeasLocGroupRelation;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_ExportConf;
@@ -438,13 +421,6 @@ private SimpleJButton __close_JButton = null;
 private SimpleJButton __cancel_JButton = null;
 private SimpleJButton __apply_JButton = null;
 
-private JList __products_avail_JList = null;
-private DefaultListModel __products_avail_listModel = null;
-private SimpleJComboBox __group_name_JComboBox = null;
-
-private JLabel __group_name_JLabel = null;
-private JLabel __products_avail_JLabel = null;
-
 private JTextField __product_info_id_JTextField = null;
 private SimpleJComboBox __product_info_group_JComboBox = null;
 
@@ -529,7 +505,6 @@ private String __props_annotationtext_graph_JLabel_str = "ANNOTATION_TEXT_Y";
 private String __props_annotationtext_graph_JLabel_desc_str = "Add up to 2 locations for annotation text at specific (y) values";
 private String __props_range_graph_JLabel_str = "RANGE";
 private String __props_range_graph_JLabel_desc_str = "Set extents for Y-axis (lower extent, upper extent)";
-private JLabel __props_title_graph_JLabel = null;
 private JTextField __props_title_graph_JTextField = null;
 private JCheckBox __props_creationtime_graph_JCheckBox = null;
 private JCheckBox __props_timestamp_graph_JCheckBox = null;
@@ -604,11 +579,6 @@ private JTextField __security_tab_firewall_passwd_JTextField = null;
 //JTextField __additFiles_tab_file_JTextField = null;
 //SimpleJButton __additFiles_tab_browse_JButton = null;
 
-//Time Series Tab - created with ExportConf object.
-//boolean to indicate that an ExportConf object has
-//been deleted.
-private boolean __product_deleted = false;
-
 private String __timeseries_tab_str = "Time Series";
 
 //Units
@@ -624,12 +594,7 @@ String [] __arrWorksheet_tooltips = null;
 private SimpleJButton __timeseries_tab_clear_selected_JButton = null;
 private SimpleJButton __timeseries_tab_move_right_JButton = null;
 
-//New Export Product Tab
-private String __new_exportProd_tab_str = "New Export";
-private JTextField __new_exportProd_tab_name_JTextField = null;
-
 //New Group Tab
-private String __new_group_tab_str = "New Group";
 private JTextField __new_group_tab_name_JTextField = null;
 
 //Holds RIVERSIDEDB OBJECTS and Vectors of the objects
@@ -647,14 +612,10 @@ private Vector __db_RTi_ExportConf_vect = null;
 private Vector __worksheet_RTi_ExportConf_vect = null;
 RiversideDB_ExportConf __db_RTi_ExportConf = null;
 
-//used to indicate the ExportConf_vect has been altered in some way
-private boolean __ec_vect_hasChanged = false;
-
 //Holds all the MeasTypes
 //private Vector __all_MeasType_vect = null;
 
 //Holds all the MeasTypes WITH CREATE METHOD EXPORT!!!!!!!
-private Vector __all_export_MeasTypes_vect = new Vector();
 private Vector __leftList_MeasType_vect = null;
 
 //vector of ExportTypes
@@ -668,7 +629,6 @@ private JPanel __timeseries_tab_JPanel = null;
 private JPanel __properties_tab_JPanel = null;
 private JPanel __security_tab_JPanel = null;
 private JPanel __automation_tab_JPanel = null;
-private JPanel __archiving_tab_JPanel = null;
 
 //Holds objects with current, but uncommitted changes
 RiversideDB_ExportProduct __gui_RTi_ExportProduct = null;
@@ -693,8 +653,6 @@ private boolean __cautious_mode = true;
 
 //Holds the export type used for the object in the GUI
 private String __db_ExportProduct_type = null;
-//holds the Group the export product belongs to
-private String __db_ExportProduct_group = null;
 
 //DBUser
 RiversideDB_DBUser __DBUser = null;
@@ -827,10 +785,6 @@ public RiversideDB_Export_JFrame(
 		// get the ExportType
  		__db_ExportProduct_type =
  		__db_RTi_ExportProduct.getProduct_type();
-
-		//Product group
- 		__db_ExportProduct_group =
- 		__db_RTi_ExportProduct.getProduct_group();
 
 		//get list of ExportConf objects for this -save
 		//in both the GUI and the DB vectors.
@@ -982,7 +936,6 @@ public RiversideDB_Export_JFrame(
 		if ( __RTi_MeasLocGroup_vect != null ) {
 			num = __RTi_MeasLocGroup_vect.size();
 		}
-		int mlg_num = -999;
 		RiversideDB_MeasLocGroup mlg = null;
 		if ( num > 0 ) {
 			mlg = 	(RiversideDB_MeasLocGroup)
@@ -1052,9 +1005,6 @@ public JPanel assemble_tab_automation( ) {
 
 	//give it a listener to listen for when it is clicked and unclicked
  	__automation_tab_automated_JCheckBox.addActionListener( this );
-
-	//Export label "Export"
-	JLabel automation_tab_export_JLabel = new JLabel( "Export :");
 
 	//RadioButton WITH Label "every interval"
  	__automation_tab_every_interval_JRadioButton = new JRadioButton(
@@ -1317,7 +1267,6 @@ Method adds all the components to a JPanel for the Files tab.
 @return JPanel with all the components.
 */
 public JPanel assemble_tab_files( ) {
-	String routine = __class + ".assemble_tab_files";
 
 	JPanel files_JPanel = new JPanel();
 	files_JPanel.setLayout( __gridbag );
@@ -1450,17 +1399,14 @@ Method adds all the components to a JPanel for the New GROUP tab.
 @return JPanel with all the components.
 */
 public JPanel assemble_tab_new_group( ) {
-	String routine = __class + ".assemble_tab_new_group";
 
 	//Make panel to hold everything.  This will be returned.
 	JPanel newGroup_JPanel = new JPanel();
 	newGroup_JPanel.setLayout( __gridbag );
 
 	//Label for name of new product
-	JLabel new_group_tab_name_JLabel = new JLabel (
-	"Name of New Group: ");
-	new_group_tab_name_JLabel.setToolTipText(
-	"Required: name of new group" );
+	JLabel new_group_tab_name_JLabel = new JLabel ("Name of New Group: ");
+	new_group_tab_name_JLabel.setToolTipText("Required: name of new group" );
 
 	//TextField to enter actual name
  	__new_group_tab_name_JTextField = new JTextField( 20 );
@@ -2433,7 +2379,6 @@ Method adds all the components to a JPanel for the Security tab.
 @return JPanel with all the components.
 */
 public JPanel assemble_tab_security( ) {
-	String routine = __class + ".assemble_tab_security";
 
 	//Make panel to hold everything.  This will be returned.
 	JPanel security_JPanel = new JPanel();
@@ -2633,7 +2578,6 @@ public JPanel assemble_tab_timeSeries() {
 	//now go through the vector and add the types to the list model
 	RiversideDB_MeasType rti_mt = null;
 	TSIdent tsid = null;
-	String create_str =null;
 	for ( int i=0; i< numb_all_MeasType; i++ ) {
 		rti_mt =  (RiversideDB_MeasType)
  		__leftList_MeasType_vect.elementAt(i);
@@ -2959,7 +2903,6 @@ public void closeGUI() {
 		ec = null;
 	}
 
-	boolean blnClose = true;
 	if( blnUpdated)  {
 		if(( __gui_RTi_ExportProduct.isDirty()) || (dirty_exportconf)) {
 // REVISIT [LT] 2004-12-22 (isDataDirty()) - The code needed to implement the 
@@ -3098,10 +3041,9 @@ protected void checkRequiredInput() throws Exception {
 		}
 	}
 	//if the date entry is not null, make sure it is a valid date
-	DateTime gui_next_date = null;
 	if ( blnCheckDate ) {
 		try {
-			gui_next_date = DateTime.parse( gui_next_date_str);
+			DateTime.parse( gui_next_date_str);
 		}
 		catch (Exception e ) {
 			Message.printWarning( 2, routine, e);
@@ -3128,8 +3070,7 @@ protected void checkRequiredInput() throws Exception {
 		table_size = table_data.size();
 
 		RiversideDB_ExportConf ec = null;
-		RiversideDB_MeasType mt = null;
-		long mt_num = -999;
+		//long mt_num = -999;
 		for ( int i=0; i< table_size; i++ ) {
 			ec = (RiversideDB_ExportConf)
 			table_data.elementAt( i );
@@ -3137,13 +3078,12 @@ protected void checkRequiredInput() throws Exception {
 				continue;
 			}
 
-			mt_num = ec.getMeasType_num();
-			int mt_size = 0;
-			if ( __leftList_MeasType_vect != null ) {
-				mt_size = __leftList_MeasType_vect.size();
-			}
+			//mt_num = ec.getMeasType_num();
+			//if ( __leftList_MeasType_vect != null ) {
+			//	mt_size = __leftList_MeasType_vect.size();
+			//}
 			//find MeasType with matching MeasType_num
-			String tsid_str = getTSIDForMeasType_num( mt_num );
+			//String tsid_str = getTSIDForMeasType_num( mt_num );
 
 			/*
 			//Required in most cases, but not all.
@@ -3178,7 +3118,6 @@ Checks the required properties for ExportProducts of type campbellscientific:
 error message encountered while checking the property fields.
 */
 protected Vector checkRequired_campbellsci_props() {
-	String routine = __class + ".checkRequired_campbellsci_props";
 
 	Vector error_vect = new Vector();
 	//Julianday - can't be null because is in an JComboBox
@@ -3567,7 +3506,6 @@ for the MeasType_num passed in.
 passed in.
 */
 protected RiversideDB_MeasType getMeasTypeForMeasType_num ( long mt_num ) {
-	String routine = __class + ".getMeasTypeForMeasType_num";
 
 	int mt_size = __leftList_MeasType_vect.size();
 	RiversideDB_MeasType mt = null;
@@ -3620,7 +3558,6 @@ protected String getTSIDForMeasType_num ( long mt_num ) {
 		Message.printWarning( 2, routine, e );
 		tsid = null;
 	}
-	String tsid_str = null;
 	if ( tsid == null ) {
 		return "";
 	}
@@ -3825,7 +3762,6 @@ automation tab, depending on the month selected in the month
 JComboBox.
 */
 protected void update_automation_days() {
-	String routine = __class + ".update_automation_days";
 	String mo_str = null;
 	String yr_str = null;
 	mo_str = (String ) __automation_tab_month_JComboBox.getSelected();
@@ -5077,8 +5013,6 @@ this ExportProduct.
 */
 protected void update_GUI_fields_propertiesTab_generic_props(
 				Vector all_props_vect ) {
-	String routine = __class +
-	".update_GUI_fields_propertiesTab_generic_props";
 
 	//For now, the generic ExportProduct type just has
 	//one JTextField with props seperated by ";" just like in db
@@ -5992,7 +5926,6 @@ public void verify_files_tab() throws Exception {
 	String gui_dest_file = null;
 	String db_dest_dir = null;
 	String db_dest_file = null;
-	String db_dest_wild = null;
 	db_dest_dir = __db_RTi_ExportProduct.getDestination_dir();
 	db_dest_file = __db_RTi_ExportProduct.getDestination_file();
 
@@ -6055,23 +5988,18 @@ public void verify_properties_tab() throws Exception {
 	String gui_exp_order_str = null;
 	String gui_exp_start_str = null;
 	String gui_exp_end_str = null;
-	String gui_retries_str = null;
-	String gui_props_str = null;
 	String gui_next_date_str = null;
 
 	long db_exp_order = -999;
-	long db_retries = -999;
 	String db_exp_start_str = null;
 	String db_exp_end_str = null;
-	String db_props_str = null;
 	Date db_next_date = null;
 	DateTime db_next_DateTime = null;
-	String db_next_date_str = null;
 	db_exp_order = __db_RTi_ExportProduct.getExport_order();
 	db_exp_start_str = __db_RTi_ExportProduct.getExport_start();
 	db_exp_end_str = __db_RTi_ExportProduct.getExport_end();
-	db_retries = __db_RTi_ExportProduct.getRetries();
-	db_props_str = __db_RTi_ExportProduct.getProperties();
+	//db_retries = __db_RTi_ExportProduct.getRetries();
+	//db_props_str = __db_RTi_ExportProduct.getProperties();
 	db_next_date = __db_RTi_ExportProduct.getNext_export_date();
 	//might be null if creating new ExportProduct and new ExportConfs
 	if ( db_next_date != null ) {
@@ -6319,7 +6247,6 @@ remember, represents how the object is in the database itself) </li></ul>
 @exception Exception thrown if error encountered
 */
 public void verify_properties_tab_generic_props() throws Exception {
-	String routine = __class + "verify_properties_tab_generic_props";
 
 	//this just has 1 JTextField with properties seperated
 	//by a ";" just like in database
@@ -6368,7 +6295,6 @@ public void verify_properties_tab_graph_props() throws Exception {
 	String gui_title_str = "";
 	boolean gui_blnCreationTime = true;
 	boolean gui_blnTimeStamp = false;
-	String gui_tsProduct_str  = null;
 	String gui_creationtime_str = "";
 	String gui_timestamp_str = "";
 	String gui_windowdim_w_str = "";
@@ -6864,7 +6790,6 @@ remember, represents how the object is in the database itself) </li></ul>
 @exception Exception thrown if error encountered
 */
 public void verify_properties_tab_shef_props() throws Exception {
-	String routine = __class + "verify_properties_tab_shef_props";
 
 	//get all props
 	String db_props_str = __gui_RTi_ExportProduct.getProperties();
@@ -6967,7 +6892,6 @@ remember, represents how the object is in the database itself) </li></ul>
 @exception Exception thrown if error encountered
 */
 public void verify_properties_tab_table_props() throws Exception {
-	String routine = __class + "verify_properties_tab_table_props";
 
 	//get all props
 	String db_props_str = __gui_RTi_ExportProduct.getProperties();
@@ -7101,7 +7025,6 @@ remember, represents how the object is in the database itself) </li></ul>
 @exception Exception thrown if error encountered
 */
 public void verify_security_tab() throws Exception {
-	String routine = __class + ".verify_security_tab";
 
 	//check all the fields in the Files tab
 	String db_user_login_str = null;
@@ -7335,7 +7258,6 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 		RiversideDB_ExportConf table_ec = null;
 		RiversideDB_ExportConf orig_ec = null;
 		String tsid_str= null;
-		boolean blnContinue = true;
 		boolean blnNewEC = false;
 		for ( int i=0; i<rows; i++ ) {
 			table_ec = (RiversideDB_ExportConf)
@@ -7454,8 +7376,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
  					__gui_RTi_ExportConf_vect.addElement(
 					table_ec );
 
-					blnContinue = false;
-					break;
+						break;
 				}
 
 				if ( j == (orig_num -1) ) {
@@ -7565,7 +7486,6 @@ remember, represents how the object is in the database itself) </li></ul>
 @exception Exception thrown if error encountered
 */
 public void verify_top_fields() throws Exception {
-	String routine = __class + ".verify_top_fields";
 
 	//holds original node name from tree- this node may need
 	//to be updated if the Export Product name changes
@@ -7694,8 +7614,6 @@ public void actionPerformed (ActionEvent event) {
 	String routine = __class + ".actionPerformed";
 
 	try {
-	String command = event.getActionCommand();
-
 	Object source = event.getSource();
 
 	if ( source.equals( __apply_JButton ) ) {
@@ -7895,7 +7813,6 @@ public void actionPerformed (ActionEvent event) {
 			//filled or has Not been updated if it isn't).
 			String db_id = null;
 			db_id = __db_RTi_ExportProduct.getProduct_name();
-			int[] arrDel=null;
 			//if ( db_id.equals(DMIUtil.MISSING_STRING ) ){}
 			if ( DMIUtil.isMissing( db_id ) ) {
 				//delete product that had
@@ -7991,7 +7908,6 @@ public void actionPerformed (ActionEvent event) {
 	//BROWSE BUTTONS
 	else if ( source.equals( __files_tab_dest_browse_JButton) ) {
 
-		String dir = null;
 		String cur_dir = null;
 		cur_dir = __files_tab_dest_dir_JTextField.getText().trim();
 		if (( cur_dir == null ) || ( cur_dir.length() <= 0 )) {
@@ -8300,7 +8216,6 @@ Respond to ItemEvents.
 @param event ItemEvent to listen for.
 */
 public void itemStateChanged ( ItemEvent event ) {
-	String routine = __class + ".itemStateChanged";
 	Object source = event.getItemSelectable();
 	if ( event.getStateChange() == ItemEvent.SELECTED ) {
 		if ( source == __automation_tab_month_JComboBox ) {

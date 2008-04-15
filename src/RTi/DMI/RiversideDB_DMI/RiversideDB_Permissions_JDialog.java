@@ -28,7 +28,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import RTi.Util.GUI.JGUIUtil;
-import RTi.Util.GUI.ResponseJDialog;
 
 /**
 This class is a dialog for interactively editing permissions.  A Permissions

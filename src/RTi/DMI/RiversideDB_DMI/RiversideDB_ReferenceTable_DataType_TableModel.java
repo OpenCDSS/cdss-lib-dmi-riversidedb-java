@@ -68,11 +68,8 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.util.Vector;
 
-import RTi.Util.Message.Message;
-import RTi.DMI.DMIUtil;
-
 /**
-Table model used for displaying thw data editor for the table DataType.
+Table model used for displaying the data editor for the table DataType.
 This class extends from RiversideDB_ReferenceTable_Abstract_TableModel.
 */
 public class RiversideDB_ReferenceTable_DataType_TableModel

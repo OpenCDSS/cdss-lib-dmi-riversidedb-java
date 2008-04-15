@@ -32,10 +32,8 @@
 package RTi.DMI.RiversideDB_DMI;
 
 import java.util.Vector;
-import javax.swing.JPanel;
 import RTi.DMI.DMIDataObject;
 import RTi.Util.Message.Message;
-import RTi.Util.Time.DateTime;
 
 /**
 Frame extending from RiversideDB_ReferenceTable_Abstract_JFrame and containing
