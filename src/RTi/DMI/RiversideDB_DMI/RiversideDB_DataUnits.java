@@ -18,6 +18,7 @@ package RTi.DMI.RiversideDB_DMI;
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
 
+import RTi.Util.IO.DataUnits;
 import RTi.Util.String.StringUtil;
 
 /**
@@ -333,6 +334,23 @@ public String toString() {
 		"Mult_factor:       " + _Mult_factor		+ "\n" +
 		"Add_factor:        " + _Add_factor		+ "\n" +
 		"Units_system:      " + _Units_system		+ "}";
+}
+
+/** 
+returns a DataUnits representation of this object
+@return a DataUnits representation of this object
+*/
+public DataUnits toDataUnits() throws Exception {
+    DataUnits units = new DataUnits();
+    units.setAbbreviation(_Units_abbrev);
+    units.setAddFactor(_Add_factor);
+    units.setBaseFlag(_Base_unit.equalsIgnoreCase("Y") ? 1 : 0);
+    units.setDimension(_Dimension);
+    units.setLongName(_Units_description);
+    units.setMultFactor(_Mult_factor);
+    units.setAddFactor(_Add_factor);
+    units.setSystem(_Units_system);
+    return units;
 }
 
 } // End RiversideDB_DataUnits

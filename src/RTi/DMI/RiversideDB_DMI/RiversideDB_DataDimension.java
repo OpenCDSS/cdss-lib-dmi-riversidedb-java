@@ -18,6 +18,7 @@ package RTi.DMI.RiversideDB_DMI;
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
 
+import RTi.Util.IO.DataDimension;
 import RTi.Util.String.StringUtil;
 
 /**
@@ -174,5 +175,14 @@ public String toString() {
 		"Dimension:  " + _Dimension	+ "\n" +
 		"Description:" + _Description	+ "}";
 }
+
+/** 
+returns a DataDimension representation of this object
+@return a DataDimension representation of this object
+*/
+public DataDimension toDataDimension() {
+    return new DataDimension(_Dimension,_Description);
+}
+
 
 } // End RiversideDB_DataDimension

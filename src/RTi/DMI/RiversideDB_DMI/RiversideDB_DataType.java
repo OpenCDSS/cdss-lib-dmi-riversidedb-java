@@ -22,6 +22,7 @@ import java.util.Vector;
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
 
+import RTi.Util.IO.DataType;
 import RTi.Util.String.StringUtil;
 
 /**
@@ -482,6 +483,26 @@ public String toString() {
 		"Default_engl_max:  " + _Default_engl_max	+ "\n" +
 		"Default_si_min:    " + _Default_si_min		+ "\n" +
 		"Default_si_max:    " + _Default_si_max		+ "}";
+}
+/** 
+returns a DataType that contains the fields of this object
+@return a DataType representation of this object
+*/
+public DataType toDataType() throws Exception {
+    DataType dt = new DataType();
+    dt.setAbbreviation(_DataType);
+    dt.setDefaultEnglishMax(_Default_engl_max);
+    dt.setDefaultEnglishMin(_Default_engl_min);
+    dt.setDefaultEnglishUnits(_Default_engl_units);
+    dt.setDefaultSIMax(_Default_si_max);
+    dt.setDefaultSIMin(_Default_si_max);
+    dt.setDefaultSIUnits(_Default_si_units);
+    dt.setDescription(_Description);
+    dt.setDimension(_Dimension);
+    dt.setMeasLocType(_Meas_loc_type);
+    dt.setMeasTimeScale(_Meas_time_scale);
+    dt.setSHEFpe(_SHEF_pe);
+    return dt;
 }
 
 } // end RiversideDB_DataType
