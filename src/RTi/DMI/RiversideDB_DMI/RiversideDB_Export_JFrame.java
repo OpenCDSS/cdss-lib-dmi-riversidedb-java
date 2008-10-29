@@ -3581,8 +3581,7 @@ protected Vector getVectorOfProperties( RiversideDB_ExportProduct ep ) {
 	String tmp_props_str = null;
 	tmp_props_str = ep.getProperties();
 	if ( Message.isDebugOn ){
-		Message.printDebug( 4, routine,
-		"Property string for selected ExportProduct object is: \"" +
+		Message.printDebug( 4, routine, "Property string for selected ExportProduct object is: \"" +
 		tmp_props_str + "\"." );
 	}
 
@@ -3599,28 +3598,23 @@ protected Vector getVectorOfProperties( RiversideDB_ExportProduct ep ) {
 		//break up string based on ";"s
 		if ( tmp_props_str.indexOf( ";" ) >= 0 ) {
 			//break it up based on ";"
-			tmp_props_vect = StringUtil.breakStringList(
-			tmp_props_str, ";", StringUtil.DELIM_SKIP_BLANKS );
+			tmp_props_vect = StringUtil.breakStringList( tmp_props_str, ";", StringUtil.DELIM_SKIP_BLANKS );
 		}
 		else  {
-
-			//we have just 1 property-- add it to vector as is.
+			// Have just 1 property-- add it to vector as is.
 			tmp_props_vect = new Vector();
 			tmp_props_vect.addElement( tmp_props_str );
 		}
 	}
 	else {
-		//there are no properties set, so add
-		//an empty vector
+		// There are no properties set, so add an empty vector
+	    tmp_props_vect = new Vector();
 		tmp_props_vect.addElement( new Vector() );
 	}
 
-	//we have a vector containing Strings - each string in
-	//format : "Propertyname=PropertyValue"
-	//Break this up further so that each string in turn is
-	//converted to its own vector where
-	//vector.elementAt(0) = property name and
-	//vector.elmentAt(i) = property value.
+	//we have a vector containing Strings - each string in format : "Propertyname=PropertyValue"
+	//Break this up further so that each string in turn is converted to its own vector where
+	//vector.elementAt(0) = property name and vector.elmentAt(i) = property value.
 	int tmp_num = 0;
 	if ( tmp_props_vect != null ) {
 		tmp_num = tmp_props_vect.size();
