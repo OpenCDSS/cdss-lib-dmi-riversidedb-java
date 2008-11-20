@@ -1,9 +1,8 @@
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Date;
-
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
+import RTi.Util.Time.DateTime;
 
 /**
 Store single value record data from time series table layouts.  Some data fields are optional
@@ -21,7 +20,7 @@ protected long _MeasType_num = DMIUtil.MISSING_LONG;
 /**
 DateTime corresponding to the data value.
 */
-protected Date _Date_Time = DMIUtil.MISSING_DATE;
+protected DateTime _Date_Time = null;
 
 /**
 Data value.
@@ -47,7 +46,7 @@ protected int _Duration = DMIUtil.MISSING_INT;
 Optional DateTime corresponding to insert date/time for the value.  Tables that use this
 column must be sorted first by _Date_Time and then _Creation_Time.
 */
-protected Date _Creation_Time = DMIUtil.MISSING_DATE;
+protected DateTime _Creation_Time = null;
 
 /**
 Constructor.  

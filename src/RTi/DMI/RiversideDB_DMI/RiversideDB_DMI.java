@@ -485,6 +485,12 @@ following design elements:
 protected final static long _VERSION_020601_20020625 = 2060120020625L;
 
 /**
+Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, for second precision
+time series.
+*/
+protected final int TABLE_LAYOUT_DATE_VALUE_TO_SECOND = 1;
+
+/**
 Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag.
 */
 protected final int TABLE_LAYOUT_DATE_VALUE_TO_MINUTE = 100;
@@ -500,10 +506,34 @@ Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_f
 protected final int TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION = 105;
 
 /**
+Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, for hourly precision
+time series.
+*/
+protected final int TABLE_LAYOUT_DATE_VALUE_TO_HOUR = 200;
+
+/**
 Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, for daily precision
 time series.
 */
 protected final int TABLE_LAYOUT_DATE_VALUE_TO_DAY = 300;
+
+/**
+Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, for monthly precision
+time series.
+*/
+protected final int TABLE_LAYOUT_DATE_VALUE_TO_MONTH = 400;
+
+/**
+Table layout having fields MeasType_num, Cal_year, Month01, ..., Month12, revision number for monthly precision
+time series.
+*/
+protected final int TABLE_LAYOUT_1MONTH = 401;
+
+/**
+Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, for yearly precision
+time series.
+*/
+protected final int TABLE_LAYOUT_DATE_VALUE_TO_YEAR = 500;
 
 // TODO (JTS - 2003-06-18)
 // Remove all the _D_XXXXX methods -- they are easier to do simply as
@@ -7004,6 +7034,12 @@ throws Exception
 		ts = new MonthTS ();
 		ts.setDataInterval ( TimeInterval.MONTH,(int)mt.getTime_step_mult());
 	}
+	/* TODO SAM 2008-11-19 Add support eventually
+	else if ( mt._Time_step_base.equalsIgnoreCase("Second") || mt._Time_step_base.equalsIgnoreCase("Sec") ) {
+	    ts = new SecondTS ();
+	    ts.setDataInterval ( TimeInterval.SECOND,(int)mt.getTime_step_mult());
+	}
+	*/
 	else if ( mt._Time_step_base.equalsIgnoreCase("Year") ) {
 		ts = new YearTS ();
 		ts.setDataInterval ( TimeInterval.YEAR,(int)mt.getTime_step_mult());
@@ -7049,13 +7085,19 @@ throws Exception
 	DMISelectStatement q = new DMISelectStatement ( this );
 	String ts_table = t.getTable_name();
 	q.addTable ( ts_table );
+	// Always query the MeasType_num
 	q.addWhereClause ( ts_table + ".MeasType_num=" + mt.getMeasType_num() );
 	// Most time series tables have similar layout, with some having a few more columns.
 	// Put all of the recognized formats in the following and let unknown formats fall through
+	boolean monthRecord = false;   // True for 12-values per record
 	if ( (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) ||
         (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) ||
         (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION) ||
-        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ) {
+        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_HOUR) ||
+        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ||
+        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MONTH) ||
+        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_YEAR) ||
+        (table_layout == TABLE_LAYOUT_1MONTH) ) {
 	    // Set booleans to indicate which optional fields are used.
 	    boolean hasFlag = true; // Default is they all do
 	    boolean hasDuration = false;
@@ -7064,31 +7106,65 @@ throws Exception
 	    }
 	    boolean hasCreationTime = false;
         if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+            // No duration but has creation time
             hasCreationTime = true;
         }
-		q.addField ( ts_table + ".Date_Time" );
-		q.addField ( ts_table + ".Val" );
-        q.addField ( ts_table + ".Quality_flag" );
-        if ( hasDuration ) {
-            q.addField ( ts_table + ".Duration" );
+        if ( table_layout == TABLE_LAYOUT_1MONTH ) {
+            // 12 values per record, requires special handling in query and transfer of result set
+            monthRecord = true;
         }
-        // Always sort by date/time of the data.
-		q.addOrderByClause ( ts_table + ".Date_Time" );
-        if ( hasCreationTime ) {
-            q.addField ( ts_table + ".Creation_Time" );
-            // Also sort by the creation time so latest value is used in final result
-            q.addOrderByClause ( ts_table + ".Creation_Time" );
+        if ( monthRecord ) {
+            // 12 values per record
+            q.addField ( ts_table + ".Cal_year" );
+            q.addField ( ts_table + ".Month01" );
+            q.addField ( ts_table + ".Month02" );
+            q.addField ( ts_table + ".Month03" );
+            q.addField ( ts_table + ".Month04" );
+            q.addField ( ts_table + ".Month05" );
+            q.addField ( ts_table + ".Month06" );
+            q.addField ( ts_table + ".Month07" );
+            q.addField ( ts_table + ".Month08" );
+            q.addField ( ts_table + ".Month09" );
+            q.addField ( ts_table + ".Month10" );
+            q.addField ( ts_table + ".Month11" );
+            q.addField ( ts_table + ".Month12" );
+            // Order by revision number so that the latest values are visible in the time series,
+            // but won't include revision number in the final time series results
+            q.addField ( ts_table + ".Revision_num" );
+            q.addOrderByClause ( ts_table + ".Revision_num" );
         }
-		if ( req_date1 != null ) {
-			q.addWhereClause ( ts_table + ".Date_Time >= " + DMIUtil.formatDateTime( this, req_date1));
-		}
-		if ( req_date2 != null ) {
-			q.addWhereClause ( ts_table + ".Date_Time <= " + DMIUtil.formatDateTime( this, req_date2));
-		}
+        else {
+            // More common date/value table layout
+            q.addField ( ts_table + ".Date_Time" );
+            q.addField ( ts_table + ".Val" );
+            q.addField ( ts_table + ".Quality_flag" );
+            if ( hasDuration ) {
+                q.addField ( ts_table + ".Duration" );
+            }
+            // Always sort by date/time of the data.
+            q.addOrderByClause ( ts_table + ".Date_Time" );
+            if ( hasCreationTime ) {
+                q.addField ( ts_table + ".Creation_Time" );
+                // Also sort by the creation time so latest value is used in final result
+                q.addOrderByClause ( ts_table + ".Creation_Time" );
+            }
+            if ( req_date1 != null ) {
+                q.addWhereClause ( ts_table + ".Date_Time >= " + DMIUtil.formatDateTime( this, req_date1));
+            }
+            if ( req_date2 != null ) {
+                q.addWhereClause ( ts_table + ".Date_Time <= " + DMIUtil.formatDateTime( this, req_date2));
+            }
+        }
 		// Submit the query...
 		ResultSet rs = dmiSelect ( q );
 		// Convert the data to a Vector of records so we can get the first and last dates to allocate memory...
-		List v = toTSDateValueRecordList ( hasDuration, hasCreationTime, rs );
+		List v = null;
+		if ( monthRecord ) {
+		    v = toTSDateValueRecordListFromMonthData ( rs );
+		}
+		else {
+		    v = toTSDateValueRecordList ( hasDuration, hasCreationTime, rs );
+		}
 		closeResultSet(rs);
 		int size = 0;
 		if ( v != null ) {
@@ -7124,8 +7200,8 @@ throws Exception
 			}
 			else {
 			    // Precision will be set consistent with the time series interval when dates are set.
-			    ts.setDate1(new DateTime(data._Date_Time));
-			    ts.setDate1Original(new DateTime(data._Date_Time));
+			    ts.setDate1(data._Date_Time);
+			    ts.setDate1Original(data._Date_Time);
 			}
 
 			data = (RiversideDB_TSDateValueRecord)v.get(size - 1);
@@ -7134,8 +7210,8 @@ throws Exception
 			    ts.setDate2Original(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
 			}
 			else {
-	            ts.setDate2(new DateTime(data._Date_Time));
-	            ts.setDate2Original(new DateTime(data._Date_Time));
+	            ts.setDate2(data._Date_Time);
+	            ts.setDate2Original(data._Date_Time);
 			}
 			// All the minute data has flags.
 			if ( hasFlag ) {
@@ -7143,23 +7219,18 @@ throws Exception
 			}
 			ts.allocateDataSpace();
 		}
-		DateTime date = new DateTime ( ts.getDate1() );
 		for ( int i = 0; i < size; i++ ) {
 			// Loop through and assign the data...
 			data = (RiversideDB_TSDateValueRecord)v.get(i);
-			// Set the date rather than declaring a new instance
-			// to increase performance... data._Date_Time is a
-			// Date so cannot be used directly in code that needs a DateTime instance...
-			date.setDate ( data._Date_Time );
 			// For now ignore the revision number because the newer creation date is easier to deal with...
 			if ( !DMIUtil.isMissing(data._Val) ) {
                 if ( hasFlag && hasDuration ) {
                     // Need to set the duration and quality flag...
-                    ts.setDataValue ( date, data._Val, data._Quality_flag, data._Duration );
+                    ts.setDataValue ( data._Date_Time, data._Val, data._Quality_flag, data._Duration );
                 }
                 else if ( hasFlag ) {
                     // Has flag but no duration.
-                    ts.setDataValue ( date, data._Val, data._Quality_flag, 0 );
+                    ts.setDataValue ( data._Date_Time, data._Val, data._Quality_flag, 0 );
                 }
             }
 		}
@@ -10257,7 +10328,7 @@ throws Exception {
 
 /**
 Convert a ResultSet to a Vector of RiversideDB_Tables.  The result set must have been
-queried with dateTime, value, quality flag, [duration], [creationTime]
+queried with MeasType_num, dateTime, value, quality flag, [duration], [creationTime]
 @param tableHasDuration Indicate that the table has duration.
 @param tableHasCreationTime Indicate that the table has creation time.
 @param rs ResultSet from a Tables table query.
@@ -10277,10 +10348,15 @@ throws Exception {
     RiversideDB_TSDateValueRecord data = null;
     while ( rs.next() ) {
         data = new RiversideDB_TSDateValueRecord();
+        // Skip MeasType_num
         index = 1;
         dt = rs.getTimestamp ( index++ );
-        if ( !rs.wasNull() ) {
-            data._Date_Time = dt;
+        if ( rs.wasNull() ) {
+            // Skip the record since won't be able to set information
+            continue;
+        }
+        else {
+            data._Date_Time = new DateTime(dt);
         }
         d = rs.getDouble ( index++ );
         if ( !rs.wasNull() ) {
@@ -10303,10 +10379,51 @@ throws Exception {
             // Add the creation time.
             dt = rs.getTimestamp ( index++ );
             if ( !rs.wasNull() ) {
-                data._Creation_Time = dt;
+                data._Creation_Time = new DateTime(dt);
             }
         }
         v.addElement(data);
+    }
+    return v;
+}
+
+/**
+Convert a ResultSet to a Vector of RiversideDB_Tables.  The result set must have been
+queried with MeasType_num, dateTime, 12 values, revision_num (ignored) in transfer.
+@param rs ResultSet from a Tables table query.
+@throws Exception if an error occurs
+*/
+private List toTSDateValueRecordListFromMonthData ( ResultSet rs ) 
+throws Exception {
+    if ( rs == null ) {
+        return null;
+    }
+    Vector v = new Vector();
+    int index = 1;
+    double d;
+    int calYear = 0;
+    RiversideDB_TSDateValueRecord data = null;
+    while ( rs.next() ) {
+        index = 1; // Skip MeasType_num
+        calYear = rs.getInt ( index++ );
+        if ( rs.wasNull() ) {
+            // No way to process the data
+            continue;
+        }
+        // Loop through the 12 months...
+        for ( int imon = 1; imon <= 12; imon++ ) {
+            d = rs.getDouble ( index++ );
+            if ( !rs.wasNull() ) {
+                data = new RiversideDB_TSDateValueRecord();
+                // Create new DateTime instances to ensure unique values.
+                DateTime dt = new DateTime ( DateTime.PRECISION_MONTH);
+                dt.setYear( calYear );
+                dt.setMonth ( imon );
+                data._Val = d;
+                data._Date_Time = dt;
+                v.addElement(data);
+            }
+        }
     }
     return v;
 }
