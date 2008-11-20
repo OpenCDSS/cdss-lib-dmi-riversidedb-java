@@ -320,6 +320,7 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -497,6 +498,12 @@ protected final int TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION = 102;
 Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, Duration, Creation_Time.
 */
 protected final int TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION = 105;
+
+/**
+Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, for daily precision
+time series.
+*/
+protected final int TABLE_LAYOUT_DATE_VALUE_TO_DAY = 300;
 
 // TODO (JTS - 2003-06-18)
 // Remove all the _D_XXXXX methods -- they are easier to do simply as
@@ -6930,12 +6937,12 @@ null to read the entire time series).
 null to read the entire time series).
 @param req_units requested data units (specify null or blank string to 
 return units from the database).
-@param read_data Indicates whether data should be read (specify false to 
+@param readData Indicates whether data should be read (specify false to 
 only read header information).
 @exception if there is an error reading the time series.
 */
 public TS readTimeSeries (String tsident_string, DateTime req_date1,
-			  DateTime req_date2, String req_units, boolean read_data )
+			  DateTime req_date2, String req_units, boolean readData )
 throws Exception
 {	// Read a time series from the database.
 	// IMPORTANT - BECAUSE WE CAN'T GET THE LAST RECORD FROM A ResultSet
@@ -6993,7 +7000,7 @@ throws Exception
 		ts = new DayTS ();
 		ts.setDataInterval ( TimeInterval.DAY,(int)mt.getTime_step_mult());
 	}
-	else if ( mt._Time_step_base.equalsIgnoreCase("Month") ) {
+	else if ( mt._Time_step_base.equalsIgnoreCase("Month") || mt._Time_step_base.equalsIgnoreCase("Mon") ) {
 		ts = new MonthTS ();
 		ts.setDataInterval ( TimeInterval.MONTH,(int)mt.getTime_step_mult());
 	}
@@ -7034,7 +7041,7 @@ throws Exception
 	// dates, we really need to get the dates from somewhere.  Currently
 	// RiversideDB does not store the most current period dates in the
 	// database - this needs to be corrected.
-	if ( !read_data ) {
+	if ( !readData ) {
 		return ts;
 	}
 	// Read the data...
@@ -7043,18 +7050,33 @@ throws Exception
 	String ts_table = t.getTable_name();
 	q.addTable ( ts_table );
 	q.addWhereClause ( ts_table + ".MeasType_num=" + mt.getMeasType_num() );
-	if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE ||
-            table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ||
-            table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+	// Most time series tables have similar layout, with some having a few more columns.
+	// Put all of the recognized formats in the following and let unknown formats fall through
+	if ( (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) ||
+        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) ||
+        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION) ||
+        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ) {
+	    // Set booleans to indicate which optional fields are used.
+	    boolean hasFlag = true; // Default is they all do
+	    boolean hasDuration = false;
+	    if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
+	        hasDuration = true;
+	    }
+	    boolean hasCreationTime = false;
+        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+            hasCreationTime = true;
+        }
 		q.addField ( ts_table + ".Date_Time" );
 		q.addField ( ts_table + ".Val" );
         q.addField ( ts_table + ".Quality_flag" );
-        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
+        if ( hasDuration ) {
             q.addField ( ts_table + ".Duration" );
         }
+        // Always sort by date/time of the data.
 		q.addOrderByClause ( ts_table + ".Date_Time" );
-        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+        if ( hasCreationTime ) {
             q.addField ( ts_table + ".Creation_Time" );
+            // Also sort by the creation time so latest value is used in final result
             q.addOrderByClause ( ts_table + ".Creation_Time" );
         }
 		if ( req_date1 != null ) {
@@ -7066,7 +7088,7 @@ throws Exception
 		// Submit the query...
 		ResultSet rs = dmiSelect ( q );
 		// Convert the data to a Vector of records so we can get the first and last dates to allocate memory...
-		Vector v = toTSDateValueToMinuteList ( table_layout, rs );
+		List v = toTSDateValueRecordList ( hasDuration, hasCreationTime, rs );
 		closeResultSet(rs);
 		int size = 0;
 		if ( v != null ) {
@@ -7077,7 +7099,7 @@ throws Exception
 			// The header will be complete other than dates but no data will be filled in...
 			return ts;
 		}
-		RiversideDB_TSDateValueToMinute data = null;
+		RiversideDB_TSDateValueRecord data = null;
 
 		if ( (req_date1 != null) && (req_date2 != null) ) {
 			// Allocate the memory regardless of whether there was
@@ -7092,8 +7114,9 @@ throws Exception
 		}
 		else if ( size > 0 ) {
 			// Set the date from the records...
-			data = (RiversideDB_TSDateValueToMinute)v.elementAt(0);
+			data = (RiversideDB_TSDateValueRecord)v.get(0);
 			if ( ts instanceof IrregularTS ) {
+			    // FIXME SAM 2008-11-19 Need precision of dates for irregular data in database
 			    // Set the precision to minute since it is unlikely that data values need
 			    // to be recorded to the second
 			    ts.setDate1(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
@@ -7105,7 +7128,7 @@ throws Exception
 			    ts.setDate1Original(new DateTime(data._Date_Time));
 			}
 
-			data = (RiversideDB_TSDateValueToMinute)v.elementAt(size - 1);
+			data = (RiversideDB_TSDateValueRecord)v.get(size - 1);
 			if ( ts instanceof IrregularTS ) {
 			    ts.setDate2(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
 			    ts.setDate2Original(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
@@ -7115,27 +7138,28 @@ throws Exception
 	            ts.setDate2Original(new DateTime(data._Date_Time));
 			}
 			// All the minute data has flags.
-            ts.hasDataFlags(true, 4);
+			if ( hasFlag ) {
+			    ts.hasDataFlags(true, 4);
+			}
 			ts.allocateDataSpace();
 		}
 		DateTime date = new DateTime ( ts.getDate1() );
 		for ( int i = 0; i < size; i++ ) {
 			// Loop through and assign the data...
-			data = (RiversideDB_TSDateValueToMinute)v.elementAt(i);
+			data = (RiversideDB_TSDateValueRecord)v.get(i);
 			// Set the date rather than declaring a new instance
 			// to increase performance... data._Date_Time is a
 			// Date so cannot be used directly in code that needs a DateTime instance...
 			date.setDate ( data._Date_Time );
-			// For now ignore the revision number and quality...
+			// For now ignore the revision number because the newer creation date is easier to deal with...
 			if ( !DMIUtil.isMissing(data._Val) ) {
-                if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE ||
-                        table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+                if ( hasFlag && hasDuration ) {
+                    // Need to set the duration and quality flag...
+                    ts.setDataValue ( date, data._Val, data._Quality_flag, data._Duration );
+                }
+                else if ( hasFlag ) {
                     // Has flag but no duration.
                     ts.setDataValue ( date, data._Val, data._Quality_flag, 0 );
-                }
-                else if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
-                    // Also need to set the duration and quality flag...
-                    ts.setDataValue ( date, data._Val, data._Quality_flag, data._Duration );
                 }
             }
 		}
@@ -10232,34 +10256,36 @@ throws Exception {
 }
 
 /**
-Convert a ResultSet to a Vector of RiversideDB_Tables.
-@param table_format Indicate the time series table format.
+Convert a ResultSet to a Vector of RiversideDB_Tables.  The result set must have been
+queried with dateTime, value, quality flag, [duration], [creationTime]
+@param tableHasDuration Indicate that the table has duration.
+@param tableHasCreationTime Indicate that the table has creation time.
 @param rs ResultSet from a Tables table query.
 @throws Exception if an error occurs
 */
-private	Vector toTSDateValueToMinuteList ( long table_layout, ResultSet rs ) 
+private List toTSDateValueRecordList ( boolean tableHasDuration, boolean tableHasCreationTime, ResultSet rs ) 
 throws Exception {
-	if ( rs == null ) {
-		return null;
-	}
-	Vector v = new Vector();
-	int index = 1;
-	Date dt;
-	double d;
+    if ( rs == null ) {
+        return null;
+    }
+    Vector v = new Vector();
+    int index = 1;
+    Date dt;
+    double d;
     String s;
     int i;
-	RiversideDB_TSDateValueToMinute data = null;
-	while ( rs.next() ) {
-		data = new RiversideDB_TSDateValueToMinute();
-		index = 1;
-		dt = rs.getTimestamp ( index++ );
-		if ( !rs.wasNull() ) {
-			data._Date_Time = dt;
-		}
-		d = rs.getDouble ( index++ );
-		if ( !rs.wasNull() ) {
-			data._Val = d;
-		}
+    RiversideDB_TSDateValueRecord data = null;
+    while ( rs.next() ) {
+        data = new RiversideDB_TSDateValueRecord();
+        index = 1;
+        dt = rs.getTimestamp ( index++ );
+        if ( !rs.wasNull() ) {
+            data._Date_Time = dt;
+        }
+        d = rs.getDouble ( index++ );
+        if ( !rs.wasNull() ) {
+            data._Val = d;
+        }
         s = rs.getString ( index++ );
         if ( !rs.wasNull() ) {
             data._Quality_flag = s;
@@ -10267,22 +10293,22 @@ throws Exception {
         else {
             data._Quality_flag = "";
         }
-        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
+        if ( tableHasDuration ) {
             i = rs.getInt ( index++ );
             if ( !rs.wasNull() ) {
                 data._Duration = i;
             }
         }
-        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+        if ( tableHasCreationTime ) {
             // Add the creation time.
             dt = rs.getTimestamp ( index++ );
             if ( !rs.wasNull() ) {
                 data._Creation_Time = dt;
             }
         }
-		v.addElement(data);
-	}
-	return v;
+        v.addElement(data);
+    }
+    return v;
 }
 
 /**

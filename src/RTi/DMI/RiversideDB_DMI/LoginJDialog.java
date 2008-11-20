@@ -1,35 +1,3 @@
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-//	2003-04-29	Morgan Love, RTi	Initial Implementation
-//	2003-05-20	AML, RTi		Added a KeyListener so that
-//						hitting ENTER is equivalent 
-//						to the OK button and ESC is
-//						equivalent to the CANCEL button.
-//
-//	2003-06-04	AML, RTi		*use RiversideDB_DMI.setDBUser()
-//						to make the user and user
-//						permissions known to the DMI.
-//
-//	2003-06-30	AML, RTi		*code clean up
-// 2004-12-10 Luiz Teixeira, RTi 	Considerable modification toward version
-//					03.00.00.
-//					Cleanup and documentation.
-// 2004-12-14 Luiz Teixeira, RTi	Added method printDebugMessage().
-// 2004-12-14 Luiz Teixeira, RTi	Added maximum number of login attempts
-//					feature ( default - 3 tries ).
-//					Update the members name to comply with 
-//					RTi current standand:
-//						__??? for private members
-//						 _??? for protected members
-//						  ??? for public members
-//					Added LOGIN_EXCEEDED_MAX.
-// 2004-12-14 Luiz Teixeira, RTi	Improvement in the names and text of the
-//					"Predefined message strings".
-// 2006-01-17 J. Thomas Sapienza, RTi	Moved into RiversideDB_DMI package from
-//					RTi.App.RiverTrakAssistant.
-//------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
 import java.awt.GridBagConstraints;
@@ -61,21 +29,20 @@ import RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
 import RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
 
 /**
-LoginJDialog creates a JDialog for entering User ID and Password. 
+LoginJDialog creates a JDialog for entering User ID and Password to login to the RiversideDB database.
+Cancelling will retain a low-level connection to the database for read-only access but the user will
+not be able to write or perform other actions that require credentials. 
 To instantiate a LoginJDialog, use:
 <pre>
-int x= new LoginJDialog( JFrame parent, String title, 
-RiversideDB_DMI datbase_connection  ).response();
+int x= new LoginJDialog( JFrame parent, String title, RiversideDB_DMI datbase_connection  ).response();
 </pre>
 */
 public class LoginJDialog extends JDialog
-	implements ActionListener,
-		   KeyListener,
-		   FocusListener,
-		   WindowListener {
+implements ActionListener, KeyListener, FocusListener, WindowListener
+{
 
 /**
-Connection to the RiversideDB database!!
+Connection to the RiversideDB database.
 */
 private RiversideDB_DMI __dmi = null;
 
@@ -103,12 +70,12 @@ private JTextField     __status_JTextField       = null;
 Predefined message strings.
 */
 private final static String 
-	__usernameEmpty_String   = "Username field is empty!",
-	__passwordEmpty_String   = "Password field is empty!",
-	__bothFieldsEmpty_String = "Username and password fields are empty!",
-	__invalidUsername_String = "Invalid login. Please try again or cancel!",
-	__invalidPassword_String = "Invalid login. Please try again or cancel!",
-	__pleaseEnterBoth_String = "Please enter your username and password.";
+	__usernameEmpty_String = "Username field is empty.",
+	__passwordEmpty_String = "Password field is empty.",
+	__bothFieldsEmpty_String = "Username and password fields are empty.",
+	__invalidUsername_String = "Invalid login. Please try again or cancel.",
+	__invalidPassword_String = "Invalid login. Please try again or cancel.",
+	__pleaseEnterBoth_String = " Enter username and password for full permissions. ";
 
 /**
 Identifiers of all implemented login status:
@@ -116,7 +83,7 @@ Identifiers of all implemented login status:
 	LOGIN_TRY_AGAIN  - The user may try again.
 	LOGIN_ERROR      - Indicates an error while trying to validate a login.
 	LOGIN_CANCELLED  - Indicates that the user cancelled the login section.
-	LOGIN_EXCEED_MAX - Indicates that the maximun mumber of tries was reached.			  
+	LOGIN_EXCEED_MAX - Indicates that the maximum number of tries was reached.			  
 	LOGIN_OK    	 - Indicates that the login was properly validated.
 </pre> 
 */
@@ -140,7 +107,7 @@ private int __tryMax;
 
 /**
 Keep track of the number of login attempts and is checked against the maximum
-mumber of login attempts (__tryMax). 
+number of login attempts (__tryMax). 
 */
 private int __tryCount; 
 
@@ -185,20 +152,20 @@ throws Exception
 	__username_JTextField.addKeyListener( this );
 
 	// Password Label and TextField
-	JLabel password_JLabel    = new JLabel ( __password_String );
+	JLabel password_JLabel = new JLabel ( __password_String );
 	__password_JPasswordField = new JPasswordField( 25 );
-	__password_JPasswordField.setEchoChar   (  '*' );
+	__password_JPasswordField.setEchoChar ( '*' );
 	__password_JPasswordField.addKeyListener( this );
 
 	// OK button
-	__ok_JButton =
-		new SimpleJButton ( __ok_String,     __ok_String,     this );
-	__ok_JButton.addFocusListener     ( this );
+	__ok_JButton = new SimpleJButton ( __ok_String, __ok_String, this );
+	__ok_JButton.addFocusListener ( this );
+	__ok_JButton.setToolTipText( "Attempt to login as specified user." );
 
 	// Cancel button	
-	__cancel_JButton = 
-		new SimpleJButton ( __cancel_String, __cancel_String, this );
+	__cancel_JButton = new SimpleJButton ( __cancel_String, __cancel_String, this );
 	__cancel_JButton.addFocusListener ( this );
+	__cancel_JButton.setToolTipText( "Cancel login.  Read-only permissions will still be in effect." );
 
 	// Status area
 	__status_JTextField = new JTextField();
@@ -286,13 +253,11 @@ protected void login()
 {
 	String routine = __class + ".login";
 	
-	String username = ( __username_JTextField    .getText    () ).trim();
-	String password = 
-		new String( __password_JPasswordField.getPassword() ).trim();
+	String username = ( __username_JTextField.getText() ).trim();
+	String password = new String( __password_JPasswordField.getPassword() ).trim();
 	
-	// Check if the username and password was entered
-	if( ( username == null || username.length() <= 0 ) && 
-	    ( password == null || password.length() <= 0 ) ) {
+	// Check if the username and password were entered
+	if( ( username == null || username.length() <= 0 ) && ( password == null || password.length() <= 0 ) ) {
 		__status_JTextField.setText( __bothFieldsEmpty_String );
 		Message.printWarning( 2, routine, __bothFieldsEmpty_String );
 		__response = LOGIN_TRY_AGAIN;
@@ -321,8 +286,7 @@ protected void login()
 			du = __dmi.readDBUserForLogin( username );
 		} catch ( Exception e ) {
 			Message.printWarning( 2, routine, e);
-			Message.printWarning( 1, routine, 
-				"Database access error. Exiting.");
+			Message.printWarning( 1, routine, "Database access error. Exiting.");
 			__response = LOGIN_ERROR;
 			response();
 		}
@@ -336,8 +300,7 @@ protected void login()
 			try {
 				if ( c.validateString(password, db_password) ) {
 					
-					Message.printStatus(5, routine, "User '"
-					 	+ username + "' logged in." );
+					Message.printStatus(5, routine, "User '" + username + "' logged in." );
 		
 					// Set DBUser for this session
 					try {
@@ -346,30 +309,25 @@ protected void login()
 						__response = LOGIN_OK;
 					}
 					catch ( Exception e ) {
-						Message.printWarning (
-							2, routine, e );
-						Message.printWarning(1, routine,
-							"Unable to set DBUser "+
-							"information. Exiting.");
+						Message.printWarning ( 2, routine, e );
+						Message.printWarning(1, routine, "Unable to set DBUser information. Exiting.");
 						__response = LOGIN_ERROR;
 					}
 					response();
 				} else {
 					// Invalid password, Try again...
-					__status_JTextField.setText(
-						__invalidPassword_String );
-					Message.printWarning( 1, routine,
-						__invalidPassword_String );
+					__status_JTextField.setText( __invalidPassword_String );
+					Message.printWarning( 1, routine, __invalidPassword_String );
 		
 					// Set username/password fields to empty
-					__username_JTextField.setText    ( "" );
+					__username_JTextField.setText ( "" );
 					__password_JPasswordField.setText( "" );
 					if ( __tryCount < __tryMax ) {
 						__tryCount++;
 						__response = LOGIN_TRY_AGAIN;	
-					} else {
-						// Exceeded the max # of tries,
-						// so cancel this login section.						
+					}
+					else {
+						// Exceeded the max # of tries, so cancel this login section.						
 						__response = LOGIN_EXCEEDED_MAX;
 						response();
 					}
@@ -377,8 +335,7 @@ protected void login()
 			}
 			catch ( Exception e ) {
 				Message.printWarning( 2, routine, e );
-				Message.printWarning( 1, routine, 
-					"Database access error. Exiting.");
+				Message.printWarning( 1, routine, "Database access error. Exiting.");
 				__response = LOGIN_ERROR;
 				response();
 			}
@@ -389,14 +346,14 @@ protected void login()
 			Message.printWarning(1,routine,__invalidUsername_String);
 
 			// Set username/password fields to empty
-			__username_JTextField.setText    ( "" );
+			__username_JTextField.setText ( "" );
 			__password_JPasswordField.setText( "" );
 			if ( __tryCount < __tryMax ) {
 				__tryCount++;
 				__response = LOGIN_TRY_AGAIN;
-			} else {
-				// Exceeded the max # of tries,
-				// so cancel this login section.
+			}
+			else {
+				// Exceeded the max # of tries, so cancel this login section.
 				__response = LOGIN_EXCEEDED_MAX;
 				response();
 			}		
@@ -408,16 +365,12 @@ protected void login()
 Static login method to be used in order to connect to a database with a
 username and password without having to open the login dialog.
 */
-public static boolean login ( RiversideDB_DMI dmi,
-			      String username, 
-			      String password,
-			      boolean isPasswordEncrypted )
+public static boolean login ( RiversideDB_DMI dmi, String username, String password, boolean isPasswordEncrypted )
 {
 	String routine=__class+ ".login(RiversideDB_DMI,String,String,boolean)";
 
 	// Check id and password
-	if ( (username == null) || (username.length() <= 0) ||
-	     (password == null) || (password.length() <= 0) ) {
+	if ( (username == null) || (username.length() <= 0) || (password == null) || (password.length() <= 0) ) {
 		Message.printWarning( 2, routine, __pleaseEnterBoth_String );
 		return false;
 	}
@@ -428,14 +381,12 @@ public static boolean login ( RiversideDB_DMI dmi,
 		}
 		catch (Exception e) {
 			Message.printWarning( 2, routine, e );
-			Message.printWarning( 2, routine, 
-				"Unable to verify name and password. Exiting.");
+			Message.printWarning( 2, routine, "Unable to verify name and password. Exiting.");
 			return false;
 		}
 
 		if ( dbUser == null ) {
-			Message.printWarning( 1, routine,
-				__invalidUsername_String );
+			Message.printWarning( 1, routine, __invalidUsername_String );
 			return false;
 		}
 		else {
@@ -445,11 +396,8 @@ public static boolean login ( RiversideDB_DMI dmi,
 			if (!isPasswordEncrypted) {
 				Cipher c = new Cipher("00");
 				try {
-					if ( c.validateString( password, 
-					    encryptedDatabasePassword ) ) {
-						Message.printStatus( 5, routine,
-							"User \"" + username
-							+ "\" logged in.");
+					if ( c.validateString( password, encryptedDatabasePassword ) ) {
+						Message.printStatus( 5, routine, "User \"" + username + "\" logged in.");
 					}
 					else {
 						return false;
@@ -461,8 +409,7 @@ public static boolean login ( RiversideDB_DMI dmi,
 				}
 			}
 			else {
-				if ( !password.equals(
-				    	encryptedDatabasePassword) ) {
+				if ( !password.equals(encryptedDatabasePassword) ) {
 					return false;
 				}
 			}
@@ -485,10 +432,10 @@ Return the response to the login attempt.
 */
 public int response()
 {
-	if ( __response == LOGIN_TRY_AGAIN )
-	{
+	if ( __response == LOGIN_TRY_AGAIN ) {
 		// Response to LOGIN_TRY_AGAIN. Nothing to do.
-	} else {	
+	}
+	else {	
 		// Response to LOGIN_OK, LOGIN_ERROR, LOGIN_CANCELLED and
 		// LOGIN_EXCEEDED_MAX. Dispose of the dialog. 
 		setVisible( false );
@@ -501,7 +448,7 @@ public int response()
 
 /**
 Print user information to the log file if running under the debug settings
-and the login was sucessful.
+and the login was successful.
 */
 private void printDebugMessage()
 {
@@ -510,17 +457,12 @@ private void printDebugMessage()
 	try {
 		if ( Message.isDebugOn ) {
 			RiversideDB_DBUser DBUser = __dmi.getDBUser();
-			mssg = "Current DBUser set to: \n"
-			+ "DBUser_num            = "
-			+ DBUser.getDBUser_num()
-			+ "Login                 = "
-			+ DBUser.getLogin()
-			+ "Description           = "
-			+ DBUser.getDescription()
-			+ "PrimaryDBGroup_num    = "
-			+ DBUser.getPrimaryDBGroup_num()
-			+ "Default_DBPermissions = "
-			+ DBUser.getDefault_DBPermissions();
+			mssg = "Current DBUser set to: "
+			+ "DBUser_num = " + DBUser.getDBUser_num()
+			+ "Login = \"" + DBUser.getLogin()
+			+ "\" Description = \"" + DBUser.getDescription()
+			+ "\" PrimaryDBGroup_num = " + DBUser.getPrimaryDBGroup_num()
+			+ "Default_DBPermissions = \"" + DBUser.getDefault_DBPermissions() + "\"";
 			Message.printDebug( 2, routine, mssg );
 		}
 	} catch ( Exception e ) {
@@ -544,13 +486,13 @@ public void actionPerformed ( ActionEvent event )
 	try {
 		Object source  = event.getSource();
         	
-        	// OK clicked, check username and password.
+       	// OK clicked, check username and password.
 		if ( source.equals( __ok_JButton ) ) {
 			login();
 		}
 		
 		// CANCEL clicked. Nothing else to do.
-		else  if ( source.equals( __cancel_JButton ) ) {
+		else if ( source.equals( __cancel_JButton ) ) {
 			__response = LOGIN_CANCELLED;
 			response();
 		}
@@ -559,7 +501,6 @@ public void actionPerformed ( ActionEvent event )
 		Message.printWarning( 2, routine, e);
 	}
 }
-
 
 //----------------------------------------------------------------------------// 
 //                                   Key Events                               //
@@ -603,7 +544,6 @@ public void keyTyped ( KeyEvent event )
 {
 }
 
-
 //----------------------------------------------------------------------------// 
 //                                 Focus Events                               //
 //----------------------------------------------------------------------------// 
@@ -624,7 +564,6 @@ Focus lost event handler.
 public void focusLost( FocusEvent event )
 {
 }
-
 
 //----------------------------------------------------------------------------// 
 //                                 Window Events                              //
@@ -688,4 +627,3 @@ public void windowOpened ( WindowEvent event )
 }
 
 }
-//------------------------------------------------------------------------------
