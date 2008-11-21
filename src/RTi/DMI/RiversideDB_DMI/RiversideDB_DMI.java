@@ -859,15 +859,11 @@ throws Exception {
 }
 
 /** 
-Constructor for a database server and database name, to use an automatically
-created URL.
+Constructor for a database server and database name, to use an automatically created URL.
 @param database_engine The database engine to use (see the DMI constructor).
-@param database_server The IP address or DSN-resolvable database server
-machine name.
-@param database_name The database name on the server.  If null, default to
-"RiversideDB".
-@param port Port number used by the database.  If negative, default to that for
-the database engine.
+@param database_server The IP address or DSN-resolvable database server machine name.
+@param database_name The database name on the server.  If null, default to "RiversideDB".
+@param port Port number used by the database.  If negative, default to that for the database engine.
 @param system_login If not null, this is used as the system login to make the
 connection.  If null, the default system login is used.
 @param system_password If not null, this is used as the system password to make
@@ -7104,6 +7100,19 @@ throws Exception
 	    if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
 	        hasDuration = true;
 	    }
+	    // Table formats indicate revisions to data using either a revision number (sequential integer)
+	    // or creation time (date/time).  The records will need to be ordered by one of these to ensure
+	    // that the latest values are evident in the results.
+	    boolean hasRevisionNum = false;
+	    if ( (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) ||
+            (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) ||
+	        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_HOUR) ||
+	        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ||
+	        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MONTH) ||
+	        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_YEAR) ||
+	        (table_layout == TABLE_LAYOUT_1MONTH) ) {
+	        hasRevisionNum = true;
+	    }
 	    boolean hasCreationTime = false;
         if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
             // No duration but has creation time
@@ -7143,9 +7152,16 @@ throws Exception
             }
             // Always sort by date/time of the data.
             q.addOrderByClause ( ts_table + ".Date_Time" );
-            if ( hasCreationTime ) {
+            if ( hasRevisionNum ) {
+                // Order by revision number so that the latest values are visible in the time series,
+                // but won't include revision number in the final time series results
+                q.addField ( ts_table + ".Revision_num" );
+                q.addOrderByClause ( ts_table + ".Revision_num" );
+            }
+            else if ( hasCreationTime ) {
+                // Newer alternative to revision number - sort by the creation time so latest value is used
+                // in final result
                 q.addField ( ts_table + ".Creation_Time" );
-                // Also sort by the creation time so latest value is used in final result
                 q.addOrderByClause ( ts_table + ".Creation_Time" );
             }
             if ( req_date1 != null ) {
