@@ -66,7 +66,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
 Table model used for displaying the data editor for the table TableLayout.
@@ -92,7 +92,7 @@ Default constructor.
 @param editable whether the data is editable or not.
 */
 public RiversideDB_ReferenceTable_TableLayout_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;
@@ -100,13 +100,12 @@ throws Exception {
 
 /**
 Stores a backup of each object so that the original values prior to any
-editing can be chcked later to find out if anything is different.
+editing can be checked later to find out if anything is different.
 */
 public void backupData()
 {
 	for (int i = 0; i < _rows; i++) {
-		RiversideDB_TableLayout t =
-			(RiversideDB_TableLayout)_data.elementAt(i);
+		RiversideDB_TableLayout t = (RiversideDB_TableLayout)_data.get(i);
 		t.setOriginal(t.cloneSelf());
 		t.setDirty(false);
 	}
@@ -125,7 +124,7 @@ protected int checkTableField( int integerKey, int row )
 	RiversideDB_TableLayout d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_TableLayout)_data.elementAt(i);
+			d = (RiversideDB_TableLayout)_data.get(i);
 			if ( d.getTableLayout_num() == integerKey ) {
 				return checkTableField( integerKey + 1, row );
 			}
@@ -238,7 +237,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_TableLayout t=(RiversideDB_TableLayout)_data.elementAt(row);
+	RiversideDB_TableLayout t=(RiversideDB_TableLayout)_data.get(row);
 	switch (column) {
 		case COL_TABLE_LAYOUT_TABLELAYOUT_NUM:
 			return new Integer((int)t.getTableLayout_num());
@@ -259,10 +258,8 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_TableLayout t =
-		(RiversideDB_TableLayout)_data.elementAt(row);
-	RiversideDB_TableLayout t0 =
-		(RiversideDB_TableLayout)t.getOriginal();
+	RiversideDB_TableLayout t = (RiversideDB_TableLayout)_data.get(row);
+	RiversideDB_TableLayout t0 = (RiversideDB_TableLayout)t.getOriginal();
 	String s;
 	int i;
 	switch (column) {

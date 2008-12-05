@@ -16,6 +16,7 @@ package RTi.DMI.RiversideDB_DMI;
 
 import RTi.Util.GUI.JWorksheet;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.TS.TSIdent;
@@ -29,8 +30,7 @@ import RTi.Util.Message.Message;
 //import RTi.DMI.RiversideDB_DataType;
 
 /**
-This class is a table model for displaying data from 
-RiversideDB_ImportConf and MeasType objects.
+This class is a table model for displaying data from RiversideDB_ImportConf and MeasType objects.
 */
 public class RiversideDB_ImportConf_TableModel 
 extends JWorksheet_AbstractRowTableModel {
@@ -49,7 +49,7 @@ private JWorksheet __worksheet;
 Vector of MeasTypes ordered corresponding to the
 order of the ImportConf objects passed in.
 */
-Vector __measType_vect = null;
+List __measType_vect = null;
 
 /**
 Array of Strings to use for the labels of the worksheet pertaining to
@@ -70,7 +70,7 @@ String __importType_str = "";
 
 //Vector containing values for field - this is a JComboBox
 //(all the choices for field will be the same for the entire column)
-Vector _field_vect = null;
+List _field_vect = null;
 
 //Connection to database to query 
 RiversideDB_DMI __rdmi;
@@ -78,7 +78,7 @@ RiversideDB_DMI __rdmi;
 //To get JComboBox for units (which will contain different items 
 //depending on the data type of the selected product), need to
 //query the vector of DataTypes
-Vector __dataType_vect = null;
+List __dataType_vect = null;
 
 //ROWS
 private final static int __tsid = 0;
@@ -92,7 +92,7 @@ private final static int __ext_units = 6;
 /**
 Constructor.  This builds the Model for displaying the given 
 RiversideDB_ImportConf objects' information.
-@param v Vector of Vectors.  First Vector is Vector of 
+@param v List of Vectors.  First Vector is Vector of 
 RiversideDB_ImportConf objects for which to display data.  
 The ImportConf object itself knows about the related 
 RiversideDB_MeasType object. The second Vector is
@@ -126,10 +126,10 @@ ImportConf fields.
 created choices in units JComoBox
 @throws Exception if an invalid data or dmi was passed in.
 */
-public RiversideDB_ImportConf_TableModel(Vector v, 
+public RiversideDB_ImportConf_TableModel(List v, 
 String [] arrLabels, String [] arrToolTips, 
 String importType_str, RiversideDB_DMI dmi,
-Vector dataType_vect ) 
+List dataType_vect ) 
 throws Exception {
 	if (v.size() != 2 ) {
 		throw new Exception ("Need to pass in a Vector of size " +
@@ -139,8 +139,8 @@ throws Exception {
 	// ( _data is a Vector inherited from
 	// JWorksheet_AbstractRowTableModel.  It stores the Vector of data
 	// that you'll show in the table. )
-	_data = (Vector)v.elementAt(0);
-	__measType_vect = (Vector)v.elementAt(1);
+	_data = (List)v.get(0);
+	__measType_vect = (List)v.get(1);
 
 	if (_data == null) {
 		throw new Exception ("Null data Vector passed to " 
@@ -194,7 +194,7 @@ public void deleteMeasType ( String tsid_str ) {
 	RiversideDB_MeasType mt = null;
 	String s = null;
 	for ( int i=0; i< num_mt; i++ ) {
-		mt =( RiversideDB_MeasType) __measType_vect.elementAt(i);
+		mt =( RiversideDB_MeasType) __measType_vect.get(i);
 		if ( mt == null ) {
 			continue;
 		}
@@ -208,7 +208,7 @@ public void deleteMeasType ( String tsid_str ) {
 			s = "";
 		}
 		if ( s.equals( tsid_str ) ) {
-			__measType_vect.removeElementAt(i);
+			__measType_vect.remove(i);
 		}
 	}
 }
@@ -319,7 +319,7 @@ public RiversideDB_MeasType getMeasTypeForTSIdent( String tsid_str ) {
 	RiversideDB_MeasType mt = null;
 	String s = null;
 	for ( int i=0; i< num_mt; i++ ) {
-		mt =( RiversideDB_MeasType) __measType_vect.elementAt(i);
+		mt =( RiversideDB_MeasType) __measType_vect.get(i);
 		if ( mt == null ) {
 			continue;
 		}
@@ -371,12 +371,11 @@ public Object getValueAt(int row, int col) {
 	// for each column.  You can do a lot in here, I've done some really
 	// complicated stuff for some tables.  But for the most part,
 	// something simple like below will work
-	RiversideDB_ImportConf table = 
-	(RiversideDB_ImportConf ) _data.elementAt(row);
+	RiversideDB_ImportConf table = (RiversideDB_ImportConf )_data.get(row);
 
 	String s ="";
 	RiversideDB_MeasType mt = null;
-	mt = ( RiversideDB_MeasType ) __measType_vect.elementAt(row);
+	mt = ( RiversideDB_MeasType ) __measType_vect.get(row);
 	switch (col) {
 		case __tsid:	//tsid	
 				if ( mt == null ) { 
@@ -509,26 +508,22 @@ public void setValueAt(Object value, int row, int col) {
 			break;
  		case __ts_active: //enabled
 			s = (String) value;
-			table = 
-			(RiversideDB_ImportConf) _data.elementAt( row );
+			table = (RiversideDB_ImportConf) _data.get( row );
 			table.setIsActive( s.toUpperCase() );
 			break;
  		case __ext_id: //data file/ shef id
 			s = (String) value;
-			table = 
-			(RiversideDB_ImportConf) _data.elementAt( row );
+			table = (RiversideDB_ImportConf) _data.get( row );
 			table.setExternal_id( s.toUpperCase() );
 			break;
  		case __ext_field: //data col/SHEF PE
 			s = (String) value;
-			table = 
-			(RiversideDB_ImportConf) _data.elementAt( row );
+			table = (RiversideDB_ImportConf) _data.get( row );
 			table.setExternal_field( s.toUpperCase() );
 			break;
  		case __ext_table: //table file 
 			s = (String) value;
-			table = 
-			(RiversideDB_ImportConf) _data.elementAt( row );
+			table = (RiversideDB_ImportConf) _data.get( row );
 			table.setExternal_table( s.toUpperCase() );
 			break;
  		case __ext_units: //units
@@ -536,8 +531,7 @@ public void setValueAt(Object value, int row, int col) {
 			if ( s.equals("SAME") ) {
 				s = "";
 			}
-			table = 
-			(RiversideDB_ImportConf) _data.elementAt( row );
+			table = (RiversideDB_ImportConf) _data.get( row );
 			table.setExternal_units( s.toUpperCase() );
 			break;
 	}
@@ -575,9 +569,9 @@ Method creates JComboBoxes for the following 3 columns:
 */
 public void updateWorksheet( ) {
 	//make comboBox for isActive YES or NO. 
-	Vector active_vect = new Vector();
-	active_vect.addElement( "Y" );
-	active_vect.addElement( "N" );
+	List active_vect = new Vector();
+	active_vect.add( "Y" );
+	active_vect.add( "N" );
 
 	//set column for to use this (choices do not change )
 	__worksheet.setColumnJComboBoxValues( __ts_active, active_vect );
@@ -587,7 +581,7 @@ public void updateWorksheet( ) {
 		_field_vect= new Vector();
 		if ( __importType_str.indexOf( "SHEF" ) >= 0 ){
 			//data from SHEF_TYPE table
-			Vector v= null;
+			List v= null;
 			try {
 				v = __rdmi.readSHEFTypeList();
 			}
@@ -600,18 +594,18 @@ public void updateWorksheet( ) {
 			int s = v.size();
 			RiversideDB_SHEFType st = null;
 			for ( int i=0; i< s; i++ ){
-				st = ( RiversideDB_SHEFType )v.elementAt(i);
+				st = ( RiversideDB_SHEFType )v.get(i);
 				if ( st == null ) {
 					continue;
 				}
-				_field_vect.addElement( st.getSHEF_pe() );
+				_field_vect.add( st.getSHEF_pe() );
 			}
 			v = null;
 		}
 		else {
 			//numbers 1-50
 			for ( int i=1; i<=50; i++ ) {
-				_field_vect.addElement( String.valueOf(i) );
+				_field_vect.add( String.valueOf(i) );
 			}
 		
 		}
@@ -630,8 +624,8 @@ public void updateWorksheet( ) {
 	String type = null;
 	int size_dt = __dataType_vect.size();
 	for ( int i=0; i<_rows; i++ ) {
-		Vector units_vect= new Vector();
-		mt = (RiversideDB_MeasType) __measType_vect.elementAt(i);
+		List units_vect= new Vector();
+		mt = (RiversideDB_MeasType) __measType_vect.get(i);
 		if ( mt == null ) {	
 			continue;
 		}
@@ -645,16 +639,14 @@ public void updateWorksheet( ) {
 		type = tsid.getType();
 		RiversideDB_DataType dt =null;
 		String dim = "";
-		Vector du_vect = null;
+		List du_vect = null;
 		//use type to get DataType object
 		for ( int j=0; j<size_dt; j++ ) {
-			dt = (RiversideDB_DataType) __dataType_vect.
-			elementAt(j);
+			dt = (RiversideDB_DataType)__dataType_vect.get(j);
 			if ( dt == null ) {	
 				continue;
 			}	
-			if ( (type != null ) && 
-			(dt.getDataType().equals( type ) )) {
+			if ( (type != null ) && (dt.getDataType().equals( type ) )) {
 				//use this to get the Dimension
 				dim = dt.getDimension();
 				break;
@@ -672,16 +664,16 @@ public void updateWorksheet( ) {
 		int du_size = du_vect.size();
 		DataUnits du = null;
 		for ( int k=0; k<du_size; k++ ) {
-			du =(DataUnits) du_vect.elementAt(k);
+			du =(DataUnits) du_vect.get(k);
 			if ( du == null ) {	
 				continue;
 			}
-			units_vect.addElement( du.getAbbreviation() );
+			units_vect.add( du.getAbbreviation() );
 			du = null;
 		//set this to be the items in the cell specific JComboBox
 	
 			if ( k == du_size-1 ) {
-				units_vect.addElement( "SAME" );
+				units_vect.add( "SAME" );
 			}
 
 			__worksheet.

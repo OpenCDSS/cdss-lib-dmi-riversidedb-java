@@ -70,6 +70,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
@@ -311,17 +312,17 @@ private RiversideDB_MeasLocGroup  __db_RTi_MeasLocGroup = null;
 private RiversideDB_MeasLocGroup __gui_RTi_MeasLocGroup = null;
 
 // List of all DBUsers
-private Vector __RTi_DBUser_vect = null;
+private List __RTi_DBUser_vect = null;
 
 // Vector contain DBUserMeasLocGroupRelation objects for a given MeasLocGroup.
-private Vector __db_RTi_DBUserMeasLocGroupRelation_vect = null;
-private Vector __gui_RTi_DBUserMeasLocGroupRelation_vect = null;
+private List __db_RTi_DBUserMeasLocGroupRelation_vect = null;
+private List __gui_RTi_DBUserMeasLocGroupRelation_vect = null;
 
 // Flag to indicate vector of DBUserMeasLocGroupRelation objects has changed.
 private boolean __blnDBUserMeasLocGroupRelation_setDirty = false;
 
 // MeasLocGroup vector
-private Vector __RTi_MeasLocGroup_vect = null;
+private List __RTi_MeasLocGroup_vect = null;
 
 // Flag to indicate if we are running in CAUTIOUS MODE---
 // aka, if we prompt the user for confirmation of changes
@@ -332,7 +333,7 @@ private boolean __canWriteMeasLocGroup = false;
 
 // Holds a Vector of status information-- each
 //field that has been changed is recored in this vector.
-private Vector __dirty_vect = new Vector();
+private List __dirty_vect = new Vector();
 
 // Holds the DBUser object
 private RiversideDB_DBUser __DBUser = null;
@@ -467,7 +468,7 @@ public RiversideDB_MeasLocGroup_JFrame(
 		numb_users = __RTi_DBUser_vect.size();
 		RiversideDB_DBUser du = null;
 		for ( int i=0; i<numb_users; i++ ) {
-			du = (RiversideDB_DBUser) __RTi_DBUser_vect.elementAt(i);
+			du = (RiversideDB_DBUser) __RTi_DBUser_vect.get(i);
 			if ( du == null ) {
 				continue;
 			}
@@ -477,7 +478,7 @@ public RiversideDB_MeasLocGroup_JFrame(
  				__preselected_MeasLocGroup_num );
 				//add it to the vector
  				__db_RTi_DBUserMeasLocGroupRelation_vect.
-				addElement( dbumlgr );
+				add( dbumlgr );
 				break;
 			}
 			du = null;
@@ -568,7 +569,7 @@ protected void checkRequiredInput() throws Exception
 		RiversideDB_MeasLocGroup mlg = null;
 		for ( int i=0; i<size; i++ ) {
 			mlg = (RiversideDB_MeasLocGroup )
- 				__RTi_MeasLocGroup_vect.elementAt(i);
+ 				__RTi_MeasLocGroup_vect.get(i);
 			if ( mlg == null ) {
 				continue;
 			}
@@ -730,7 +731,7 @@ protected JPanel create_dbmlgr_panel ()
 	int numb_users = __RTi_DBUser_vect.size();
 	RiversideDB_DBUser du = null;
 	for ( int i=0; i<numb_users; i++ ) {
-		du = (RiversideDB_DBUser) __RTi_DBUser_vect.elementAt(i);
+		du = (RiversideDB_DBUser) __RTi_DBUser_vect.get(i);
 		if ( du == null ) {
 			continue;
 		}
@@ -766,7 +767,7 @@ protected JPanel create_dbmlgr_panel ()
  	__selected_users_ListModel = new DefaultListModel();
 
 	// Get list from DBUserMeasLocGroupRelation table for current MeasLocGrp
-	Vector dbmlgr_vect = null;
+	List dbmlgr_vect = null;
 	try {
 		// _preselectedMeasLocGroup_num will be -999 if
 		// creating a new MeasLocGroup.
@@ -787,7 +788,7 @@ protected JPanel create_dbmlgr_panel ()
 	RiversideDB_DBUser dbuser = null;
 	for ( int i=0; i<numb_dbmlgr; i++ ) {
 		dbmlgr = (RiversideDB_DBUserMeasLocGroupRelation)
-		dbmlgr_vect.elementAt(i);
+		dbmlgr_vect.get(i);
 		if ( dbmlgr == null ) {
 			continue;
 		}
@@ -1128,10 +1129,10 @@ protected void update_database() throws Exception {
 	StringBuffer b = new StringBuffer();
 	for ( int i=0; i< __dirty_vect.size(); i++ ) {
 		if ( i == ( __dirty_vect.size()-1) ) {
-			b.append( (String) __dirty_vect.elementAt(i) );
+			b.append( (String) __dirty_vect.get(i) );
 		}
 		else {
-			b.append( (String) __dirty_vect.elementAt(i) + "\n" );
+			b.append( (String) __dirty_vect.get(i) + "\n" );
 		}
 	}
 
@@ -1272,7 +1273,7 @@ protected void update_database() throws Exception {
 				dbumlg =
 				(RiversideDB_DBUserMeasLocGroupRelation)
  				__gui_RTi_DBUserMeasLocGroupRelation_vect.
-				elementAt(i);
+				get(i);
 				if ( dbumlg == null ) {
 					continue;
 				}
@@ -1395,7 +1396,7 @@ public void verify_fields() throws Exception {
 
 	if ( ! db_id.equalsIgnoreCase( gui_id ) ) {
  		__gui_RTi_MeasLocGroup.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Identifier from \"" + db_id +
 		"\" to \"" + gui_id + "\"");
 
@@ -1410,7 +1411,7 @@ public void verify_fields() throws Exception {
 
 	if ( ! db_name.equalsIgnoreCase( gui_name ) ) {
  		__gui_RTi_MeasLocGroup.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Name from \"" + db_name +
 		"\" to \"" + gui_name + "\"");
  		__gui_RTi_MeasLocGroup.setName( gui_name );
@@ -1424,7 +1425,7 @@ public void verify_fields() throws Exception {
 
 	if ( ! db_desc.equalsIgnoreCase( gui_desc ) ) {
  		__gui_RTi_MeasLocGroup.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Description from \"" + db_desc +
 		"\" to \"" + gui_desc + "\"");
  		__gui_RTi_MeasLocGroup.setDescription( gui_desc );
@@ -1438,7 +1439,7 @@ public void verify_fields() throws Exception {
 
 	if ( ! db_optable.equalsIgnoreCase( gui_optable ) ) {
  		__gui_RTi_MeasLocGroup.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change Optable from \"" + db_optable +
 			"\" to \"" + gui_optable + "\"");
  		__gui_RTi_MeasLocGroup.setOptable( gui_optable );
@@ -1481,7 +1482,7 @@ public void verify_fields() throws Exception {
 
 		//add to Vector
  		__gui_RTi_DBUserMeasLocGroupRelation_vect.
-		addElement( dbumlg );
+		add( dbumlg );
 
 		user = null;
 		dbumlg = null;
@@ -1492,33 +1493,33 @@ public void verify_fields() throws Exception {
 	// objects to simple strings in format: MeasLocGroup_num,DBUser_num
 	// For example: 4, 1 , so that we can compare using our generic
 	// utility in __Util class.
-	Vector v_add = null;
-	Vector v_rem = null;
+	List v_add = null;
+	List v_rem = null;
 
 	// Make Vector containing simple String objects instead of
 	// DBUserMeasLocGroupRelation objects
-	Vector db_string_vect = new Vector();
-	Vector gui_string_vect = new Vector();
+	List db_string_vect = new Vector();
+	List gui_string_vect = new Vector();
 	int db_vect_size = __db_RTi_DBUserMeasLocGroupRelation_vect.size();
 	int gui_vect_size = __gui_RTi_DBUserMeasLocGroupRelation_vect.size();
 	RiversideDB_DBUserMeasLocGroupRelation m = null;
 	for ( int i=0; i<db_vect_size; i++ ) {
 		m = (RiversideDB_DBUserMeasLocGroupRelation )
- 		__db_RTi_DBUserMeasLocGroupRelation_vect.elementAt( i );
+ 		__db_RTi_DBUserMeasLocGroupRelation_vect.get( i );
 		if ( m == null ) {
 			continue;
 		}
-		db_string_vect.addElement(
+		db_string_vect.add(
 		m.getDBUser_num() + "," + m.getMeasLocGroup_num() );
 		m = null;
 	}
 	for ( int i=0; i<gui_vect_size; i++ ) {
 		m = (RiversideDB_DBUserMeasLocGroupRelation )
- 		__gui_RTi_DBUserMeasLocGroupRelation_vect.elementAt( i );
+ 		__gui_RTi_DBUserMeasLocGroupRelation_vect.get( i );
 		if ( m == null ) {
 			continue;
 		}
-		gui_string_vect.addElement(
+		gui_string_vect.add(
 		m.getDBUser_num() + "," + m.getMeasLocGroup_num() );
 		m = null;
 	}
@@ -1532,7 +1533,7 @@ public void verify_fields() throws Exception {
 	} else {
 		// need to update.
  		__blnDBUserMeasLocGroupRelation_setDirty = true;
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change list of DBUsers related to this MeasLocGroup "
 			+ "table?" );
 	}
@@ -1678,7 +1679,7 @@ public void actionPerformed (ActionEvent event)
 				StringBuffer b = new StringBuffer();
 				for (int i=0;i< __dirty_vect.size(); i++ ) {
 					b.append( (String)
- 					__dirty_vect.elementAt(i) +
+ 					__dirty_vect.get(i) +
 					"\n" );
 				}
 				//write out a confirmation message.

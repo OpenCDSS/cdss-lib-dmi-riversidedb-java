@@ -285,8 +285,7 @@ public void populateTree()
 	int top_grp_num =-999;
 
 	for ( int g=0; g<grp_size; g++ ) {
-		pg = (RiversideDB_ProductGroup)
-			__productGroup_vect.elementAt(g);
+		pg = (RiversideDB_ProductGroup)__productGroup_vect.get(g);
 		if ( pg == null ) continue;
 
 		boolean canReadProductGroup = false;
@@ -339,8 +338,7 @@ public void populateTree()
 
 		RiversideDB_ImportProduct ip = null;
 		for ( int p=0; p< obj_size; p++ ) {
-			ip = (RiversideDB_ImportProduct)
-			__product_vect.elementAt(p);
+			ip = (RiversideDB_ImportProduct)__product_vect.get(p);
 			if ( ip == null ) {
 				continue;
 			}
@@ -503,8 +501,8 @@ public void actionPerformed (ActionEvent event)
 
 					//Re-read database to create
 					//new Vector of Import Products
-					try {	__product_vect =
-						__dmi.readImportProductList();
+					try {
+						__product_vect = __dmi.readImportProductList();
 						}
 					catch ( Exception e ) {
 						Message.printWarning(

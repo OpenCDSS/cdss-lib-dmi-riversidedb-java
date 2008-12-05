@@ -66,7 +66,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
 Table model used for displaying the data editor for the table MeasTransProtocol.
@@ -91,7 +91,7 @@ Default constructor.
 @param editable whether the data is editable or not.
 */
 public RiversideDB_ReferenceTable_MeasTransProtocol_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;	
@@ -99,13 +99,12 @@ throws Exception {
 
 /**
 Stores a backup of each object so that the original values prior to any
-editing can be chcked later to find out if anything is different.
+editing can be checked later to find out if anything is different.
 */
 public void backupData()
 {
 	for (int i = 0; i < _rows; i++) {
-		RiversideDB_MeasTransProtocol m5 =
-			(RiversideDB_MeasTransProtocol) _data.elementAt(i);
+		RiversideDB_MeasTransProtocol m5 = (RiversideDB_MeasTransProtocol)_data.get(i);
 		m5.setOriginal(m5.cloneSelf());
 		m5.setDirty(false);
 	}
@@ -125,7 +124,7 @@ protected String checkTableField( String s, int row )
 	RiversideDB_MeasTransProtocol d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_MeasTransProtocol)_data.elementAt(i);
+			d = (RiversideDB_MeasTransProtocol)_data.get(i);
 			if (d.getProtocol().trim().equals(s)) {
 				return checkTableField("X" + s, row);
 			}
@@ -235,8 +234,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_MeasTransProtocol m =
-		(RiversideDB_MeasTransProtocol)_data.elementAt(row);
+	RiversideDB_MeasTransProtocol m = (RiversideDB_MeasTransProtocol)_data.get(row);
 	switch (column) {
 		case COL_MEAS_TRANS_PROTOCOL_PROTOCOL:
 			return m.getProtocol();
@@ -255,10 +253,8 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_MeasTransProtocol m =
-		(RiversideDB_MeasTransProtocol)_data.elementAt(row);
-	RiversideDB_MeasTransProtocol m0 =
-		(RiversideDB_MeasTransProtocol)m.getOriginal();
+	RiversideDB_MeasTransProtocol m = (RiversideDB_MeasTransProtocol)_data.get(row);
+	RiversideDB_MeasTransProtocol m0 = (RiversideDB_MeasTransProtocol)m.getOriginal();
 	String s;
 	switch (column) {
 		case COL_MEAS_TRANS_PROTOCOL_PROTOCOL:

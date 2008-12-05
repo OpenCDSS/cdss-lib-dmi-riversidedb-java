@@ -22,7 +22,7 @@
 package RTi.DMI.RiversideDB_DMI;
 
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
@@ -243,14 +243,13 @@ Table_num for the search.
 @param Table_num value to compare in objects.
 @return the vector position or -1 if not found.
 */
-public static int indexOf ( Vector tables, long Table_num )
+public static int indexOf ( List tables, long Table_num )
 {	int size = 0;
 	if ( tables != null ) {
 		size = tables.size();
 	}
 	for ( int i = 0; i < size; i++ ) {
-		if (	((RiversideDB_Tables)tables.elementAt(i))._Table_num ==
-			Table_num ) {
+		if ( ((RiversideDB_Tables)tables.get(i))._Table_num == Table_num ) {
 			return i;
 		}
 	}

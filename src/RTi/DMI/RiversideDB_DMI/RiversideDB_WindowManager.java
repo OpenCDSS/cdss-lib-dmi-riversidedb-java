@@ -39,7 +39,7 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.awt.Frame;
 import javax.swing.JFrame;
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.WindowManager;
 import RTi.Util.GUI.WindowManagerData;
@@ -134,7 +134,7 @@ public boolean areWindowsOpenWithUnsavedData()
 		}
 	}
 
-	Vector v;
+	List v;
 	WindowManagerData data;
 	int size = 0;
 	for ( int i = 0; i < _windowInstanceInformation.length; i++ ) {
@@ -142,7 +142,7 @@ public boolean areWindowsOpenWithUnsavedData()
 			v = _windowInstanceInformation[i];
 			size = v.size();
 			for (int j = 0; j < size; j++) {
-				data = (WindowManagerData) v.elementAt(j);
+				data = (WindowManagerData) v.get(j);
 				if ( data.getStatus() == STATUS_OPEN ) {
 					if  ( isDataDirty( i, data.getID() ) ) {
 						// Found one dirt. Return true.

@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.GRTS.TSProduct;
@@ -116,23 +117,23 @@ private SimpleJMenuItem __productGroupMenuItem = null;
 A Vector of all the TSProduct objects read from databases, in the order they
 appear in the list.
 */
-private Vector __allTSPs = null;
+private List __allTSPs = null;
 
 /**
 The Vector of DMIs passed into the constructor.
 */
-private Vector __dmis = null;
+private List __dmis = null;
 
 /**
 A Vector wherein each element corresponds to one of the rows in the list, and
 contains the DMI used to query that TSProduct.
 */
-private Vector __rowDMIs = null;
+private List __rowDMIs = null;
 
 /**
 The Vector of data that appears in the list.
 */
-private Vector __listData = null;
+private List __listData = null;
 
 /**
 Private to avoid use.
@@ -143,7 +144,7 @@ private RiversideDB_TSProductManager_JFrame() {}
 Constructor.
 @param dmis a Vector of TSProductDMIs to query TSProducts from.
 */
-public RiversideDB_TSProductManager_JFrame(Vector dmis) {
+public RiversideDB_TSProductManager_JFrame(List dmis) {
 	this(dmis, "");
 }
 
@@ -153,7 +154,7 @@ Constructor.
 @param dmiInUse the default DMI to select from the combo box at the top 
 of the dialog.  If null, the default DMI will be the first one in the list.
 */
-public RiversideDB_TSProductManager_JFrame(Vector dmis, String dmiInUse) {
+public RiversideDB_TSProductManager_JFrame(List dmis, String dmiInUse) {
 	super();
 
 	__dmis = dmis;
@@ -212,7 +213,7 @@ currently-selected row.
 private boolean canChangeCurrentRowProductGroup(RiversideDB_DMI dmi) {
 	String routine = CLASS + ".canChangeCurrentRowProductGroup()";
 
-	Vector choices = null;
+	List choices = null;
 
 	try {
 		choices = RiversideDB_Util.getProductGroupsChoices(dmi);
@@ -250,8 +251,8 @@ private boolean canUpdateCurrentRow(boolean isPopup) {
 	}
 
 	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)
-		__allTSPs.elementAt(row);
-	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.elementAt(row);
+		__allTSPs.get(row);
+	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 	RiversideDB_DBUser user = dmi.getDBUser();
 
 	if (isPopup) {
@@ -321,8 +322,8 @@ private void changePermissions() {
 	}
 
 	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)
-		__allTSPs.elementAt(row);
-	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.elementAt(row);
+		__allTSPs.get(row);
+	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 	RiversideDB_DBUser user = dmi.getDBUser();
 
 	boolean isUser = false;
@@ -348,7 +349,7 @@ private void changePermissions() {
 		dmi.updateTSProductDBPermissionsForTSProduct_num(
 			tsp.getTSProduct_num(), permissions);
 		tsp.setDBPermissions(permissions);
-		__allTSPs.setElementAt(tsp, row);
+		__allTSPs.set(row, tsp);
 	}
 	catch (Exception e) {
 		Message.printWarning(2, routine, "Database error.");
@@ -366,11 +367,11 @@ private void changeProductGroup() {
 	int row = __productJList.getSelectedIndex();
 
 	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)
-		__allTSPs.elementAt(row);
-	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.elementAt(row);
+		__allTSPs.get(row);
+	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 
 	try {
-		Vector choices = null;
+		List choices = null;
 		try {
 			choices = RiversideDB_Util.getProductGroupsChoices(dmi);
 		}
@@ -400,7 +401,7 @@ private void changeProductGroup() {
 		dmi.updateTSProductProductGroup_numForTSProduct_num(
 			tsp.getTSProduct_num(), StringUtil.atoi(group));
 		tsp.setProductGroup_num(StringUtil.atoi(group));
-		__allTSPs.setElementAt(tsp, row);
+		__allTSPs.set(row,tsp);
 	}
 	catch (Exception e) {
 		Message.printWarning(2, routine, "Database error.");
@@ -443,11 +444,11 @@ private void deleteTSProduct(int row) {
 	String routine = CLASS + ".processTSPVectorForList";
 
 	RiversideDB_TSProduct tsp 
-		= (RiversideDB_TSProduct)__allTSPs.elementAt(row);
+		= (RiversideDB_TSProduct)__allTSPs.get(row);
 
 	try {
 
-		RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.elementAt(row);
+		RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 		if (dmi.canDelete(tsp.getDBUser_num(), tsp.getDBGroup_num(),
 			tsp.getDBPermissions())) {
 			dmi.deleteTSProductForTSProduct_num(
@@ -461,9 +462,9 @@ private void deleteTSProduct(int row) {
 			return;
 		}
 		
-		__allTSPs.removeElementAt(row);
-		__listData.removeElementAt(row);
-		__rowDMIs.removeElementAt(row);
+		__allTSPs.remove(row);
+		__listData.remove(row);
+		__rowDMIs.remove(row);
 		__productJList.setListData(__listData);
 
 	}
@@ -606,7 +607,7 @@ public void mousePressed(MouseEvent event) {
 
 	if (__popup.isPopupTrigger(event)) {
 		if (canChangeCurrentRowProductGroup(
-		    (RiversideDB_DMI)__rowDMIs.elementAt(row))) {
+		    (RiversideDB_DMI)__rowDMIs.get(row))) {
 			__productGroupMenuItem.setEnabled(true);
 		}
 		else {
@@ -634,7 +635,7 @@ public void mouseReleased(MouseEvent event) {
 
 	if (__popup.isPopupTrigger(event)) {
 		if (canChangeCurrentRowProductGroup(
-		    (RiversideDB_DMI)__rowDMIs.elementAt(row))) {
+		    (RiversideDB_DMI)__rowDMIs.get(row))) {
 			__productGroupMenuItem.setEnabled(true);
 		}
 		else {
@@ -654,11 +655,11 @@ already exist.
 private void openTSProduct(int row) {
 	String routine = CLASS + ".openRiversideTSProduct";
 
-	Vector dbProps = null;
+	List dbProps = null;
 	RiversideDB_TSProduct tsp 
-		= (RiversideDB_TSProduct)__allTSPs.elementAt(row);
+		= (RiversideDB_TSProduct)__allTSPs.get(row);
 	String identifier = tsp.getIdentifier();
-	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.elementAt(row);	
+	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);	
 	Message.printStatus(1, "", "Open product: " + identifier);
 	try {
 		// read all the properties for that TSProduct from the 
@@ -678,14 +679,14 @@ private void openTSProduct(int row) {
 	PropList props = new PropList("TSProduct");
 	props.setHowSet(Prop.SET_FROM_PERSISTENT);
 	int size = dbProps.size();
-	Vector tsids = new Vector();
+	List tsids = new Vector();
 	RiversideDB_TSProductProps tspp = null;
 
 	// Loops through all the properties and adds them to an actual proplist.
 	// Also keeps track of any properties that end with TSID, as these 
 	// are time series that will need to be queried from the database.
 	for (int i = 0; i < size; i++) {
-		tspp = (RiversideDB_TSProductProps)dbProps.elementAt(i);
+		tspp = (RiversideDB_TSProductProps)dbProps.get(i);
 		try {
 			props.set(tspp.getProperty() + "="
 				+ tspp.getVal());
@@ -715,20 +716,20 @@ private void openTSProduct(int row) {
 		props.set("ProductIDOriginal", identifier);
 		product = new TSProduct(props, null);
 		TS ts = null;
-		Vector tsList = new Vector();
+		List tsList = new Vector();
 		String s = null;
 		size = tsids.size();
 		for (int i = 0; i < size; i++) {
-			s = (String)tsids.elementAt(i);
+			s = (String)tsids.get(i);
 			ts = dmi.readTimeSeries(s, null, null, null, true);
-			tsList.addElement(ts);
+			tsList.add(ts);
 		}
 		product.setTSList(tsList);
 		product.showProps(1);
 
 		TSViewJFrame view = new TSViewJFrame(product);
 	
-		tsp = (RiversideDB_TSProduct)__allTSPs.elementAt(row);
+		tsp = (RiversideDB_TSProduct)__allTSPs.get(row);
 
 		if (dmi.canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(),
 			tsp.getDBPermissions())) {		
@@ -750,7 +751,7 @@ to be used internally.
 @param tspVector the Vector of time series products to process.  Cannot be 
 null.
 */
-private void processTSPVectorForList(DMI dmi, Vector tspVector) {
+private void processTSPVectorForList(DMI dmi, List tspVector) {
 
 	int size = tspVector.size();
 
@@ -758,7 +759,7 @@ private void processTSPVectorForList(DMI dmi, Vector tspVector) {
 
 	for (int i = 0; i < size; i++) {
 		__rowDMIs.add(dmi);
-		tsp = (RiversideDB_TSProduct)tspVector.elementAt(i);
+		tsp = (RiversideDB_TSProduct)tspVector.get(i);
 		__allTSPs.add(tsp);
 		__listData.add(tsp.getIdentifier() + " - " + tsp.getName());
 	}
@@ -772,8 +773,8 @@ private void renameClicked() {
 	int row = __productJList.getSelectedIndex();
 
 	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)
-		__allTSPs.elementAt(row);
-	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.elementAt(row);
+		__allTSPs.get(row);
+	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 	String currentID = tsp.getIdentifier();
 	int tsproduct_num = tsp.getTSProduct_num();
 
@@ -807,9 +808,8 @@ private void renameClicked() {
 		dmi.updateTSProductIdentifierForTSProduct_num(
 			tsproduct_num, id);
 		tsp.setIdentifier(id);
-		__allTSPs.setElementAt(tsp, row);
-		__listData.setElementAt(tsp.getIdentifier() + " - " 
-			+ tsp.getName(), row);
+		__allTSPs.set(row,tsp);
+		__listData.set(row,tsp.getIdentifier() + " - " + tsp.getName());
 	}
 	catch (Exception e) {
 		Message.printWarning(2, routine, 
@@ -898,10 +898,10 @@ private void setupGUI(String dmiInUse) {
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 
-	Vector v = new Vector();
+	List v = new Vector();
 	DMI dmi = null;
 	for (int i = 0; i < __dmis.size(); i++) {
-		dmi = (DMI)__dmis.elementAt(i);
+		dmi = (DMI)__dmis.get(i);
 		v.add(dmi.getInputName());
 	}
 
@@ -1011,16 +1011,16 @@ private void showProducts(String inputName) {
 	DMI dmi = null;
 
 	for (int i = 0; i < __dmis.size(); i++) {
-		dmi = (DMI)__dmis.elementAt(i);
+		dmi = (DMI)__dmis.get(i);
 
 		if (!dmi.getInputName().equals(inputName)) {
 			continue;
 		}
 
-		tspd = (TSProductDMI)__dmis.elementAt(i);
+		tspd = (TSProductDMI)__dmis.get(i);
 		
 		try {
-			processTSPVectorForList((DMI)__dmis.elementAt(i), 
+			processTSPVectorForList((DMI)__dmis.get(i), 
 				tspd.readTSProductDMITSProductList(false));
 		}
 		catch (Exception e) {

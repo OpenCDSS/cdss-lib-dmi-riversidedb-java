@@ -134,6 +134,7 @@ import  java.awt.event.ItemEvent;
 import  java.awt.event.ItemListener;
 import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
+import  java.util.List;
 import  java.util.Vector;
 
 import 	javax.swing.JCheckBox;
@@ -389,7 +390,7 @@ private SimpleJComboBox __TS_units_JComboBox = null;
 private JTextField __TS_create_method_JTextField = null;
 
 //vector of strings for MeasType.Time_step_base
-private Vector __timestep_base_vect = new Vector();
+private List __timestep_base_vect = new Vector();
 
 //Strings for TIMESTEP_BASE options...
 String TIME_STEPBASE_IRREGULAR = "IRREGULAR";
@@ -440,9 +441,9 @@ private JCheckBox __QA_QC_tab_editable_JCheckBox = null;
 //MeasType object that is currently being used...
 RiversideDB_MeasType __db_RTi_MeasType = null;
 //DataType
-private Vector __RTi_DataType_vect = null;
+private List __RTi_DataType_vect = null;
 //Tables
-private Vector __RTi_Tables_vect = null;
+private List __RTi_Tables_vect = null;
 
 //boolean to include extra confirmation dialogs before writing to the database
 private boolean __cautious_mode = true;
@@ -452,7 +453,7 @@ private RiversideDB_MeasType __gui_RTi_MeasType = null;
 
 //Holds a Vector of status information-- each
 //field that has been changed is recored in this vector.
-private Vector __dirty_vect = new Vector();
+private List __dirty_vect = new Vector();
 
 //String for "NONE" selection in the SimpleJComboBox
 String NONE_STRING = "NONE";
@@ -812,7 +813,7 @@ public JPanel assemble_tab_transmitProt() {
 	transProt_tab_transmit_JLabel.setToolTipText("Data Transmission method (see manual for more details) (reuqired)");
 
 	//MeasTransProtocol
-	Vector RTi_MeasTransProtocol_vect = null;
+	List RTi_MeasTransProtocol_vect = null;
 	try {	RTi_MeasTransProtocol_vect = __dmi.readMeasTransProtocolList();
 	}
 	catch ( Exception e ) {
@@ -826,12 +827,12 @@ public JPanel assemble_tab_transmitProt() {
 
 	//use the RTi_MeasTransProtocol_vect to fill the comboBox
 	//of transmit protocol methods.
-	Vector prot_vect = new Vector();
+	List prot_vect = new Vector();
 	String prot_str = null;
 	RiversideDB_MeasTransProtocol mtp = null;
 	for ( int i=0; i<RTi_MeasTransProtocol_vect.size(); i++ ) {
 		mtp = (RiversideDB_MeasTransProtocol) 
-			RTi_MeasTransProtocol_vect.elementAt(i);
+			RTi_MeasTransProtocol_vect.get(i);
 		if ( mtp == null ) {
 			continue;
 		}
@@ -840,7 +841,7 @@ public JPanel assemble_tab_transmitProt() {
 			if ( prot_str.length() > 45 ) {
 				prot_str = prot_str.substring( 0, 45 ) + "...";
 			}
-			prot_vect.addElement( prot_str );
+			prot_vect.add( prot_str );
 		}
 		mtp = null;
 		prot_str = null;
@@ -989,9 +990,9 @@ public JPanel assemble_tab_TS1( ) {
 
 	//DBLoad Vector is composed of 2 choices
 	//"1 - Insert and Update" and "2 - Drop and Replace"
-	Vector dbload_vect = new Vector();
-	dbload_vect.addElement( DBLOAD_METHOD_1 );
-	dbload_vect.addElement( DBLOAD_METHOD_2 );
+	List dbload_vect = new Vector();
+	dbload_vect.add( DBLOAD_METHOD_1 );
+	dbload_vect.add( DBLOAD_METHOD_2 );
 
 	//combobox for dbload methods
  	__TS1_tab_dbload1_JComboBox = new SimpleJComboBox( dbload_vect );
@@ -1002,7 +1003,7 @@ public JPanel assemble_tab_TS1( ) {
 	ts1_tab_table_num1_JLabel.setToolTipText("Database table name that stores the time series data (required)");
 
 	//Table_nums vect should come from the __RTi_Tables_vect already created.
-	Vector v = null;
+	List v = null;
 	v = setup_tables_vect();
 	//now make the ComboBox for Table nums!  
  	__TS1_tab_table_num1_JComboBox = new SimpleJComboBox( v );
@@ -1081,9 +1082,9 @@ public JPanel assemble_tab_TS2( ) {
 	TS2_tab_dbload2_JLabel.setToolTipText("Indicates how second copy of time series should be loaded into database (optional)");
 	//DBLoad Vector is composed of 2 choices
 	//"1 - Insert and Update" and "2 - Drop and Replace"
-	Vector dbload_vect = new Vector();
-	dbload_vect.addElement( DBLOAD_METHOD_1 );
-	dbload_vect.addElement( DBLOAD_METHOD_2 );
+	List dbload_vect = new Vector();
+	dbload_vect.add( DBLOAD_METHOD_1 );
+	dbload_vect.add( DBLOAD_METHOD_2 );
 
 	//combobox for dbload methods
  	__TS2_tab_dbload2_JComboBox = new SimpleJComboBox( dbload_vect );
@@ -1093,9 +1094,9 @@ public JPanel assemble_tab_TS2( ) {
 	"Time Series Data Table:" );
 	TS2_tab_table_num2_JLabel.setToolTipText("Database table name that stores copied time series data (optional)");
 
-	Vector v =  null;
+	List v =  null;
 	v = setup_tables_vect();
-	v.insertElementAt(NONE_STRING, 0 );
+	v.add(0, NONE_STRING );
 	//now make the ComboBox for Table nums!  - 
  	__TS2_tab_table_num2_JComboBox = new SimpleJComboBox( v );
 
@@ -1458,11 +1459,11 @@ private void create_top_panel( ) {
 	//We Already have vector of data type objects.
 	//get list of all datatypes with description
 
-	Vector datatype_vect =  new Vector();
+	List datatype_vect =  new Vector();
 	RiversideDB_DataType dt = null;
 	String datatype_str = null;
 	for ( int i=0; i< __RTi_DataType_vect.size(); i++ ) {
-		dt = (RiversideDB_DataType) __RTi_DataType_vect.elementAt(i);
+		dt = (RiversideDB_DataType) __RTi_DataType_vect.get(i);
 		if ( dt == null ) {
 			continue;
 		}
@@ -1475,7 +1476,7 @@ private void create_top_panel( ) {
 				datatype_str.substring(0, 45) + "...";
 			}
 			//add them to the vector
-			datatype_vect.addElement( datatype_str );
+			datatype_vect.add( datatype_str );
 		}
 		dt = null;
 		datatype_str = null;
@@ -1500,7 +1501,7 @@ private void create_top_panel( ) {
 	JLabel TS_dataSource_JLabel = new JLabel( "Data Source:" );
 	TS_dataSource_JLabel.setToolTipText("Agency or creator of the data (required)");
 
-	Vector RTi_DataSource_vect = null;
+	List RTi_DataSource_vect = null;
 	try {	
 		RTi_DataSource_vect = __dmi.readDataSourceList();
 	}
@@ -1515,9 +1516,9 @@ private void create_top_panel( ) {
 	//to use to make a list of Source choices.
 	RiversideDB_DataSource ds = null;
 	String source_str = null;
-	Vector source_vect = new Vector();
+	List source_vect = new Vector();
 	for ( int i=0; i<RTi_DataSource_vect.size(); i++ ) {
-		ds = (RiversideDB_DataSource) RTi_DataSource_vect.elementAt(i);
+		ds = (RiversideDB_DataSource) RTi_DataSource_vect.get(i);
 		if ( ds == null ) {
 			continue;
 		}
@@ -1528,7 +1529,7 @@ private void create_top_panel( ) {
 				source_str = 
 				source_str.substring( 0, 45 ) + "...";
 			}
-			source_vect.addElement( source_str );
+			source_vect.add( source_str );
 		}
 
 		source_str = null;
@@ -1548,12 +1549,12 @@ private void create_top_panel( ) {
  		__timestep_base_vect = new Vector();
 	}
 
- 	__timestep_base_vect.addElement( TIME_STEPBASE_DAY );
- 	__timestep_base_vect.addElement( TIME_STEPBASE_HOUR );
- 	__timestep_base_vect.addElement( TIME_STEPBASE_IRREGULAR );
- 	__timestep_base_vect.addElement( TIME_STEPBASE_MINUTE );
- 	__timestep_base_vect.addElement( TIME_STEPBASE_MONTH );
- 	__timestep_base_vect.addElement( TIME_STEPBASE_YEAR );
+ 	__timestep_base_vect.add( TIME_STEPBASE_DAY );
+ 	__timestep_base_vect.add( TIME_STEPBASE_HOUR );
+ 	__timestep_base_vect.add( TIME_STEPBASE_IRREGULAR );
+ 	__timestep_base_vect.add( TIME_STEPBASE_MINUTE );
+ 	__timestep_base_vect.add( TIME_STEPBASE_MONTH );
+ 	__timestep_base_vect.add( TIME_STEPBASE_YEAR );
 
 	//make combobox - required ( no "none" option )
  	__TS_timeStepBase_JComboBox = new SimpleJComboBox( __timestep_base_vect );
@@ -1583,7 +1584,7 @@ private void create_top_panel( ) {
 
 	//make a vector with just the Scenario ID and description-
 	//Scenario
-	Vector RTi_Scenario_vect = null;
+	List RTi_Scenario_vect = null;
 	try {	RTi_Scenario_vect = __dmi.readScenarioList();
 	}
 	catch ( Exception e ) {
@@ -1599,10 +1600,10 @@ private void create_top_panel( ) {
 	//Also, add an empty string as the LAST element since
 	//the scenario can be blank.
 	RiversideDB_Scenario ms = null;
-	Vector scenario_vect = new Vector();
+	List scenario_vect = new Vector();
 	String scen_str = null;
 	for ( int i=0; i<RTi_Scenario_vect.size(); i++ ) {
-		ms = (RiversideDB_Scenario) RTi_Scenario_vect.elementAt(i);
+		ms = (RiversideDB_Scenario) RTi_Scenario_vect.get(i);
 		if ( ms != null ) {
 			scen_str = ms.getIdentifier() + " - " +
 				ms.getDescription();
@@ -1612,7 +1613,7 @@ private void create_top_panel( ) {
 					scen_str.substring( 0, 45 ) + "...";
 				}
 
-				scenario_vect.addElement( scen_str );
+				scenario_vect.add( scen_str );
 			}
 		}
 		ms = null;
@@ -1620,7 +1621,7 @@ private void create_top_panel( ) {
 	}
 	RTi_Scenario_vect = null;
 	//now add the NONE string to the END of the vector
-	scenario_vect.addElement( NONE_STRING );
+	scenario_vect.add( NONE_STRING );
 
 	//now  make the combobox - NOT required ( "none" string )
  	__TS_scenario_JComboBox = new SimpleJComboBox( scenario_vect );
@@ -1650,15 +1651,15 @@ private void create_top_panel( ) {
 	sel_dataType_int = __TS_dataType_JComboBox.getSelectedIndex();
 
 	dt = null;
-	dt = (RiversideDB_DataType) __RTi_DataType_vect.elementAt(sel_dataType_int);
+	dt = (RiversideDB_DataType) __RTi_DataType_vect.get(sel_dataType_int);
 
 	// now use that to get the Dimesnion
 	String dim = null;
 	dim = dt.getDimension();
 
 	//use dimension to get list of units for 
-	Vector units_vect = new Vector();
-	Vector v = DataUnits.lookupUnitsForDimension( __system_units, dim );
+	List units_vect = new Vector();
+	List v = DataUnits.lookupUnitsForDimension( __system_units, dim );
 
 	int size = 0;
 	if ( v != null ) {
@@ -1667,15 +1668,15 @@ private void create_top_panel( ) {
 
 	DataUnits du = null;
 	for ( int i=0; i< size; i++ ) {
-		du = (DataUnits)v.elementAt(i);
-		units_vect.addElement( du.getAbbreviation() + 
+		du = (DataUnits)v.get(i);
+		units_vect.add( du.getAbbreviation() + 
 		" - " + du.getLongName() );
 	}
 	if ( size == 0 ) {
-		units_vect.addElement( "      " );
+		units_vect.add( "      " );
 	}
 	//now sort the units 
-	Vector sorted_units_vect = null;
+	List sorted_units_vect = null;
 	sorted_units_vect = StringUtil.sortStringList( units_vect,
 		StringUtil.SORT_ASCENDING, null, false, true );
 	units_vect = null;
@@ -1684,7 +1685,7 @@ private void create_top_panel( ) {
 	}
 	String dt_str = (String) __TS_dataType_JComboBox.getSelected();
 	if ( dt_str.startsWith("FLOODMONITOR") ) {
-		sorted_units_vect.removeAllElements();
+		sorted_units_vect.clear();
 		sorted_units_vect.add("MULTIPLE");
 	}
 
@@ -2055,7 +2056,7 @@ on the database version.  The tables are have isTSTemplate set
 to true ("Y") and have names that start with "TS" are included.
 @return Vector with applicable tables.
 */
-protected Vector setup_tables_vect() {
+protected List setup_tables_vect() {
 	String routine = __class + ".setup_tables_vet";
 
 	//earlier versions of DB, did not have the isTSTemplate field
@@ -2068,7 +2069,7 @@ protected Vector setup_tables_vect() {
 	}
 
 	//just read in all tables.
-	Vector v = new Vector();
+	List v = new Vector();
 	int size =0;
 	if ( __RTi_Tables_vect != null ) {
 		size = __RTi_Tables_vect.size();
@@ -2080,7 +2081,7 @@ protected Vector setup_tables_vect() {
 	String desc = null;
 	String name = null;
 	for ( int i=0;i<size;i++ ) {
-		rt = (RiversideDB_Tables) __RTi_Tables_vect.elementAt(i);
+		rt = (RiversideDB_Tables) __RTi_Tables_vect.get(i);
 		if ( rt== null ) {
 			continue;
 		}
@@ -2104,7 +2105,7 @@ protected Vector setup_tables_vect() {
 			//if "Y", then add, not if"N"
 			if ( rt.getIsTSTemplate().equalsIgnoreCase("N") ) {
 				if ( name.startsWith( "TS" ) ) {
-					v.addElement( 
+					v.add( 
 					rt.getTable_num() + " - " +
 					name_desc  );
 				}
@@ -2112,7 +2113,7 @@ protected Vector setup_tables_vect() {
 		}
 		else { //working with older DB that did not have
 			//isTSTemplate field.
-			v.addElement( name_desc );
+			v.add( name_desc );
 		}
 	}//end loop
 	return v; 
@@ -2143,10 +2144,10 @@ protected void update_database( ) throws Exception
 	StringBuffer b = new StringBuffer();
 	for ( int i=0; i< __dirty_vect.size(); i++ ) {
 		if ( i == ( __dirty_vect.size())-1 ) {
-			b.append( (String) __dirty_vect.elementAt(i)  );
+			b.append( (String) __dirty_vect.get(i)  );
 		}
 		else {
-			b.append( (String) __dirty_vect.elementAt(i) + "\n" );
+			b.append( (String) __dirty_vect.get(i) + "\n" );
 		}
 	}
 
@@ -2331,7 +2332,7 @@ throws Exception {
  		__TS_tsid_JTextField.setText( update_tsid_field() );
 		tsid = __TS_tsid_JTextField.getText().trim();
 
-		Vector v = null;
+		List v = null;
 		try {
 			//query using the TSIdent value
 			v = __dmi.readMeasTypeListForTSIdent( tsid );
@@ -2350,7 +2351,7 @@ throws Exception {
 			//then we have no MeasType with that tsid
 		}
 		else if ( size == 1 ) {
-			mt = ( RiversideDB_MeasType ) v.elementAt(0);
+			mt = ( RiversideDB_MeasType ) v.get(0);
 			if (mt.getMeasType_num() != 
  			__gui_RTi_MeasType.getMeasType_num() ){
 	
@@ -3005,7 +3006,7 @@ public void verify_QA_QC_tab() throws Exception {
 	if ( ! db_min_str.equalsIgnoreCase( gui_min_str ) ) {
 		//set Dirty
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Minimum Check from \"" + db_min_str + "\" to \"" +
 		gui_min_str + "\"");
 		//set in object
@@ -3032,7 +3033,7 @@ public void verify_QA_QC_tab() throws Exception {
 	if ( ! db_max_str.equalsIgnoreCase( gui_max_str ) ) {
 		//set Dirty
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Maximum Check from \"" + db_max_str + "\" to \"" +
 		gui_max_str + "\"");
 		//set in object
@@ -3058,7 +3059,7 @@ public void verify_QA_QC_tab() throws Exception {
 	//curr_visible is:"Y" or "N"
 	if ( !db_visible.equalsIgnoreCase( gui_visible )) {
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Is Visible value (Y/N) (QA/QC tab) from \"" + 
 		db_visible + "\" to \"" + gui_visible + "\"");
 		//set in object
@@ -3089,7 +3090,7 @@ public void verify_QA_QC_tab() throws Exception {
 	//curr_editable is:"Y" or "N"
 	if ( !db_editable.equalsIgnoreCase( gui_editable )) {
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change Is Editable value (Y/N) (QA/QC tab) from \""
 			+ db_editable
 			+ "\" to \""
@@ -3134,7 +3135,7 @@ public void verify_transProt_tab() throws Exception {
 	if ( !db_transmit.equalsIgnoreCase( gui_transmit )) {
 		//Set setDirty flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Transmit Protocol from \"" + db_transmit + "\" to \"" +
 		gui_transmit + "\"");
 		//set in object
@@ -3213,7 +3214,7 @@ public void verify_top_fields( ) throws Exception {
 	if ( ! db_dataType.equalsIgnoreCase( gui_dataType ) ){
 		//set setDirty Flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Data Type from \"" + db_dataType + "\" to \"" +
 		gui_dataType + "\"");
 		//set the DataType Value in the Object in memory
@@ -3230,7 +3231,7 @@ public void verify_top_fields( ) throws Exception {
 	if ( ! db_subDataType.equalsIgnoreCase( gui_subDataType ) ){
 		//set the setDirty flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Subdata Type from \"" + db_subDataType + "\" to \"" +
 		gui_subDataType + "\"");
 		//set the SubDataType value in object
@@ -3250,7 +3251,7 @@ public void verify_top_fields( ) throws Exception {
 	if ( ! db_source.equalsIgnoreCase( gui_source ) ) {
 		//set setDirty
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Source from \"" + db_source + "\" to \"" +
 		gui_source + "\"");
 		//set the value in object object
@@ -3271,7 +3272,7 @@ public void verify_top_fields( ) throws Exception {
 	if ( !db_step.equalsIgnoreCase( gui_step ) ) {
 		//set the setDirty flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Time Step Base from \"" + db_step + "\" to \"" +
 		gui_step + "\"");
 		//set the SubDataType value in memory
@@ -3294,7 +3295,7 @@ public void verify_top_fields( ) throws Exception {
 	if ( db_mult != gui_mult ) {
 		//mark object as dirty 
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Time Step Multiplier from \"" + db_mult + "\" to \"" +
 		gui_mult + "\"");
 		//set new value in object
@@ -3324,7 +3325,7 @@ public void verify_top_fields( ) throws Exception {
 		//GUI is "none", but it was not none/missing in the 
 		//original object. Set the setDirty flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Scenario from \"" + db_scen + "\" to \"" +
 		gui_scen + "\"");
 		//set the Scenario value in memory
@@ -3342,7 +3343,7 @@ public void verify_top_fields( ) throws Exception {
 	if ( !db_desc.equalsIgnoreCase(gui_desc ) ) {
 		//set the setDirty flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Description from \"" + db_desc + "\" to \"" +
 		gui_desc + "\"");
 		//set the SubDataType value in memory
@@ -3363,7 +3364,7 @@ public void verify_top_fields( ) throws Exception {
 	if ( ! db_units.equalsIgnoreCase( gui_units ) ) {
 		//set the setDirty flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Units from \"" + db_units + "\" to \"" +
 		gui_units + "\"");
 		//set the SubDataType value in memory
@@ -3383,7 +3384,7 @@ public void verify_top_fields( ) throws Exception {
 	if ( !db_create.equalsIgnoreCase( gui_create ) ){
 		//set the setDirty flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Create Method from \"" + db_create + "\" to \"" +
 		gui_create + "\"");
 		//set the createmethod value in memory
@@ -3500,7 +3501,7 @@ public void verify_TS1_tab() throws Exception {
 	if ( db_table_num1 != gui_table_num1 ) {
 		//then it is a change so set dirty
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Table Number1 (Data Storage tab)from \"" + 
 		db_table_num1 + "\" to \"" +
 		gui_table_num1 + "\"");
@@ -3526,7 +3527,7 @@ public void verify_TS1_tab() throws Exception {
 	if ( db_dbload1 != gui_dbload1 ) {
 		//Set setDirty flag
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Load Method1 (Data Storage tab) from \"" + 
 		db_dbload1 + "\" to \"" + gui_dbload1 + "\"");
 		//set in memory
@@ -3575,7 +3576,7 @@ public void verify_TS2_tab() throws Exception {
 	if ( db_table_num2 != gui_table_num2 ) {
 		//then it is a change so set dirty
  		__gui_RTi_MeasType.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Table Number2 from \"" + db_table_num2 + "\" to \"" +
 		gui_table_num2 + "\"");
 		//now set it in memory
@@ -3608,7 +3609,7 @@ public void verify_TS2_tab() throws Exception {
 		if ( db_dbload2 != gui_dbload2 ) {
 			//Set setDirty flag
  			__gui_RTi_MeasType.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change DBLoad2 from \"" + 
 			db_dbload2 + "\" to \"" + gui_dbload2 + "\"");
 			//set in memory
@@ -3709,8 +3710,7 @@ public void actionPerformed (ActionEvent event) {
 				//holds messages from __dirty_vect
 				StringBuffer b = new StringBuffer();
 				for ( int i=0; i< __dirty_vect.size(); i++ ) {
-					b.append( (String) 
- 					__dirty_vect.elementAt(i) + "\n" );
+					b.append( (String)__dirty_vect.get(i) + "\n" );
 				}
 
 				//write out a confirmation message.
@@ -3800,31 +3800,30 @@ public void itemStateChanged ( ItemEvent event ) {
 	
 			RiversideDB_DataType dt = null;
 			dt = (RiversideDB_DataType) 
- 			__RTi_DataType_vect.elementAt(sel_dataType_int);
+ 			__RTi_DataType_vect.get(sel_dataType_int);
 		
 			// now use that to get the Dimesnion
 			String dim = null;
 			dim = dt.getDimension();
 	
 			// use dimension to get list of units for 
-			Vector units_vect = new Vector();
-			Vector v = 
-				DataUnits.lookupUnitsForDimension( __system_units, dim );
+			List units_vect = new Vector();
+			List v = DataUnits.lookupUnitsForDimension( __system_units, dim );
 			int size = 0;
 			if ( v != null ) {
 				size = v.size();
 			}
 			DataUnits du = null;
 			for ( int i=0; i< size; i++ ) {
-				du = (DataUnits)v.elementAt(i);
-				units_vect.addElement( du.getAbbreviation() + 
+				du = (DataUnits)v.get(i);
+				units_vect.add( du.getAbbreviation() + 
 				" - " + du.getLongName() );
 			}
 			if ( size == 0 ) {
-				units_vect.addElement( "      " );
+				units_vect.add( "      " );
 			}
 			//now sort the units 
-			Vector sorted_units_vect = null;
+			List sorted_units_vect = null;
 			sorted_units_vect = StringUtil.sortStringList( units_vect,
 				StringUtil.SORT_ASCENDING, null, false, true );
 			units_vect = null;
@@ -3836,14 +3835,14 @@ public void itemStateChanged ( ItemEvent event ) {
 			String dt_str = (String)
  			__TS_dataType_JComboBox.getSelected();
 			if ( dt_str.startsWith("FLOODMONITOR" ) ) {
-				sorted_units_vect.removeAllElements();
+				sorted_units_vect.clear();
 				sorted_units_vect.add("MULTIPLE");
 			}
 			//now update the jcombobox with the units
  			__TS_units_JComboBox.removeAllItems();
 			for ( int i=0;i<sorted_units_vect.size(); i++ ) {
  				__TS_units_JComboBox.addItem(
-				sorted_units_vect.elementAt(i));
+				sorted_units_vect.get(i));
 			}
 	
 			//update the units strings in the QA/QC tab

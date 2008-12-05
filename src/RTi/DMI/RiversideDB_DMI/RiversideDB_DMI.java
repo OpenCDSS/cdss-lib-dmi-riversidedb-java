@@ -815,9 +815,9 @@ Vector of RiversideDB_TableLayout, which are referenced when reading and writing
 //private Vector _RiversideDB_TableLayout_Vector = new Vector();
 
 /**
-Vector of RiversideDB_Tables, which are referenced when reading and writing time series.
+List of RiversideDB_Tables, which are referenced when reading and writing time series.
 */
-private Vector _RiversideDB_Tables_Vector = new Vector();
+private List _RiversideDB_Tables_Vector = new Vector();
 
 /**
 The current user working in the database.  Initialized in the constructors
@@ -2973,7 +2973,7 @@ throws Exception {
 	String routine = "RiversideDB_DMI.changeCurrentGroup";
 
 	// look up the group to make sure it's valid
-	Vector dbgroupV = readDBGroupList();
+	List dbgroupV = readDBGroupList();
 	int size = 0;
 	if (dbgroupV != null) {
 		size = dbgroupV.size();
@@ -2981,7 +2981,7 @@ throws Exception {
 	int found = -1;
 	RiversideDB_DBGroup group = null;
 	for (int i = 0; i < size; i++) {
-		group = (RiversideDB_DBGroup)dbgroupV.elementAt(i);
+		group = (RiversideDB_DBGroup)dbgroupV.get(i);
 		if (group.getID().equalsIgnoreCase(new_dbgroup)) {
 			found = i;
 			break;
@@ -2996,12 +2996,11 @@ throws Exception {
 			+ "\" is not valid.");
 	}
 
-	group = (RiversideDB_DBGroup)dbgroupV.elementAt(found);
+	group = (RiversideDB_DBGroup)dbgroupV.get(found);
 
 	// loop through the relationships to see if the current user is
 	// in the group
-	Vector dbuserGroupV = readDBUserDBGroupRelationListForDBGroup_num(
-		group.getDBGroup_num());
+	List dbuserGroupV = readDBUserDBGroupRelationListForDBGroup_num( group.getDBGroup_num());
 	
 	size = 0;
 	if (dbuserGroupV != null) {
@@ -3010,8 +3009,7 @@ throws Exception {
 
 	RiversideDB_DBUserDBGroupRelation rel = null;
 	for (int i = 0; i < size; i++) {
-		rel = (RiversideDB_DBUserDBGroupRelation)
-			dbuserGroupV.elementAt(i);
+		rel = (RiversideDB_DBUserDBGroupRelation)dbuserGroupV.get(i);
 		if (rel.getDBUser_num() == _dbuser.getDBUser_num()) {
 			// users match so switch the current group
 			_dbgroup = group;
@@ -3167,12 +3165,12 @@ public int[] deleteExportProductForProductGroup_num(int ProductGroup_num)
 throws Exception {
 	// First get a list of all the export products with that 
 	// ProductGroup_num
-	Vector v = readExportProductListForProductGroup_num(ProductGroup_num);
+	List v = readExportProductListForProductGroup_num(ProductGroup_num);
 
 	int confCount = 0;
 	for (int i = 0; i < v.size(); i++) {
 		RiversideDB_ExportProduct e = (RiversideDB_ExportProduct)
-			v.elementAt(i);
+			v.get(i);
 		confCount += deleteExportConfForExportProduct_num(
 			e.getExportProduct_num());
 	}
@@ -3341,12 +3339,12 @@ public int[] deleteImportProductForProductGroup_num(int ProductGroup_num)
 throws Exception {
 	// First get a list of all the import products with that 
 	// ProductGroup_num
-	Vector v = readImportProductListForProductGroup_num(ProductGroup_num);
+	List v = readImportProductListForProductGroup_num(ProductGroup_num);
 
 	int confCount = 0;
 	for (int i = 0; i < v.size(); i++) {
 		RiversideDB_ImportProduct e = (RiversideDB_ImportProduct)
-			v.elementAt(i);
+			v.get(i);
 		confCount += deleteImportConfForImportProduct_num(
 			e.getImportProduct_num());
 	}
@@ -3446,12 +3444,12 @@ throws Exception {
 	int[] deleted = new int[7];
 	deleted[0] = deleted[1] = deleted[2] = 0;
 	deleted[3] = deleted[4] = deleted[5] = deleted[6] = 0;
-	Vector v = readMeasTypeListForMeasLoc_num (MeasLoc_num); 
+	List v = readMeasTypeListForMeasLoc_num (MeasLoc_num); 
 	int total = 0;
 	if (v != null) {	
 		for (int i = 0; i < v.size(); i++) {
 			RiversideDB_MeasType m = 
-				(RiversideDB_MeasType)v.elementAt(i);
+				(RiversideDB_MeasType)v.get(i);
 			long MeasType_num = m.getMeasType_num();
 			total += deleteMeasTypeForMeasType_num(MeasType_num)[6];
 		}
@@ -3470,10 +3468,10 @@ throws Exception {
 	deleted[3] = dmiDelete(d);
 	total += deleted[3];
 
-	Vector v2 = readStageDischargeRatingListForMeasLoc_num(MeasLoc_num);
+	List v2 = readStageDischargeRatingListForMeasLoc_num(MeasLoc_num);
 	RiversideDB_StageDischargeRating sdr = null;
 	for (int i = 0; i < v2.size(); i++) {
-		sdr = (RiversideDB_StageDischargeRating)v2.elementAt(i);
+		sdr = (RiversideDB_StageDischargeRating)v2.get(i);
 		d = new DMIDeleteStatement(this);
 		buildSQL(d, _D_RATINGTABLE);
 		d.addWhereClause("RatingTable_num = " 
@@ -3872,7 +3870,7 @@ deleted in each table.<br>
 */
 public int[] deleteStateGroupForMeasLocGroup_num(int MeasLocGroup_num)
 throws Exception {
-	Vector v = readStateGroupListForMeasLocGroup_num(MeasLocGroup_num);
+	List v = readStateGroupListForMeasLocGroup_num(MeasLocGroup_num);
 	RiversideDB_StateGroup sg = null;
 	int stateTotal = 0;
 
@@ -3880,7 +3878,7 @@ throws Exception {
 	deleteds[0] = deleteds[1] = deleteds[2] = 0;
 	
 	for (int i = 0; i < v.size(); i++) {
-		sg = (RiversideDB_StateGroup)v.elementAt(i);
+		sg = (RiversideDB_StateGroup)v.get(i);
 		stateTotal += deleteStateForStateGroup_num(
 			sg.getStateGroup_num());
 	}
@@ -4134,22 +4132,22 @@ of an output file - NOT IMPLEMENTED; 1 for very concise output (e.g.,
 the database name and version, for use in a product footer) - 
 <b>NOT IMPLEMENTED</b>.
 */
-public Vector getDatabaseProperties ( int level )
-{	Vector v = new Vector ();
-	v.addElement ( "Database Engine:  " + getDatabaseEngine() );
+public List getDatabaseProperties ( int level )
+{	List v = new Vector ();
+	v.add ( "Database Engine:  " + getDatabaseEngine() );
 	if ( getDatabaseName() == null ) {
-		v.addElement ( "Connect Method:  ODBC DSN" );
+		v.add ( "Connect Method:  ODBC DSN" );
 	}
-	else {	v.addElement (
+	else {	v.add (
 		"Connect Method:  JDBC using the following information  " );
-		v.addElement ( "Database server:  " + getDatabaseServer() );
-		v.addElement ( "Database name:  " + getDatabaseName() );
+		v.add ( "Database server:  " + getDatabaseServer() );
+		v.add ( "Database name:  " + getDatabaseName() );
 	}
-	v.addElement ( "Database version appears to be (VVVVVVYYYYMMDD):  " +
+	v.add ( "Database version appears to be (VVVVVVYYYYMMDD):  " +
 			getDatabaseVersion() );
-	v.addElement ( "" );
-	v.addElement ( "Database history (most recent at top):" );
-	v.addElement ( "" );
+	v.add ( "" );
+	v.add ( "Database history (most recent at top):" );
+	v.add ( "" );
 	return v;
 }
 
@@ -4268,7 +4266,7 @@ public RiversideDB_DBUser getDBUser() {
 Return the global Vector of RiversideDB_Tables
 @return the global Vector of RiversideDB_Tables.
 */
-public Vector getRiversideDB_Tables () {
+public List getRiversideDB_Tables () {
 	return _RiversideDB_Tables_Vector;
 }
 
@@ -4288,7 +4286,7 @@ facilitate efficient access to data dimensions and units throughout all code.
 @param dataDimension Vector to process.
 @throws Exception if an error occurs
 */
-public void initializeDataDimension (Vector dataDimension)
+public void initializeDataDimension (List dataDimension)
 throws Exception {
 	String routine = "RiversideDB_DMI.initializeDataDimension";
 
@@ -4308,7 +4306,7 @@ throws Exception {
 
 	for (int i = 0; i < size; i++) {
 		RiversideDB_DataDimension d = 
-			(RiversideDB_DataDimension)dataDimension.elementAt(i);
+			(RiversideDB_DataDimension)dataDimension.get(i);
 		try {	// Else add the units...
 			DataDimension.addDimension ( 
 				new DataDimension ( d.getDimension(),
@@ -4331,7 +4329,7 @@ efficient access to data units by applications.
 @param dataUnits Vector to process.
 @throws Exception if an error occurs
 */
-public void initializeUnits (Vector dataUnits)
+public void initializeUnits (List dataUnits)
 throws Exception {	
 	String routine = "RiversideDB_DMI.initializeUnits";
 
@@ -4353,7 +4351,7 @@ throws Exception {
 
 	for (int i = 0; i < size; i++) {
 		RiversideDB_DataUnits d = 
-			(RiversideDB_DataUnits)dataUnits.elementAt(i);
+			(RiversideDB_DataUnits)dataUnits.get(i);
 		try {	// Else add the units...
 			units = new DataUnits ();
 
@@ -4417,12 +4415,12 @@ public boolean isRootUser() {
 Reads all the action data models from the data source.  From AlertIOInterface.
 @return a Vector of data models for all the actions in the system.
 */
-public Vector readAllActionDataModels() 
+public List readAllActionDataModels() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_ACTION);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toActionList(rs);
+	List v = toActionList(rs);
 	closeResultSet(rs);	
 	return v;
 }
@@ -4440,13 +4438,13 @@ throws Exception {
 	buildSQL(q, _S_ACTION);
 	q.addWhereClause("Action.action_num = " + actionNum);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toActionList(rs);
+	List v = toActionList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
 	else {
-		return (ActionDataModel)v.elementAt(0);
+		return (ActionDataModel)v.get(0);
 	}
 }
 
@@ -4462,7 +4460,7 @@ throws Exception {
 	buildSQL(q, _S_ACTIONCONTACT);
 	q.addWhereClause("ActionContactRelationship.ActionNum = " + actionNum);
 	ResultSet rs = dmiSelect(q);
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	int i;
 	while (rs.next()) {
@@ -4479,7 +4477,7 @@ throws Exception {
 
 	int[] nums = new int[v.size()];
 	for (i = 0; i < nums.length; i++) {
-		nums[i] = ((Integer)v.elementAt(i)).intValue();
+		nums[i] = ((Integer)v.get(i)).intValue();
 	}
 	return nums;
 }
@@ -4490,13 +4488,13 @@ Read the Area data for all records matching a given MeasLoc_num.
 @return a vector of objects of type RiversideDB_Area.
 @throws Exception if an error occurs
 */
-public Vector readAreaListForMeasLoc_num ( long MeasLoc_num )
+public List readAreaListForMeasLoc_num ( long MeasLoc_num )
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_AREA );
 	q.addWhereClause ( "Area.MeasLoc_num = " + MeasLoc_num ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toAreaList (rs);
+	List v = toAreaList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -4506,12 +4504,12 @@ Read the AutoUpdateProduct table for all records.
 @return a Vector of AutoUpdateProduct objects.
 @throws Exception if an exception occurs.
 */
-public Vector readAutoUpdateProductList()
+public List readAutoUpdateProductList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_AUTOUPDATEPRODUCT);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toAutoUpdateProductList(rs);
+	List v = toAutoUpdateProductList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -4528,13 +4526,13 @@ throws Exception {
 	buildSQL(q, _S_CONTACT);
 	q.addWhereClause("Contact.ContactNum = " + contactNum);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataTestFunctionList(rs);
+	List v = toDataTestFunctionList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
 	else {
-		return (Contact)v.elementAt(0);
+		return (Contact)v.get(0);
 	}
 }
 
@@ -4543,13 +4541,13 @@ Read all DataDimension records, ordered by the Dimension field.
 @return a Vector of all DataDimension values
 @throws Exception if an exception occurs.
 */
-public Vector readDataDimensionList()
+public List readDataDimensionList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_DATADIMENSION );
 	q.addOrderByClause("DataDimension.Dimension");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataDimensionList (rs);
+	List v = toDataDimensionList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -4567,12 +4565,12 @@ throws Exception {
 	q.addWhereClause("DataDimension.Dimension = '" + dimension + "'");
 	q.addOrderByClause("DataDimension.Dimension");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataDimensionList (rs);
+	List v = toDataDimensionList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_DataDimension)v.elementAt(0);
+	return (RiversideDB_DataDimension)v.get(0);
 }
 
 /**
@@ -4580,13 +4578,13 @@ Read all DataSource records, ordered by the Source_abbrev field.
 @return a Vector of all DataSource objects
 @throws Exception if an error occurs.
 */
-public Vector readDataSourceList()
+public List readDataSourceList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_DATASOURCE );
 	q.addOrderByClause("DataSource.Source_abbrev");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataSourceList (rs);
+	List v = toDataSourceList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -4605,12 +4603,12 @@ throws Exception {
 	q.addWhereClause("DataSource.Source_abbrev = '" + Source_abbrev + "'");
 	q.addOrderByClause("DataSource.Source_abbrev");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataSourceList (rs);
+	List v = toDataSourceList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_DataSource)v.elementAt(0);
+	return (RiversideDB_DataSource)v.get(0);
 }
 
 /**
@@ -4627,7 +4625,7 @@ throws Exception {
 	q.addWhereClause("DataTestActionRelationship.DataTestNum = " 
 		+ dataTestNum);
 	ResultSet rs = dmiSelect(q);
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	int i;
 	while (rs.next()) {
@@ -4651,7 +4649,7 @@ throws Exception {
 	
 	int[] nums = new int[size];
 	for (i = 0; i < size; i++) {
-		nums[i] = ((Integer)v.elementAt(i)).intValue();
+		nums[i] = ((Integer)v.get(i)).intValue();
 	}
 	return nums;
 }
@@ -4667,14 +4665,14 @@ throws Exception {
 	buildSQL(q, _S_DATATEST);
 	q.addWhereClause("DataTest.DataTestNum = " + dataTestNum);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataTestList(rs);
+	List v = toDataTestList(rs);
 	closeResultSet(rs);
 	
 	if (v == null || v.size() == 0) {
 		return null;
 	}
 
-	DataTestDataModel model = (DataTestDataModel)v.elementAt(0);
+	DataTestDataModel model = (DataTestDataModel)v.get(0);
 	int[] actionNums = readDataTestActionNums(dataTestNum);
 	model.setActionNums(actionNums);
 	return readDataTestStatusForDataTestNum(dataTestNum, model);
@@ -4735,13 +4733,13 @@ throws Exception {
 	q.addWhereClause("DataTestExpression.DataTestExpressionNum = " 
 		+ expressionNum);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataTestExpressionList(rs);
+	List v = toDataTestExpressionList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
 	else {
-		return (DataTestExpressionDataModel)v.elementAt(0);
+		return (DataTestExpressionDataModel)v.get(0);
 	}
 }
 
@@ -4759,14 +4757,13 @@ throws Exception {
 	q.addWhereClause("DataTestFunction.DataTestFunctionNum = " 
 		+ functionNum);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataTestFunctionList(rs);
+	List v = toDataTestFunctionList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
 	else {
-		DataTestFunctionDataModel model 
-			= (DataTestFunctionDataModel)v.elementAt(0);
+		DataTestFunctionDataModel model = (DataTestFunctionDataModel)v.get(0);
 		String[] ids = readDataTestFunctionInputIDs(functionNum);
 		model.setInputDataIDs(ids);
 		return model;
@@ -4789,7 +4786,7 @@ throws Exception {
 		+ dataTestFunctionNum);
 	q.addOrderByClause("DataTestFunctionInputIDs.Position");
 	ResultSet rs = dmiSelect(q);
-	Vector v = new Vector();
+	List v = new Vector();
 	int i;
 	int index;
 	String s;
@@ -4812,7 +4809,7 @@ throws Exception {
 
 	String[] ids = new String[size];
 	for (i = 0; i < size; i++) {
-		ids[i] = (String)v.elementAt(i);
+		ids[i] = (String)v.get(i);
 	}
 	return ids;
 }
@@ -4822,13 +4819,13 @@ Read all DataType records, ordered by the DataType field.
 @return a Vector of all DataType objects
 @throws Exception if an error occurs.
 */
-public Vector readDataTypeList()
+public List readDataTypeList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_DATATYPE );
 	q.addOrderByClause("DataType.DataType");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataTypeList (rs);
+	List v = toDataTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -4846,12 +4843,12 @@ throws Exception {
 	q.addWhereClause("DataType.DataType = '" + DataType + "'");
 	q.addOrderByClause("DataType.DataType");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataTypeList (rs);
+	List v = toDataTypeList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_DataType)v.elementAt(0);
+	return (RiversideDB_DataType)v.get(0);
 }
 
 /**
@@ -4859,13 +4856,13 @@ Read all DataUnits records, ordered by the Units_abbrev field.
 @return a Vector of all DataUnits objects
 @throws Exception if an error occurs.
 */
-public Vector readDataUnitsList()
+public List readDataUnitsList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_DATAUNITS );
 	q.addOrderByClause("DataUnits.Units_abbrev");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataUnitsList (rs);
+	List v = toDataUnitsList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -4883,12 +4880,12 @@ throws Exception {
 	q.addWhereClause("DataUnits.Units_abbrev = '" + Units_abbrev + "'");
 	q.addOrderByClause("DataUnits.Units_abbrev");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataUnitsList (rs);
+	List v = toDataUnitsList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_DataUnits)v.elementAt(0);
+	return (RiversideDB_DataUnits)v.get(0);
 }
 
 /**
@@ -4896,19 +4893,18 @@ Read all DBGroup records.
 @return a Vector of RiversideDB_DBGroup objects
 @throws Exception if an error occurs.
 */
-public Vector readDBGroupList() 
+public List readDBGroupList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DBGROUP);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDBGroupList(rs);
+	List v = toDBGroupList(rs);
 	closeResultSet(rs);
 	return v;
 }
 
 /**
-Executes a query on the DBGRoup table for the record that matches the given
-group number.
+Executes a query on the DBGRoup table for the record that matches the given group number.
 @param DBGroup_num the group number for which to return the matching group
 @return the matching RiversideDB_DBGroup object, or null if none were found.
 @throws Exception if an error occurs.
@@ -4919,12 +4915,12 @@ throws Exception {
 	buildSQL(q, _S_DBGROUP);
 	q.addWhereClause("DBGroup.DBGroup_num = " + DBGroup_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDBGroupList(rs);
+	List v = toDBGroupList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_DBGroup)v.elementAt(0);
+	return (RiversideDB_DBGroup)v.get(0);
 }
 
 /**
@@ -4940,13 +4936,13 @@ throws Exception {
 	buildSQL(q, _S_DBUSER);
 	q.addWhereClause("DBUser.DBUser_num = " + DBUser_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDBUserList(rs);
+	List v = toDBUserList(rs);
 	closeResultSet(rs);
 	if (v.size() == 0) {
 		return null;
 	}
 	else {
-		return (RiversideDB_DBUser)v.elementAt(0);
+		return (RiversideDB_DBUser)v.get(0);
 	}
 }
 
@@ -4963,13 +4959,13 @@ throws Exception {
 	buildSQL(q, _S_DBUSER);
 	q.addWhereClause("DBUser.Login = '" + escape(login) + "'");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDBUserList(rs);
+	List v = toDBUserList(rs);
 	closeResultSet(rs);
 	if (v.size() == 0) {
 		return null;
 	}
 	else {
-		return (RiversideDB_DBUser)v.elementAt(0);
+		return (RiversideDB_DBUser)v.get(0);
 	}
 }
 
@@ -4978,12 +4974,12 @@ Executes a query on the DBUser table and returns all records.
 @return a Vector of RiversideDB_DBUser objects, one for each record.
 @throws Exception if an error occurs.
 */
-public Vector readDBUserList() 
+public List readDBUserList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DBUSER);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDBUserList(rs);
+	List v = toDBUserList(rs);
 	closeResultSet(rs);
 	
 	return v;
@@ -4996,13 +4992,13 @@ with matching DBGroup_nums
 @return a Vector of RiversideDB_DBUserDBGroupRelation objects.
 @throws Exception if an error occurs
 */
-public Vector readDBUserDBGroupRelationListForDBGroup_num(int DBGroup_num) 
+public List readDBUserDBGroupRelationListForDBGroup_num(int DBGroup_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DBUSERDBGROUPRELATION);
 	q.addWhereClause("DBUserDBGroupRelation.DBGroup_num = " + DBGroup_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDBUserDBGroupRelationList(rs);
+	List v = toDBUserDBGroupRelationList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5014,7 +5010,7 @@ with matching MeasLocGroup_nums
 @return a Vector of RiversideDB_DBUserDBMeasLocRelation objects.
 @throws Exception if an error occurs
 */
-public Vector readDBUserMeasLocGroupRelationListForMeasLocGroup_num(
+public List readDBUserMeasLocGroupRelationListForMeasLocGroup_num(
 int MeasLocGroup_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
@@ -5022,7 +5018,7 @@ throws Exception {
 	q.addWhereClause("DBUserMeasLocGroupRelation.MeasLocGroup_num = " 
 		+ MeasLocGroup_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDBUserMeasLocGroupRelationList(rs);
+	List v = toDBUserMeasLocGroupRelationList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5034,7 +5030,7 @@ with matching DBUser_nums
 @return a Vector of RiversideDB_DBUserDBMeasLocRelation objects.
 @throws Exception if an error occurs
 */
-public Vector readDBUserMeasLocGroupRelationListForDBUser_num(
+public List readDBUserMeasLocGroupRelationListForDBUser_num(
 int DBUser_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
@@ -5042,7 +5038,7 @@ throws Exception {
 	q.addWhereClause("DBUserMeasLocGroupRelation.DBUser_num = " 
 		+ DBUser_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDBUserMeasLocGroupRelationList(rs);
+	List v = toDBUserMeasLocGroupRelationList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5055,26 +5051,25 @@ ExportProduct_num is equal to the value passed to the method
 @return Vector of RiversideDB_ExportConf objects, one per record
 @throws Exception if an error occurs
 */
-public Vector readExportConfListForExportProduct_num(int ExportProduct_num)
+public List readExportConfListForExportProduct_num(int ExportProduct_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_EXPORTCONF );
 	q.addWhereClause("ExportConf.ExportProduct_num = " + ExportProduct_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toExportConfList (rs);
+	List v = toExportConfList (rs);
 	closeResultSet(rs);
 	return v;
 }
 
 /**
 Executes query on ExportConf table, returning all records where 
-ExportProduct_num is equal to the value passed to the method and ordered
-by Identifier
+ExportProduct_num is equal to the value passed to the method and ordered by Identifier
 @param ExportProduct_num the value to use for the where clause
 @return Vector of RiversideDB_ExportConf objects, one per record
 @throws Exception if an error occurs
 */
-public Vector readExportConfListForExportProduct_numByLocation
+public List readExportConfListForExportProduct_numByLocation
 (int ExportProduct_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
@@ -5087,7 +5082,7 @@ throws Exception {
 	q.addWhereClause("MeasType.MeasType_num = ExportConf.MeasType_num");
 	q.addOrderByClause("MeasLoc.Identifier");	
 	ResultSet rs = dmiSelect(q);
-	Vector v = toExportConfList (rs);
+	List v = toExportConfList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5097,19 +5092,18 @@ Executes query on ExportConf table, returning all records.
 @return Vector of RiversideDB_ExportConf objects
 @throws Exception if an error occurs.
 */
-public Vector readExportConfList() 
+public List readExportConfList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_EXPORTCONF );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toExportConfList (rs);
+	List v = toExportConfList (rs);
 	closeResultSet(rs);
 	return v;
 }	
 
 /**
-Reads the export conf table to find the export conf that matches the given
-meas type num.
+Reads the export conf table to find the export conf that matches the given meas type num.
 @param MeasType_num the meas type num to find the export conf for
 @return the matching export conf object or null if none could be found.
 @throws Exception if an error occurs
@@ -5120,12 +5114,12 @@ throws Exception {
 	buildSQL (q, _S_EXPORTCONF);
 	q.addWhereClause("ExportConf.MeasType_num = " + MeasType_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toExportConfList(rs);
+	List v = toExportConfList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_ExportConf)v.elementAt(0);
+	return (RiversideDB_ExportConf)v.get(0);
 }
 
 /**
@@ -5141,21 +5135,20 @@ int ExportProduct_num) throws Exception {
 	buildSQL ( q, _S_EXPORTPRODUCT );
 	q.addWhereClause("ExportProduct_num = " + ExportProduct_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toExportProductList (rs);
+	List v = toExportProductList (rs);
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;	
 	}
-	return (RiversideDB_ExportProduct)v.elementAt(0);
+	return (RiversideDB_ExportProduct)v.get(0);
 }
 
 /**
-Read ExportProduct table, returning all records ordered by Product_group and
-Product_name.
+Read ExportProduct table, returning all records ordered by Product_group and Product_name.
 @return Vector of RiversideDB_ExportProduct objects, one per record
 @throws Exception if an error occurs
 */
-public Vector readExportProductList()
+public List readExportProductList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_EXPORTPRODUCT );
@@ -5166,7 +5159,7 @@ throws Exception {
 //	}	
 	q.addOrderByClause("ExportProduct.Product_name");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toExportProductList (rs);
+	List v = toExportProductList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5178,7 +5171,7 @@ Product_name that match the given ProductGroup_num.
 @return Vector of RiversideDB_ExportProduct objects, one per record
 @throws Exception if an error occurs
 */
-public Vector readExportProductListForProductGroup_num(int ProductGroup_num)
+public List readExportProductListForProductGroup_num(int ProductGroup_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_EXPORTPRODUCT );
@@ -5190,7 +5183,7 @@ throws Exception {
 	q.addOrderByClause("ExportProduct.Product_name");
 	q.addWhereClause("ProductGroup_num = " + ProductGroup_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toExportProductList (rs);
+	List v = toExportProductList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5200,13 +5193,13 @@ Read all ExportType records, ordered by Name.
 @return a Vector of all ExportType values
 @throws Exception if an error occurs
 */
-public Vector readExportTypeList()
+public List readExportTypeList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_EXPORTTYPE );
 	q.addOrderByClause("ExportType.Name");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toExportTypeList (rs);
+	List v = toExportTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5218,12 +5211,11 @@ Is anything ever going to be done with these?
 @return a vector of objects of type RiversideDB_Geoloc.
 @throws Exception if an error occurs
 */
-public Vector readGeolocList_SP () 
+public List readGeolocList_SP () 
 throws Exception {	
-	CallableStatement cs = 
-		getConnection().prepareCall("{call Geoloc_Select}");
+	CallableStatement cs = getConnection().prepareCall("{call Geoloc_Select}");
 	ResultSet rs = cs.executeQuery();
-	Vector v = toGeolocList(rs);
+	List v = toGeolocList(rs);
 	cs.close();
 	closeResultSet(rs);
 	return v;
@@ -5233,8 +5225,7 @@ throws Exception {
 Read the Geoloc data for a given Geoloc record with the given Geoloc_num,
 via a stored procedure.
 @param Geoloc_num Geoloc_num to query for.
-@return a RiversideDB_Geoloc object, or null if no matching record could be 
-found
+@return a RiversideDB_Geoloc object, or null if no matching record could be found
 @throws Exception if an error occurs
 */
 public RiversideDB_Geoloc readGeolocForGeoloc_num_SP ( long Geoloc_num )
@@ -5244,20 +5235,19 @@ throws Exception {
 	);	
 	ResultSet rs = cs.executeQuery();
 
-	Vector v = toGeolocList (rs);
+	List v = toGeolocList (rs);
 	cs.close();
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;	
 	}
-	return (RiversideDB_Geoloc)v.elementAt(0);
+	return (RiversideDB_Geoloc)v.get(0);
 }
 
 /**
 Read the Geoloc data for a record with the given Geoloc_num.
 @param Geoloc_num Geoloc_num to query for.
-@return a RiversideDB_Geoloc object, or null if no matching records could be 
-found
+@return a RiversideDB_Geoloc object, or null if no matching records could be found
 @throws Exception if an error occurs
 */
 public RiversideDB_Geoloc readGeolocForGeoloc_num ( long Geoloc_num )
@@ -5267,12 +5257,12 @@ throws Exception {
 	q.addWhereClause("Geoloc.Geoloc_num = " + Geoloc_num);
 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toGeolocList (rs);
+	List v = toGeolocList (rs);
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;	
 	}
-	return (RiversideDB_Geoloc)v.elementAt(0);
+	return (RiversideDB_Geoloc)v.get(0);
 }
 
 // TODO - evaluate issues that occur when global data are edited in the
@@ -5295,12 +5285,12 @@ Executes query on ImportConf table, returning all objects
 @return Vector of RiversideDB_ImportConf objects
 @throws Exception if an error occurs
 */
-public Vector readImportConfList() 
+public List readImportConfList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_IMPORTCONF);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toImportConfList (rs);
+	List v = toImportConfList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5313,13 +5303,13 @@ matching records
 @return Vector of RiversideDB_ImportConf objects
 @throws Exception if an error occurs
 */
-public Vector readImportConfListForImportProduct_num(int ImportProduct_num) 
+public List readImportConfListForImportProduct_num(int ImportProduct_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_IMPORTCONF);
 	q.addWhereClause("ImportConf.ImportProduct_num = " + ImportProduct_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toImportConfList (rs);
+	List v = toImportConfList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5332,8 +5322,7 @@ Identifier.
 @return Vector of RiversideDB_ImportConf objects
 @throws Exception if an error occurs
 */
-public Vector readImportConfListForImportProduct_numByLocation(
-int ImportProduct_num) 
+public List readImportConfListForImportProduct_numByLocation(int ImportProduct_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_IMPORTCONF);
@@ -5344,14 +5333,13 @@ throws Exception {
 	q.addWhereClause("MeasType.MeasType_num = ImportConf.MeasType_num");
 	q.addOrderByClause("MeasLoc.Identifier");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toImportConfList (rs);
+	List v = toImportConfList (rs);
 	closeResultSet(rs);
 	return v;
 }
 
 /**
-Reads the import conf table to find the import conf that matches the given
-meas type num.
+Reads the import conf table to find the import conf that matches the given meas type num.
 @param MeasType_num the meas type num to find the import conf for
 @return the matching import conf object or null if none could be found.
 @throws Exception if an error occurs
@@ -5362,12 +5350,12 @@ throws Exception {
 	buildSQL (q, _S_IMPORTCONF);
 	q.addWhereClause("ImportConf.MeasType_num = " + MeasType_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toImportConfList(rs);
+	List v = toImportConfList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_ImportConf)v.elementAt(0);
+	return (RiversideDB_ImportConf)v.get(0);
 }
 
 /**
@@ -5376,7 +5364,7 @@ Product_name.
 @return vector of RiversideDB_ImportProduct objects, one per record
 @throws Exception if an error occurs
 */
-public Vector readImportProductList()
+public List readImportProductList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_IMPORTPRODUCT );
@@ -5387,7 +5375,7 @@ throws Exception {
 //	}
 	q.addOrderByClause("ImportProduct.Product_name");
 	ResultSet rs = dmiSelect(q);	
-	Vector v = toImportProductList (rs);
+	List v = toImportProductList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5405,12 +5393,12 @@ int ImportProduct_num) throws Exception {
 	buildSQL ( q, _S_IMPORTPRODUCT );
 	q.addWhereClause("ImportProduct_num = " + ImportProduct_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toImportProductList (rs);
+	List v = toImportProductList (rs);
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;	
 	}
-	return (RiversideDB_ImportProduct)v.elementAt(0);
+	return (RiversideDB_ImportProduct)v.get(0);
 }
 
 /**
@@ -5420,7 +5408,7 @@ Product_name that match the given ProductGroup_num.
 @return Vector of RiversideDB_ImportProduct objects, one per record
 @throws Exception if an error occurs
 */
-public Vector readImportProductListForProductGroup_num(int ProductGroup_num)
+public List readImportProductListForProductGroup_num(int ProductGroup_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_IMPORTPRODUCT );
@@ -5432,7 +5420,7 @@ throws Exception {
 	q.addOrderByClause("ImportProduct.Product_name");
 	q.addWhereClause("ProductGroup_num = " + ProductGroup_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toImportProductList (rs);
+	List v = toImportProductList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5443,13 +5431,13 @@ Read all ImportType records, ordered by Name.
 @return a Vector of all ImportType values
 @throws Exception if an error occurs
 */
-public Vector readImportTypeList() 
+public List readImportTypeList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_IMPORTTYPE );
 	q.addOrderByClause("ImportType.Name");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toImportTypeList (rs);
+	List v = toImportTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5467,12 +5455,12 @@ throws Exception {
 	q.addWhereClause("ImportType.Name = '" + Name + "'");
 	q.addOrderByClause("ImportType.Name");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toImportTypeList (rs);
+	List v = toImportTypeList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_ImportType)v.elementAt(0);
+	return (RiversideDB_ImportType)v.get(0);
 }
 
 /**
@@ -5480,13 +5468,13 @@ Read all MeasCreateMethod records, ordered by Method.
 @return a Vector of all MeasCreateMethods values
 @throws Exception if an error occurs
 */
-public Vector readMeasCreateMethodList() 
+public List readMeasCreateMethodList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASCREATEMETHOD );
 	q.addOrderByClause("MeasCreateMethod.Method");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasCreateMethodList (rs);
+	List v = toMeasCreateMethodList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5504,12 +5492,12 @@ throws Exception {
 	q.addWhereClause("MeasCreateMethod.Method = '" + Method + "'");
 	q.addOrderByClause("MeasCreateMethod.Method");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasCreateMethodList (rs);
+	List v = toMeasCreateMethodList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_MeasCreateMethod)v.elementAt(0);
+	return (RiversideDB_MeasCreateMethod)v.get(0);
 }
 
 /**
@@ -5524,12 +5512,12 @@ throws Exception {
 	buildSQL (q, _S_MEASLOC);
 	q.addWhereClause("MeasLoc.Identifier = '" + escape(Identifier) + "'");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocList (rs);
+	List v = toMeasLocList (rs);
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;	
 	}
-	return (RiversideDB_MeasLoc)v.elementAt(0);
+	return (RiversideDB_MeasLoc)v.get(0);
 }
 
 /**
@@ -5540,20 +5528,19 @@ and Meas_loc_type
 @return the matching RiversideDB_MeasLoc object, or null if none could be found
 @throws Exception if an error occurs
 */
-public RiversideDB_MeasLoc readMeasLocForIdentifier ( String Identifier,
-String type ) 
+public RiversideDB_MeasLoc readMeasLocForIdentifier ( String Identifier, String type ) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL (q, _S_MEASLOC);
 	q.addWhereClause("MeasLoc.Identifier = '" + escape(Identifier) + "'");
 	q.addWhereClause("MeasLoc.Meas_loc_type = '" + type + "'");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocList (rs);
+	List v = toMeasLocList (rs);
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;	
 	}
-	return (RiversideDB_MeasLoc)v.elementAt(0);
+	return (RiversideDB_MeasLoc)v.get(0);
 }
 
 /**
@@ -5568,12 +5555,12 @@ throws Exception {
 	buildSQL(q, _S_MEASLOC);
 	q.addWhereClause("MeasLoc.MeasLoc_num = " + MeasLoc_num );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocList (rs);
+	List v = toMeasLocList (rs);
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;	
 	}
-	return (RiversideDB_MeasLoc)v.elementAt(0);
+	return (RiversideDB_MeasLoc)v.get(0);
 }
 
 /**
@@ -5581,31 +5568,30 @@ Read all MeasLoc data ordered by identifier.
 @return a vector of objects of type RiversideDB_MeasLoc.
 @throws Exception if an error occurs
 */
-public Vector readMeasLocList () throws Exception {
+public List readMeasLocList () throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASLOC );
 	q.addOrderByClause("MeasLoc.Identifier");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocList (rs);
+	List v = toMeasLocList (rs);
 	closeResultSet(rs);
 	return v;
 }
 
 /**
-Read all MeasLoc data that has the given MeasLocGroup_num, ordered by 
-Identifier.
+Read all MeasLoc data that has the given MeasLocGroup_num, ordered by Identifier.
 @param MeasLocGroup_num the MeasLocGroup_num for which to read MeasLoc data
 @return a vector of objects of type RiversideDB_MeasLoc.
 @throws Exception if an error occurs
 */
-public Vector readMeasLocListForMeasLocGroup_num (int MeasLocGroup_num) 
+public List readMeasLocListForMeasLocGroup_num (int MeasLocGroup_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASLOC );
 	q.addOrderByClause("MeasLoc.Identifier");
 	q.addWhereClause("MeasLoc.MeasLocGroup_num = " + MeasLocGroup_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocList (rs);
+	List v = toMeasLocList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5615,12 +5601,12 @@ Read all MeasLocGroup data ordered by MeasLocGroup_num.
 @return a vector of objects of type RiversideDB_MeasLocGroup.
 @throws Exception if an error occurs
 */
-public Vector readMeasLocGroupList () throws Exception {
+public List readMeasLocGroupList () throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASLOCGROUP );
 	q.addOrderByClause("MeasLocGroup.MeasLocGroup_num");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocGroupList (rs);
+	List v = toMeasLocGroupList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5630,32 +5616,14 @@ Read all MeasLocGroup data with the given DBUser_num
 @return a vector of objects of type RiversideDB_MeasLocGroup.
 @throws Exception if an error occurs
 */
-public Vector readMeasLocGroupListForDBUser_num(int DBUser_num) 
+public List readMeasLocGroupListForDBUser_num(int DBUser_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_MEASLOCGROUP);
 	q.addWhereClause("MeasLocGroup.DBUser_num = " + DBUser_num);
 	q.addOrderByClause("MeasLocGroup.DBUser_num");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocGroupList(rs);
-	closeResultSet(rs);
-	return v;
-}
-
-/**
-Read all MeasLocGroup data with the given MeasLocGroup_num
-@return a vector of objects of type RiversideDB_MeasLocGroup.
-@throws Exception if an error occurs
-@deprecated -- this should not return a list!  Only 1.
-*/
-public Vector readMeasLocGroupListForMeasLocGroup_num(int MeasLocGroup_num) 
-throws Exception {
-	DMISelectStatement q = new DMISelectStatement ( this );
-	buildSQL ( q, _S_MEASLOCGROUP );
-	q.addWhereClause("MeasLocGroup.MeasLocGroup_num = " + MeasLocGroup_num);
-	q.addOrderByClause("MeasLocGroup.MeasLocGroup_num");
-	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocGroupList (rs);
+	List v = toMeasLocGroupList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5665,20 +5633,19 @@ Read all MeasLocGroup data with the given MeasLocGroup_num
 @return a vector of objects of type RiversideDB_MeasLocGroup.
 @throws Exception if an error occurs
 */
-public RiversideDB_MeasLocGroup readMeasLocGroupForMeasLocGroup_num(
-int MeasLocGroup_num) 
+public RiversideDB_MeasLocGroup readMeasLocGroupForMeasLocGroup_num(int MeasLocGroup_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL ( q, _S_MEASLOCGROUP );
 	q.addWhereClause("MeasLocGroup.MeasLocGroup_num = " + MeasLocGroup_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocGroupList(rs);
+	List v = toMeasLocGroupList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
 	else {
-		return (RiversideDB_MeasLocGroup)v.elementAt(0);
+		return (RiversideDB_MeasLocGroup)v.get(0);
 	}
 }
 
@@ -5687,13 +5654,13 @@ Read all MeasLocType records, ordered by Type.
 @return a Vector of all the MeasLocType values
 @throws Exception if an error occurs
 */
-public Vector readMeasLocTypeList() 
+public List readMeasLocTypeList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASLOCTYPE );
 	q.addOrderByClause("MeasLocType.Type");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasLocTypeList (rs);
+	List v = toMeasLocTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5703,13 +5670,13 @@ Read all MeasQualityFlag records, ordered by QualityFlag.
 @return a Vector of all the MeasQualityFlag values
 @throws Exception if an error occurs
 */
-public Vector readMeasQualityFlagList() 
+public List readMeasQualityFlagList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASQUALITYFLAG );
 	q.addOrderByClause("MeasQualityFlag.Quality_flag");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasQualityFlagList (rs);
+	List v = toMeasQualityFlagList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5730,12 +5697,12 @@ throws Exception {
 		+ Quality_flag + "'");
 	q.addOrderByClause("MeasQualityFlag.Quality_flag");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasQualityFlagList (rs);
+	List v = toMeasQualityFlagList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_MeasQualityFlag)v.elementAt(0);
+	return (RiversideDB_MeasQualityFlag)v.get(0);
 }
 
 /**
@@ -5744,7 +5711,7 @@ Read all MeasReducGridWeight records that match the given OutputMeasType_num.
 @return a Vector of all the matching MeasReducGridWeight records
 @throws Exception if an error occurs
 */
-public Vector readMeasReducGridWeightListForOutputMeasType_num 
+public List readMeasReducGridWeightListForOutputMeasType_num 
 (long OutputMeasType_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
@@ -5752,7 +5719,7 @@ throws Exception {
 	q.addWhereClause ( "MeasReducGridWeight.OutputMeasType_num=" + 
 		OutputMeasType_num );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasReducGridWeightList (rs);
+	List v = toMeasReducGridWeightList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5763,15 +5730,14 @@ Read all MeasReducRelation records that match the given OutputMeasType_num.
 @return a Vector of all the matching MeasReducRelation records
 @throws Exception if an error occurs
 */
-public Vector readMeasReducRelationListForOutputMeasType_num 
+public List readMeasReducRelationListForOutputMeasType_num 
 (long OutputMeasType_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASREDUCRELATION );
-	q.addWhereClause ( "MeasReducRelation.OutputMeasType_num=" + 
-		OutputMeasType_num );
+	q.addWhereClause ( "MeasReducRelation.OutputMeasType_num=" + OutputMeasType_num );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasReducRelationList (rs);
+	List v = toMeasReducRelationList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5781,12 +5747,12 @@ Read all MeasReduction records.
 @return a Vector of all the MeasReduction values
 @throws Exception if an error occurs
 */
-public Vector readMeasReductionList() 
+public List readMeasReductionList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASREDUCTION );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasReductionList (rs);
+	List v = toMeasReductionList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5805,12 +5771,12 @@ throws Exception {
 	q.addWhereClause ( "MeasReduction.OutputMeasType_num=" + 
 		OutputMeasType_num );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasReductionList (rs);
+	List v = toMeasReductionList (rs);
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;
 	}
-	return (RiversideDB_MeasReduction)v.elementAt(0);
+	return (RiversideDB_MeasReduction)v.get(0);
 }
 
 /**
@@ -5818,13 +5784,13 @@ Read all MeasReductionType records, ordered by Type.
 @return a Vector of all the MeasReductionType values
 @throws Exception if an error occurs
 */
-public Vector readMeasReductionTypeList() 
+public List readMeasReductionTypeList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASREDUCTIONTYPE );
 	q.addOrderByClause("MeasReductionType.Type");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasReductionTypeList (rs);
+	List v = toMeasReductionTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5843,12 +5809,12 @@ throws Exception {
 	q.addWhereClause("MeasReductionType.Type = '" + Type + "'");
 	q.addOrderByClause("MeasReductionType.Type");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasReductionTypeList (rs);
+	List v = toMeasReductionTypeList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_MeasReductionType)v.elementAt(0);
+	return (RiversideDB_MeasReductionType)v.get(0);
 }
 
 /**
@@ -5856,13 +5822,13 @@ Read all MeasScenario records, ordered by Method.
 @return a Vector of all MeasScenario values
 @throws Exception if an error occurs
 */
-public Vector readMeasScenarioList() 
+public List readMeasScenarioList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASSCENARIO );
 	q.addOrderByClause("MeasScenario.Method");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasScenarioList (rs);
+	List v = toMeasScenarioList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5872,12 +5838,12 @@ Read all MeasScenarioRelation records.
 @return a Vector of all MeasScenario values
 @throws Exception if an error occurs
 */
-public Vector readMeasScenarioRelationList() 
+public List readMeasScenarioRelationList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASSCENARIORELATION );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasScenarioRelationList (rs);
+	List v = toMeasScenarioRelationList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5887,13 +5853,13 @@ Read all MeasTimeScale records, ordered by Scale.
 @return a Vector of all MeasTimeScale values
 @throws Exception if an error occurs
 */
-public Vector readMeasTimeScaleList() 
+public List readMeasTimeScaleList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTIMESCALE );
 	q.addOrderByClause("MeasTimeScale.Scale");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTimeScaleList (rs);
+	List v = toMeasTimeScaleList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5911,12 +5877,12 @@ throws Exception {
 	q.addWhereClause("MeasTimeScale.Scale = '" + Scale + "'");
 	q.addOrderByClause("MeasTimeScale.Scale");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTimeScaleList (rs);
+	List v = toMeasTimeScaleList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_MeasTimeScale)v.elementAt(0);
+	return (RiversideDB_MeasTimeScale)v.get(0);
 }
 
 /**
@@ -5924,13 +5890,13 @@ Read all MeasTransProtocol records, ordered by Protocol.
 @return a Vector of all MeasTransProtocl values
 @throws Exception if an error occurs
 */
-public Vector readMeasTransProtocolList() 
+public List readMeasTransProtocolList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTRANSPROTOCOL );
 	q.addOrderByClause("MeasTransProtocol.Protocol");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTransProtocolList (rs);
+	List v = toMeasTransProtocolList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -5951,12 +5917,12 @@ throws Exception {
 	q.addWhereClause("MeasTransProtocol.Protocol = '" + Protocol + "'");
 	q.addOrderByClause("MeasTransProtocol.Protocol");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTransProtocolList (rs);
+	List v = toMeasTransProtocolList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_MeasTransProtocol)v.elementAt(0);
+	return (RiversideDB_MeasTransProtocol)v.get(0);
 }
 
 /**
@@ -5965,13 +5931,13 @@ Read all the MeasType records that match the given MeasLoc_num.
 @return a Vector of RiversideDB_MeasType objects.
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeListForMeasLoc_num(long MeasLoc_num) 
+public List readMeasTypeListForMeasLoc_num(long MeasLoc_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTYPE );
 	q.addWhereClause("MeasType.MeasLoc_num = " + MeasLoc_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeList (rs);
+	List v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	// Only interested in the first one...
 	if ( (v == null) || (v.size() == 0) ) {
@@ -5992,12 +5958,12 @@ throws Exception {
 	buildSQL ( q, _S_MEASTYPE );
 	q.addWhereClause("MeasType.MeasType_num = " + MeasType_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeList (rs);
+	List v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;
 	}
-	return (RiversideDB_MeasType)v.elementAt(0);
+	return (RiversideDB_MeasType)v.get(0);
 }
 
 /**
@@ -6008,12 +5974,12 @@ Read the MeasType table for the record that matches the given tsident string.
 */
 public RiversideDB_MeasType readMeasTypeForTSIdent ( String tsident_string ) 
 throws Exception {
-	Vector v = readMeasTypeListForTSIdent ( tsident_string );
+	List v = readMeasTypeListForTSIdent ( tsident_string );
 	// Only interested in the first one...
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;
 	}
-	return (RiversideDB_MeasType)v.elementAt(0);
+	return (RiversideDB_MeasType)v.get(0);
 }
 
 /**
@@ -6022,13 +5988,13 @@ Reads all the MeasType records that match the given Data_type.
 @return a vector of matching RiversideDB_MeasType objects.
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeListForData_type(String Data_type) 
+public List readMeasTypeListForData_type(String Data_type) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTYPE );
 	q.addWhereClause("MeasType.Data_type = '" + escape(Data_type) + "'");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeList (rs);
+	List v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6038,12 +6004,12 @@ Reads all records from MeasType.
 @return a vector of objects of type RiversideDB_MeasType 
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeList() 
+public List readMeasTypeList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTYPE);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeList (rs);
+	List v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6053,7 +6019,7 @@ Reads all records from MeasType sorted by MeasLoc Identifier (location).
 @return a vector of objects of type RiversideDB_MeasType 
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeListByLocation( ) 
+public List readMeasTypeListByLocation( ) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTYPE);
@@ -6061,7 +6027,7 @@ throws Exception {
 	q.addWhereClause( "MeasType.MeasLoc_num = MeasLoc.MeasLoc_num" );
 	q.addOrderByClause( "MeasLoc.Identifier" );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeList (rs);
+	List v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6072,7 +6038,7 @@ Read MeasType records for distinct data types, ordered by Data_type.
 Data_type field filled in.
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeListForDistinctData_type () 
+public List readMeasTypeListForDistinctData_type () 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	// Select from a join of MeasType and MeasLoc
@@ -6082,7 +6048,7 @@ throws Exception {
 	q.addOrderByClause("MeasType.Data_type");
 	ResultSet rs = dmiSelect ( q );
 	// Transfer here...
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_MeasType data = null;
@@ -6092,7 +6058,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setData_type ( s.trim() );
 		}
-		v.addElement ( data );
+		v.add ( data );
 	}
 	closeResultSet(rs);
 	return v;
@@ -6104,13 +6070,13 @@ Reads all records from MeasType that match the given MeasLoc_num.
 @return a Vector of matching RiversideDB_MeasType objects.
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeListforMeasLoc_num(long MeasLoc_num) 
+public List readMeasTypeListforMeasLoc_num(long MeasLoc_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL ( q, _S_MEASTYPE );
 	q.addWhereClause("MeasType.MeasLoc_num = " + MeasLoc_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeList (rs);
+	List v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6122,7 +6088,7 @@ set in various where clauses
 @return a vector of RiversideDB_MeasType that match the tsident string.
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeListForTSIdent ( String tsIdent ) 
+public List readMeasTypeListForTSIdent ( String tsIdent ) 
 throws Exception {
 	return readMeasTypeListForTSIdent(tsIdent,  null);
 }
@@ -6135,7 +6101,7 @@ set in various where clauses
 @return a Vector of RiversideDB_MeasType objects that match the tsident String.
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeListForTSIdentByLocation(String tsIdent)
+public List readMeasTypeListForTSIdentByLocation(String tsIdent)
 throws Exception {
 	return readMeasTypeListForTSIdent(tsIdent, "MeasLoc.Identifier");
 }
@@ -6153,7 +6119,7 @@ will have its own separate time series.
 resultSet
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeListForTSIdent(String tsIdent, String sortField) 
+public List readMeasTypeListForTSIdent(String tsIdent, String sortField) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTYPE );
@@ -6169,7 +6135,7 @@ throws Exception {
 			+ escape(id.getSubType().toUpperCase()) + "'");
 	}
 	if ( !id.getInterval().equals("") ) {
-		// REVISIT
+		// TODO
 		// This does not work because the case or spelling may not
 		// match in the lookup...
 		// Need to get directly from the interval part.
@@ -6221,7 +6187,7 @@ throws Exception {
 	}
 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeList (rs);
+	List v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6232,13 +6198,13 @@ Read all MeasTypeStats records that match the given MeasType_num
 @return Vector of objects of type RiversideDB_MeasTypeStats.
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeStatsListForMeasType_num(long MeasType_num) 
+public List readMeasTypeStatsListForMeasType_num(long MeasType_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTYPESTATS );
 	q.addWhereClause("MeasTypeStats.MeasType_num = " + MeasType_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeStatsList (rs);
+	List v = toMeasTypeStatsList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6249,13 +6215,13 @@ Read all MeasTypeStatus records that match the given MeasType_num.
 @return Vector of objects of type RiversideDB_MeasTypeStatus.
 @throws Exception if an error occurs
 */
-public Vector readMeasTypeStatusListForMeasType_num(long MeasType_num) 
+public List readMeasTypeStatusListForMeasType_num(long MeasType_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTYPESTATUS );
 	q.addWhereClause("MeasTypeStatus.MeasType_num = " + MeasType_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMeasTypeStatusList (rs);
+	List v = toMeasTypeStatusList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6265,13 +6231,13 @@ Read all MessageLog records, ordered by Date_Time, in Decreasing order.
 @return a vector of objects of type RiversideDB_MessageLog.
 @throws Exception if an error occurs
 */
-public Vector readMessageLogList ()
+public List readMessageLogList ()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MESSAGELOG );
 	q.addOrderByClause ( "MessageLog.Date_Time DESC" ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMessageLogList (rs);
+	List v = toMessageLogList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6289,12 +6255,12 @@ throws Exception {
 	q.addWhereClause("MessageLog.Message_num = " + Message_num );
 	q.addOrderByClause("MessageLog.Message_num");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toMessageLogList (rs);
+	List v = toMessageLogList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_MessageLog)v.elementAt(0);
+	return (RiversideDB_MessageLog)v.get(0);
 }
 
 /**
@@ -6304,13 +6270,13 @@ records.
 @return a Vector of RiversideDB_Operation objects.
 @throws Exception if an error occurs.
 */
-public Vector readOperationListForMeasLocGroup_num(int MeasLocGroup_num) 
+public List readOperationListForMeasLocGroup_num(int MeasLocGroup_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_OPERATION);
 	q.addWhereClause("Operation.MeasLocGroup_num = " + MeasLocGroup_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toOperationList(rs);
+	List v = toOperationList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6322,13 +6288,13 @@ OperationStateRelation records.
 @return a Vector of RiversideDB_OperationStateRelation objects.
 @throws Exception if an error occurs.
 */
-public Vector readOperationStateRelationListForOperation_num(int Operation_num)
+public List readOperationStateRelationListForOperation_num(int Operation_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_OPERATIONSTATERELATION);
 	q.addWhereClause("Operation_num = " + Operation_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toOperationStateRelationList(rs);
+	List v = toOperationStateRelationList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6352,12 +6318,12 @@ throws Exception {
 	q.addWhereClause("Operation.MeasLocGroup_num = " + measLocGroup_num);
 	q.addWhereClause("Operation.Operation_id = '" + operation_id + "'");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toOperationList(rs);
+	List v = toOperationList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_Operation)v.elementAt(0);
+	return (RiversideDB_Operation)v.get(0);
 }
 
 /**
@@ -6365,12 +6331,12 @@ Reads all ProductGroup records.
 @return a Vector of RiversideDB_ProductGroup objects.
 @throws Exception if an error occurs.
 */
-public Vector readProductGroupList() 
+public List readProductGroupList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_PRODUCTGROUP);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toProductGroupList(rs);
+	List v = toProductGroupList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6381,14 +6347,14 @@ Reads ProductGroup for all the matching ProductTypes
 @return a Vector of matching RiversideDB_ProductGroup objects.
 @throws Exception if an error occurs.
 */
-public Vector readProductGroupListForProductType(String ProductType) 
+public List readProductGroupListForProductType(String ProductType) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_PRODUCTGROUP);
 	q.addWhereClause("ProductGroup.ProductType = '" 
 		+ escape(ProductType) + "'");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toProductGroupList(rs);
+	List v = toProductGroupList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6398,12 +6364,12 @@ Reads all ProductType records.
 @return a Vector of RiversideDB_ProductType objects.
 @throws Exception if an error occurs.
 */
-public Vector readProductTypeList() 
+public List readProductTypeList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_PRODUCTTYPE);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toProductTypeList(rs);
+	List v = toProductTypeList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6431,14 +6397,14 @@ ordered by Variable and Seq.
 @return a Vector containing the database properties.
 @throws Exception if an error occurs
 */
-public Vector readPropsListVector ()
+public List readPropsListVector ()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_PROPS );
 	q.addOrderByClause ( "Props.Variable" );
 	q.addOrderByClause ( "Props.Seq" );
 	ResultSet rs = dmiSelect(q);
-	Vector v = toPropsListVector (rs);
+	List v = toPropsListVector (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6456,12 +6422,12 @@ throws Exception {
 	q.addWhereClause("Props.Variable = '" + variable + "'");
 	q.addOrderByClause("Props.Variable");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toPropsListVector (rs);
+	List v = toPropsListVector (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_Props)v.elementAt(0);
+	return (RiversideDB_Props)v.get(0);
 }
 
 /**
@@ -6471,7 +6437,7 @@ ordered by Value1.
 @return a Vector of matching RiversideDB_RatingTable objects.
 @throws Exception if an error occurs
 */
-public Vector readRatingTableListForRatingTable_num ( long RatingTable_num )
+public List readRatingTableListForRatingTable_num ( long RatingTable_num )
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_RATINGTABLE );
@@ -6480,7 +6446,7 @@ throws Exception {
 	// Might need an argument to sort by a specific field...
 	q.addOrderByClause ( "RatingTable.Value1" ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toRatingTableList (rs);
+	List v = toRatingTableList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6490,13 +6456,13 @@ Reads all Scenario records, ordered by Identifier.
 @return a vector of objects of type RiversideDB_Scenario.
 @throws Exception if an error occurs
 */
-public Vector readScenarioList ()
+public List readScenarioList ()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_SCENARIO );
 	q.addOrderByClause ( "Scenario.Identifier" ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toScenarioList (rs);
+	List v = toScenarioList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6507,14 +6473,14 @@ Reads all Scenario records for the one with the matching scenario_num.
 @return a vector of objects of type RiversideDB_Scenario.
 @throws Exception if an error occurs
 */
-public Vector readScenarioListForScenario_num (int scenario_num)
+public List readScenarioListForScenario_num (int scenario_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_SCENARIO );
 	q.addOrderByClause ( "Scenario.Identifier" ); 
 	q.addWhereClause("Scenario.scenario_num = " + scenario_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toScenarioList (rs);
+	List v = toScenarioList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6532,12 +6498,12 @@ throws Exception {
 	q.addWhereClause("Scenario.Scenario_num = " + Scenario_num );
 	q.addOrderByClause("Scenario.Scenario_num");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toScenarioList (rs);
+	List v = toScenarioList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_Scenario)v.elementAt(0);
+	return (RiversideDB_Scenario)v.get(0);
 }
 
 /**
@@ -6545,13 +6511,13 @@ Reads all the SHEFType records, ordered by SHEF_pe.
 @return a vector of objects of type RiversideDB_SHEFType.
 @throws Exception if an error occurs
 */
-public Vector readSHEFTypeList ()
+public List readSHEFTypeList ()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_SHEFTYPE );
 	q.addOrderByClause ( "SHEFType.SHEF_pe" ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toSHEFTypeList (rs);
+	List v = toSHEFTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6569,12 +6535,12 @@ throws Exception {
 	q.addWhereClause("SHEFType.SHEF_pe = '" + SHEF_pe + "'");
 	q.addOrderByClause("SHEFType.SHEF_pe");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toSHEFTypeList (rs);
+	List v = toSHEFTypeList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_SHEFType)v.elementAt(0);
+	return (RiversideDB_SHEFType)v.get(0);
 }
 
 /**
@@ -6585,14 +6551,14 @@ order, where the MeasLoc_num matches the given MeasLoc_num.
 match the given MeasLoc_num.
 @throws Exception if an error occurs
 */
-public Vector readStageDischargeRatingListForMeasLoc_num ( long MeasLoc_num )
+public List readStageDischargeRatingListForMeasLoc_num ( long MeasLoc_num )
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_STAGEDISCHARGERATING );
 	q.addOrderByClause ( "StageDischargeRating.Start_Date DESC" ); 
 	q.addWhereClause ( "StageDischargeRating.MeasLoc_num=" + MeasLoc_num ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v= toStageDischargeRatingList (rs);
+	List v= toStageDischargeRatingList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6609,9 +6575,9 @@ throws Exception {
 	buildSQL ( q, _S_STAGEDISCHARGERATING );
 	q.addOrderByClause ( "StageDischargeRating.RatingTable_num DESC" ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v= toStageDischargeRatingList (rs);
+	List v= toStageDischargeRatingList (rs);
 	closeResultSet(rs);
-	return (RiversideDB_StageDischargeRating) v.elementAt(0);
+	return (RiversideDB_StageDischargeRating) v.get(0);
 }
 
 /**
@@ -6620,14 +6586,14 @@ Scenario.
 @return a vector of objects of type RiversideDB_StateGroup.
 @throws Exception if an error occurs
 */
-public Vector readStateGroupList ()
+public List readStateGroupList ()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_STATEGROUP );
 	q.addOrderByClause ( "StateGroup.Date_Time DESC" ); 
 	q.addOrderByClause ( "StateGroup.Scenario" ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toStateGroupList (rs);
+	List v = toStateGroupList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6639,14 +6605,14 @@ by Date_Time in decreasing order, and then by Scenario.
 @return a Vector of objects of type RiversideDB_StateGroup.
 @throws Exception if an error occurs.
 */
-public Vector readStateGroupListForMeasLocGroup_num(long MeasLocGroup_num) 
+public List readStateGroupListForMeasLocGroup_num(long MeasLocGroup_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_STATEGROUP);
 	q.addOrderByClause("StateGroup.Date_Time DESC");
 	q.addOrderByClause("StateGroup.Scenario");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toStateGroupList(rs);
+	List v = toStateGroupList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6689,7 +6655,7 @@ throws Exception {
 	q.addOrderByClause ( "StateGroup.Date_Time DESC" ); 
 
 	ResultSet rs = dmiSelect(q);	
-	Vector v = toStateGroupList (rs);
+	List v = toStateGroupList (rs);
 	closeResultSet(rs);
 	if (v.size() == 0) {
 		q = new DMISelectStatement(this);
@@ -6704,8 +6670,7 @@ throws Exception {
 			// this is a problem.
 			return -1;
 		}
-		RiversideDB_StateGroup sg = 
-			(RiversideDB_StateGroup)v.elementAt(0);
+		RiversideDB_StateGroup sg = (RiversideDB_StateGroup)v.get(0);
 		return sg.getStateGroup_num();
 		
 		/*
@@ -6720,8 +6685,7 @@ throws Exception {
 		*/
 	}
 	else {
-		RiversideDB_StateGroup sg = 
-			(RiversideDB_StateGroup)v.elementAt(0);
+		RiversideDB_StateGroup sg = (RiversideDB_StateGroup)v.get(0);
 		return sg.getStateGroup_num();
 	}
 }
@@ -6734,7 +6698,7 @@ Module, Variable and Seq.
 StateGroup_num.
 @throws Exception if an error occurs
 */
-public Vector readStateListForStateGroup_num(long StateGroup_num)
+public List readStateListForStateGroup_num(long StateGroup_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_STATE);
@@ -6751,7 +6715,7 @@ throws Exception {
 		q.addOrderByClause("State.Seq"); 
 	}
 	ResultSet rs = dmiSelect(q);
-	Vector v = toStateList (rs);
+	List v = toStateList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6765,7 +6729,7 @@ Module, Variable and Seq.
 StateGroup_num.  Returns null if the database version is 3.00.00 or greater.
 @throws Exception if an error occurs
 */
-public Vector readStateListForStateGroup_numModule(long StateGroup_num,
+public List readStateListForStateGroup_numModule(long StateGroup_num,
 String module)
 throws Exception {
 	if (isDatabaseVersionAtLeast(_VERSION_030000_20041001)) {
@@ -6781,7 +6745,7 @@ throws Exception {
 	q.addOrderByClause("State.Seq"); 
 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toStateList (rs);
+	List v = toStateList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6793,7 +6757,7 @@ Reads the state records with the specified OperationStateRelation_num.
 @return a Vector of RiversideDB_States.
 @throws Exception if an error occurs.
 */
-public Vector readStateForStateGroup_numOperationStateRelation_num(
+public List readStateForStateGroup_numOperationStateRelation_num(
 long StateGroup_num, int OperationStateRelation_num)
 throws Exception {
 	if (!isDatabaseVersionAtLeast(_VERSION_030000_20041001)) {
@@ -6806,7 +6770,7 @@ throws Exception {
 	q.addWhereClause("State.OperationStateRelation_num = "
 		+ OperationStateRelation_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toStateList(rs);
+	List v = toStateList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6818,13 +6782,13 @@ Read the Station data for all records matching the given MeasLoc_num.
 MeasLoc_num.
 @throws Exception if an error occurs
 */
-public Vector readStationListForMeasLoc_num ( long MeasLoc_num )
+public List readStationListForMeasLoc_num ( long MeasLoc_num )
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_STATION );
 	q.addWhereClause ( "Station.MeasLoc_num=" + MeasLoc_num ); 
 	ResultSet rs = dmiSelect(q);
-	Vector v = toStationList (rs);
+	List v = toStationList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6834,12 +6798,12 @@ Read all data from the RiversideDB Tables table.
 @return a Vector or RiversideDB_Tables.
 @exception Exception if there is an error reading the data.
 */
-public Vector readTablesList () 
+public List readTablesList () 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL(q, _S_TABLES);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toTablesList (rs);
+	List v = toTablesList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6851,7 +6815,7 @@ only useful in database versions greater than or equal to 02.08.00.
 @return a Vector of RiversideDB_Tables that match the given IsTSTemplate value.
 @throws Exception if an error occurs
 */
-public Vector readTablesListForIsTSTemplate(String IsTSTemplate) 
+public List readTablesListForIsTSTemplate(String IsTSTemplate) 
 throws Exception {
 	if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)){
 		DMISelectStatement q = new DMISelectStatement(this);
@@ -6859,7 +6823,7 @@ throws Exception {
 		q.addWhereClause("IsTSTemplate = '" 
 			+ escape(IsTSTemplate) + "'");
 		ResultSet rs = dmiSelect(q);
-		Vector v = toTablesList(rs);
+		List v = toTablesList(rs);
 		closeResultSet(rs);
 		return v;
 	}
@@ -6881,12 +6845,12 @@ throws Exception {
 	buildSQL (q, _S_TABLES);
 	q.addWhereClause("Table_name = '" + escape(Table_name) + "'");
 	ResultSet rs = dmiSelect(q);	
-	Vector v = toTablesList(rs);
+	List v = toTablesList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return ((RiversideDB_Tables)v.elementAt(0));
+	return ((RiversideDB_Tables)v.get(0));
 }
 
 /**
@@ -6902,12 +6866,12 @@ throws Exception {
 	buildSQL (q, _S_TABLES);
 	q.addWhereClause("Table_num = " + Table_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toTablesList(rs);
+	List v = toTablesList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return ((RiversideDB_Tables)v.elementAt(0));
+	return ((RiversideDB_Tables)v.get(0));
 }
 
 /**
@@ -6915,13 +6879,13 @@ Read all TableLayout records, ordered by Identifier.
 @return a Vector of TableLayout objects
 @throws Exception if an error occurs
 */
-public Vector readTableLayoutList() 
+public List readTableLayoutList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_TABLELAYOUT );
 	q.addOrderByClause("TableLayout.Identifier");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toTableLayoutList (rs);
+	List v = toTableLayoutList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6941,12 +6905,12 @@ throws Exception {
 	q.addWhereClause("TableLayout.TableLayout_num = " + TableLayout_num );
 	q.addOrderByClause("TableLayout.TableLayout_num");
 	ResultSet rs = dmiSelect(q);
-	Vector v = toTableLayoutList (rs);
+	List v = toTableLayoutList (rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
-	return (RiversideDB_TableLayout)v.elementAt(0);
+	return (RiversideDB_TableLayout)v.get(0);
 }
 
 /**
@@ -7010,7 +6974,7 @@ throws Exception
 		return null;
 	}
 	// Based on the table format, call the appropriate read method...
-	RiversideDB_Tables t = (RiversideDB_Tables)_RiversideDB_Tables_Vector.elementAt(pos);
+	RiversideDB_Tables t = (RiversideDB_Tables)_RiversideDB_Tables_Vector.get(pos);
 	long table_layout = t.getTableLayout_num();
 	// First define the time series to be returned, based on the MeasType interval base and multiplier...
 	TS ts = null;
@@ -7271,7 +7235,7 @@ throws Exception {
 /**
 Unsupported.
 */
-public Vector readTimeSeriesList(String fname, DateTime date1, DateTime date2, String req_units, boolean read_data)
+public List readTimeSeriesList(String fname, DateTime date1, DateTime date2, String req_units, boolean read_data)
 throws Exception {
 	return null;
 }
@@ -7279,7 +7243,7 @@ throws Exception {
 /**
 Unsupported.
 */
-public Vector readTimeSeriesList(TSIdent tsident, String fname, DateTime date1, 
+public List readTimeSeriesList(TSIdent tsident, String fname, DateTime date1, 
 DateTime date2, String req_units, boolean read_data)
 throws Exception {
 	return null;
@@ -7290,12 +7254,12 @@ Read all TSProduct records.
 @return a Vector of TSProduct objects
 @throws Exception if an error occurs
 */
-public Vector readTSProductList() 
+public List readTSProductList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL(q, _S_TSPRODUCT);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toTSProductList (rs);
+	List v = toTSProductList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -7305,12 +7269,12 @@ Read all TSProductProps records.
 @return a Vector of TSProductProps objects
 @throws Exception if an error occurs
 */
-public Vector readTSProductPropsList() 
+public List readTSProductPropsList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL(q, _S_TSPRODUCTPROPS);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toTSProductPropsList (rs);
+	List v = toTSProductPropsList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -7332,86 +7296,15 @@ throws Exception {
 	q.addWhereClause("TSProduct.identifier = '" + identifier + "'");
 	
 	ResultSet rs = dmiSelect(q);
-	Vector v = toTSProductList(rs);
+	List v = toTSProductList(rs);
 	closeResultSet(rs);
 
 	if (v == null || v.size() == 0) {
 		return null;
 	}
 	else {
-		return (RiversideDB_TSProduct)v.elementAt(0);
+		return (RiversideDB_TSProduct)v.get(0);
 	}
-}
-
-/**
-Reads the TSProduct table for all records that matches the specified 
-tsproduct_num, productgroup_num.
-@param tsproduct_num the tsproduct_num for which to search.  If not missing,
-then productgroup_num MUST be missing.
-@param productgroup_num the productgroup_num for which to search.  If not 
-missing, then tsproduct_num MUST be missing.
-@return a Vector of matching HydroBase_TSProduct records.
-@throws Exception if an error occurs.
-@deprecated the user_num was removed from the call.
-*/
-public Vector readTSProductListForTSProduct_numProductGroup_numUser_num(
-int tsproduct_num, int productgroup_num)
-throws Exception {
-	return readTSProductListForTSProduct_numProductGroup_num(	
-		tsproduct_num, productgroup_num);
-}
-
-/**
-Reads the TSProduct table for all records that matches the specified 
-tsproduct_num and productgroup_num.
-@param tsproduct_num the tsproduct_num for which to search.  If not missing,
-then productgroup_num MUST be missing.
-REVISIT (JTS - 2005-08-29) 
-Why this provision??
-@param productgroup_num the productgroup_num for which to search.  If not 
-missing, then tsproduct_num MUST be missing.
-REVISIT (JTS - 2005-08-29) 
-Why this provision??
-@return a Vector of matching HydroBase_TSProduct records.
-@throws Exception if an error occurs.
-@deprecated
-*/
-public Vector readTSProductListForTSProduct_numProductGroup_num(
-int tsproduct_num, int productgroup_num)
-throws Exception {
-	DMISelectStatement q = new DMISelectStatement(this);
-	buildSQL(q, _S_TSPRODUCT);
-
-	// REVISIT (JTS - 2005-08-29)
-	// As I mentioned in the Javadocs, I am unsure right now about why
-	// there is the provision in this code that one or the other can
-	// be non-missing, but not both.  Further research is necessary.
-
-	if (!DMIUtil.isMissing(tsproduct_num)
-	    && !DMIUtil.isMissing(productgroup_num)) {
-	    	throw new Exception(
-			"One and only one value can be non-missing."
-			+ "  TSProduct_num: " + tsproduct_num 
-			+ "  ProductGroup_num: " + productgroup_num);
-	}
-	
-	if (DMIUtil.isMissing(tsproduct_num)
-	    && DMIUtil.isMissing(productgroup_num)) {
-		// query for all
-	}
-	else if (!DMIUtil.isMissing(tsproduct_num)) {
-		q.addWhereClause("TSProduct.tsproduct_num = " 
-			+ tsproduct_num);
-	}
-	else {
-		q.addWhereClause("TSProduct.productgroup_num = " 
-			+ productgroup_num);
-	}
-
-	ResultSet rs = dmiSelect(q);
-	Vector v = toTSProductList(rs);
-	closeResultSet(rs);
-	return v;
 }
 
 /**
@@ -7421,7 +7314,7 @@ tsproduct_num.<p>
 @return a Vector of the matching RiversideDB_TSProductProps records.
 @throws Exception if an error occurs.
 */
-public Vector readTSProductPropsListForTSProduct_num(int tsproduct_num) 
+public List readTSProductPropsListForTSProduct_num(int tsproduct_num) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_TSPRODUCTPROPS);
@@ -7431,7 +7324,7 @@ throws Exception {
 	}
 	q.addWhereClause("TSProductProps.tsproduct_num = " + tsproduct_num);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toTSProductPropsList(rs);
+	List v = toTSProductPropsList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -7469,9 +7362,9 @@ Converts a result set to a Vector of ActionDataModels.
 @return a Vector of ActionDataModels.
 @throws Exception if an error occurs.
 */
-private Vector toActionList(ResultSet rs) 
+private List toActionList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	boolean b = false;
 	String s;
@@ -7533,7 +7426,7 @@ throws Exception {
 			data.setResultLevel(i);
 		}
 		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -7543,9 +7436,9 @@ Convert a ResultSet to a Vector of RiversideDB_Area.
 @param rs ResultSet from a Area table query.
 @throws Exception if an error occurs
 */
-private Vector toAreaList ( ResultSet rs ) 
+private List toAreaList ( ResultSet rs ) 
 throws Exception {
- 	Vector v = new Vector();
+ 	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -7578,7 +7471,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setArea_units(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -7588,9 +7481,9 @@ Convert a ResultSet to a Vector of RiversideDB_AutoUpdateProduct.
 @param rs ResultSet from a AutoUpdateProduct table query.
 @throws Exception if an error occurs
 */
-private Vector toAutoUpdateProductList ( ResultSet rs ) 
+private List toAutoUpdateProductList ( ResultSet rs ) 
 throws Exception {
- 	Vector v = new Vector();
+ 	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -7659,7 +7552,7 @@ throws Exception {
 			data.setDBPermissions(s.trim());
 		}
 		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -7736,9 +7629,9 @@ Convert a ResultSet to a Vector of RiversideDB_DataDimension.
 @param rs ResultSet from a DataDimension table query.
 @throws Exception if an error occurs
 */
-private Vector toDataDimensionList ( ResultSet rs ) 
+private List toDataDimensionList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_DataDimension data = null;
@@ -7753,7 +7646,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -7763,9 +7656,9 @@ Convert a ResultSet to a Vector of RiversideDB_DataSource.
 @param rs ResultSet from a DataSource table query.
 @throws Exception if an error occurs
 */
-private Vector toDataSourceList ( ResultSet rs ) 
+private List toDataSourceList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_DataSource data = null;
@@ -7780,7 +7673,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setSource_name ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -7791,9 +7684,9 @@ Converts a ResultSet to a Vector of DataTestDataModels.
 @return a Vector of DataTestDataModels.
 @throws Exception if an error occurs.
 */
-private Vector toDataTestList(ResultSet rs) 
+private List toDataTestList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	boolean b = false;
 	int i;
@@ -7871,7 +7764,7 @@ throws Exception {
 			data.setPositiveCount(i);
 		}		
 		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -7882,9 +7775,9 @@ Converts a ResultSet to a Vector of DataTestExpressionDataModels.
 @return a Vector of DataTestExpressionDataModels.
 @throws Exception if an error occurs.
 */
-private Vector toDataTestExpressionList(ResultSet rs) 
+private List toDataTestExpressionList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -7921,7 +7814,7 @@ throws Exception {
 			data.setRightSideIDNum(i);
 		}		
 		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -7932,9 +7825,9 @@ Converts a ResultSet to a Vector of DataTestFunctionDataModels.
 @return a Vector of DataTestFunctionDataModels.
 @throws Exception if an error occurs.
 */
-private Vector toDataTestFunctionList(ResultSet rs) 
+private List toDataTestFunctionList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -7961,7 +7854,7 @@ throws Exception {
 			data.setMessage(s.trim());
 		}				
 		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -7972,9 +7865,9 @@ Converts a ResultSet to a Vector of DataTestResult.
 @return a Vector of DataTestResults.
 @throws Exception if an error occurs.
 */
-private Vector toDataTestResultsList(ResultSet rs) 
+private List toDataTestResultsList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	double d;
 	int index = 1;
 	int i;
@@ -8023,9 +7916,9 @@ Convert a ResultSet to a Vector of RiversideDB_DataType.
 @param rs ResultSet from a DataType table query.
 @throws Exception if an error occurs
 */
-private Vector toDataTypeList ( ResultSet rs ) 
+private List toDataTypeList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	double d;
@@ -8085,7 +7978,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDefault_si_max ( d );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8095,9 +7988,9 @@ Convert a ResultSet to a Vector of RiversideDB_DataUnits.
 @param rs ResultSet from a DataUnits table query.
 @throws Exception if an error occurs
 */
-private Vector toDataUnitsList ( ResultSet rs ) 
+private List toDataUnitsList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	double d;
@@ -8138,7 +8031,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setUnits_system ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8148,9 +8041,9 @@ Convert a ResultSet to a Vector of RiversideDB_DBGroup.
 @param rs ResultSet from a DBGroup table query.
 @throws Exception if an error occurs
 */
-private Vector toDBGroupList ( ResultSet rs ) 
+private List toDBGroupList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -8170,7 +8063,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setID( s.trim() );
 		}		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }	
@@ -8180,9 +8073,9 @@ Convert a ResultSet to a Vector of RiversideDB_DBUser.
 @param rs ResultSet from a DBUser table query.
 @throws Exception if an error occurs
 */
-private Vector toDBUserList ( ResultSet rs ) 
+private List toDBUserList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -8214,7 +8107,7 @@ throws Exception {
 		if (!rs.wasNull()) {
 			data.setPrimaryDBGroup_num(i);
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }	
@@ -8224,9 +8117,9 @@ Convert a ResultSet to a Vector of RiversideDB_DBUserDBGroupRelation.
 @param rs ResultSet from a DBUserDBGroupRelation table query.
 @throws Exception if an error occurs
 */
-private Vector toDBUserDBGroupRelationList ( ResultSet rs ) 
+private List toDBUserDBGroupRelationList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	int i;
 	RiversideDB_DBUserDBGroupRelation data = null;
@@ -8241,7 +8134,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDBGroup_num( i );
 		}		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }	
@@ -8251,9 +8144,9 @@ Convert a ResultSet to a Vector of RiversideDB_DBUserMeasLocGroupRelation.
 @param rs ResultSet from a DBUserMeasLocGroupRelation table query.
 @throws Exception if an error occurs
 */
-private Vector toDBUserMeasLocGroupRelationList ( ResultSet rs ) 
+private List toDBUserMeasLocGroupRelationList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	int i;
 	RiversideDB_DBUserMeasLocGroupRelation data = null;
@@ -8268,7 +8161,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setMeasLocGroup_num( i );
 		}		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }	
@@ -8278,9 +8171,9 @@ Convert a ResultSet to a Vector of RiversideDB_ExportConf.
 @param rs ResultSet from an ExportConf table query.
 @throws Exception if an error occurs
 */
-private Vector toExportConfList ( ResultSet rs ) 
+private List toExportConfList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -8309,7 +8202,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setIsActive ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8319,9 +8212,9 @@ Convert a ResultSet to a Vector of RiversideDB_ExportProduct.
 @param rs ResultSet from an ExportProduct table query.
 @throws Exception if an error occurs
 */
-private Vector toExportProductList ( ResultSet rs ) 
+private List toExportProductList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -8469,7 +8362,7 @@ throws Exception {
 				data.setMeasLocGroup_num(i);
 			}
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8479,9 +8372,9 @@ Convert a ResultSet to a Vector of RiversideDB_ExportType.
 @param rs ResultSet from a ExportType table query.
 @throws Exception if an error occurs
 */
-private Vector toExportTypeList ( ResultSet rs ) 
+private List toExportTypeList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_ExportType data = null;
@@ -8496,7 +8389,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setComment ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8506,9 +8399,9 @@ Convert a ResultSet to a Vector of RiversideDB_Geoloc.
 @param rs ResultSet from a Geoloc table query.
 @throws Exception if an error occurs
 */
-private Vector toGeolocList ( ResultSet rs ) 
+private List toGeolocList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -8557,7 +8450,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setElevation_units(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8567,9 +8460,9 @@ Convert a ResultSet to a Vector of RiversideDB_ImportConf.
 @param rs ResultSet from an ImportConf table query.
 @throws Exception if an error occurs
 */
-private Vector toImportConfList ( ResultSet rs ) 
+private List toImportConfList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -8606,7 +8499,7 @@ throws Exception {
 		if (!rs.wasNull()) {
 			data.setIsActive(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8616,9 +8509,9 @@ Convert a ResultSet to a Vector of RiversideDB_ImportProduct.
 @param rs ResultSet from an ImportProduct table query.
 @throws Exception if an error occurs
 */
-private Vector toImportProductList ( ResultSet rs ) 
+private List toImportProductList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -8790,7 +8683,7 @@ throws Exception {
 				data.setMeasLocGroup_num(i);
 			}
 		}		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8800,9 +8693,9 @@ Convert a ResultSet to a Vector of RiversideDB_ImportType.
 @param rs ResultSet from a ImportType table query.
 @throws Exception if an error occurs
 */
-private Vector toImportTypeList ( ResultSet rs ) 
+private List toImportTypeList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_ImportType data = null;
@@ -8817,7 +8710,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setComment ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8827,9 +8720,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasCreateMethod.
 @param rs ResultSet from a MeasCreateMethod table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasCreateMethodList ( ResultSet rs ) 
+private List toMeasCreateMethodList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_MeasCreateMethod data = null;
@@ -8844,7 +8737,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8854,9 +8747,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasLoc.
 @param rs ResultSet from a MeasLoc table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasLocList ( ResultSet rs ) 
+private List toMeasLocList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -8911,7 +8804,7 @@ throws Exception {
 				data.setMeasLocGroup_num(i);
 			}
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8921,9 +8814,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasLocGroup
 @param rs ResultSet from a MeasLocGroup table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasLocGroupList ( ResultSet rs ) 
+private List toMeasLocGroupList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -8964,7 +8857,7 @@ throws Exception {
 			data.setDBPermissions(s.trim());
 		}
 
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -8974,9 +8867,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasLocType
 @param rs ResultSet from a MeasLocType table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasLocTypeList ( ResultSet rs ) 
+private List toMeasLocTypeList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_MeasLocType data = null;
@@ -8991,7 +8884,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9001,9 +8894,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasQualityFlag.
 @param rs ResultSet from a MeasQualityFlag table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasQualityFlagList ( ResultSet rs ) 
+private List toMeasQualityFlagList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_MeasQualityFlag data = null;
@@ -9018,7 +8911,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9028,9 +8921,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasReducGridWeight.
 @param rs ResultSet from a MeasReducGridWeight table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasReducGridWeightList ( ResultSet rs ) 
+private List toMeasReducGridWeightList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	double d;
 	long l;
@@ -9066,7 +8959,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setWeight ( d );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9076,9 +8969,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasReducRelation.
 @param rs ResultSet from a MeasReducRelation table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasReducRelationList ( ResultSet rs ) 
+private List toMeasReducRelationList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	double d;
 	long l;
@@ -9098,7 +8991,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setWeight ( d );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9108,9 +9001,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasReduction.
 @param rs ResultSet from a MeasReduction table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasReductionList ( ResultSet rs ) 
+private List toMeasReductionList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -9160,7 +9053,7 @@ throws Exception {
 				data.setDBPermissions(s.trim());
 			}
 		}		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9170,9 +9063,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasReductionType.
 @param rs ResultSet from a MeasReductionType table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasReductionTypeList ( ResultSet rs ) 
+private List toMeasReductionTypeList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_MeasReductionType data = null;
@@ -9187,7 +9080,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9197,9 +9090,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasScenario.
 @param rs ResultSet from a MeasScenario table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasScenarioList ( ResultSet rs ) 
+private List toMeasScenarioList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -9232,7 +9125,7 @@ throws Exception {
 				data.setActive ( s.trim() );
 			}
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9242,9 +9135,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasScenarioRelation.
 @param rs ResultSet from a MeasScenarioRelation table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasScenarioRelationList ( ResultSet rs ) 
+private List toMeasScenarioRelationList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	double d;
 	long l;
@@ -9268,7 +9161,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setScenarioMeasType_num ( l );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9278,9 +9171,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasTimeScale.
 @param rs ResultSet from a MeasTimeScale table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasTimeScaleList ( ResultSet rs ) 
+private List toMeasTimeScaleList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_MeasTimeScale data = null;
@@ -9295,7 +9188,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9305,9 +9198,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasTransProtocol.
 @param rs ResultSet from a MeasTransProtocol table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasTransProtocolList ( ResultSet rs ) 
+private List toMeasTransProtocolList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_MeasTransProtocol data = null;
@@ -9322,7 +9215,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9332,9 +9225,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasType.
 @param rs ResultSet from a MeasType/MeasLoc table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasTypeList ( ResultSet rs ) 
+private List toMeasTypeList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	double d;
@@ -9467,7 +9360,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setMeasLoc_name ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9477,9 +9370,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasTypeStats.
 @param rs ResultSet from a MeasTypeStats table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasTypeStatsList ( ResultSet rs ) 
+private List toMeasTypeStatsList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	double d;
 	Date dt;
@@ -9516,7 +9409,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setMax_val ( d );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9526,9 +9419,9 @@ Convert a ResultSet to a Vector of RiversideDB_MeasTypeStatus.
 @param rs ResultSet from a MeasTypeStatus table query.
 @throws Exception if an error occurs
 */
-private Vector toMeasTypeStatusList ( ResultSet rs ) 
+private List toMeasTypeStatusList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	Date d;
@@ -9553,7 +9446,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setComment ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9563,9 +9456,9 @@ Convert a ResultSet to a Vector of RiversideDB_MessageLog.
 @param rs ResultSet from a MessageLog table query.
 @throws Exception if an error occurs
 */
-private Vector toMessageLogList ( ResultSet rs ) 
+private List toMessageLogList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -9594,7 +9487,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setMessage(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9604,9 +9497,9 @@ Converts a ResultSet to a Vector of RiversideDB_Operation.
 @param rs ResultSet from a Operation table query.
 @throws Exception if an error occurs
 */
-private Vector toOperationList(ResultSet rs) 
+private List toOperationList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	float f;
 	int i;
@@ -9643,7 +9536,7 @@ throws Exception {
 		if (!rs.wasNull()) {
 			data.setY(f);
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9653,9 +9546,9 @@ Converts a ResultSet to a Vector of RiversideDB_OperationStateRelation.
 @param rs ResultSet from an OperationStateRelation query.
 @throws Exception if an error occurs.
 */
-private Vector toOperationStateRelationList(ResultSet rs) 
+private List toOperationStateRelationList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	int i;
 	String s;
@@ -9679,7 +9572,7 @@ throws Exception {
 		if (!rs.wasNull()) {
 			data.setDefault_value(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9689,9 +9582,9 @@ Convert a ResultSet to a Vector of RiversideDB_ProductGroup.
 @param rs ResultSet from a ProductGroup table query.
 @throws Exception if an error occurs
 */
-private Vector toProductGroupList ( ResultSet rs ) 
+private List toProductGroupList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -9735,7 +9628,7 @@ throws Exception {
 		if (!rs.wasNull()) {
 			data.setDBPermissions(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9745,9 +9638,9 @@ Convert a ResultSet to a Vector of RiversideDB_ProductType.
 @param rs ResultSet from a ProductType table query.
 @throws Exception if an error occurs
 */
-private Vector toProductTypeList(ResultSet rs) 
+private List toProductTypeList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_ProductType data = null;
@@ -9767,7 +9660,7 @@ throws Exception {
 		if (!rs.wasNull()) {
 			data.setComment(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9778,9 +9671,9 @@ Convert a ResultSet to a Vector for RiversideDB_Props.
 @param rs ResultSet from a Props table query.
 @throws Exception if an error occurs
 */
-private Vector toPropsListVector ( ResultSet rs ) 
+private List toPropsListVector ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	RiversideDB_Props data = null;
 	long l=-999;
@@ -9808,7 +9701,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9859,9 +9752,9 @@ Convert a ResultSet to a Vector of RiversideDB_RatingTable.
 @param rs ResultSet from a RatingTable table query.
 @throws Exception if an error occurs
 */
-private Vector toRatingTableList ( ResultSet rs ) 
+private List toRatingTableList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	long l;
 	double d;
@@ -9889,7 +9782,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setShift2(d);
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9899,9 +9792,9 @@ Convert a ResultSet to a Vector of RiversideDB_Scenario.
 @param rs ResultSet from a Scenario table query.
 @throws Exception if an error occurs
 */
-private Vector toScenarioList ( ResultSet rs ) 
+private List toScenarioList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -9931,7 +9824,7 @@ throws Exception {
 				data.setActive( i );
 			}
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9941,9 +9834,9 @@ Convert a ResultSet to a Vector of RiversideDB_SHEFType.
 @param rs ResultSet from a SHEFType table query.
 @throws Exception if an error occurs
 */
-private Vector toSHEFTypeList ( ResultSet rs ) 
+private List toSHEFTypeList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -9975,7 +9868,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setTime_scale(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -9985,9 +9878,9 @@ Convert a ResultSet to a Vector of RiversideDB_StageDischargeRating.
 @param rs ResultSet from a StageDischargeRating table query.
 @throws Exception if an error occurs
 */
-private Vector toStageDischargeRatingList ( ResultSet rs ) 
+private List toStageDischargeRatingList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -10041,7 +9934,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setInterpolation_Method(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -10051,9 +9944,9 @@ Convert a ResultSet to a Vector of RiversideDB_StateGroup.
 @param rs ResultSet from a StateGroup table query.
 @throws Exception if an error occurs
 */
-private Vector toStateGroupList ( ResultSet rs ) 
+private List toStateGroupList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -10089,7 +9982,7 @@ throws Exception {
 				data.setMeasLocGroup_num(l);
 			}
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -10099,9 +9992,9 @@ Convert a ResultSet to a Vector of RiversideDB_State.
 @param rs ResultSet from a Statetable query.
 @throws Exception if an error occurs
 */
-private Vector toStateList ( ResultSet rs ) 
+private List toStateList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -10157,7 +10050,7 @@ throws Exception {
 			if ( !rs.wasNull() ) {
 				data.setVal(s.trim());
 			}
-			v.addElement(data);
+			v.add(data);
 		}
 	}
 	return v;
@@ -10168,9 +10061,9 @@ Convert a ResultSet to a Vector of RiversideDB_Station.
 @param rs ResultSet from a Station table query.
 @throws Exception if an error occurs
 */
-private Vector toStationList ( ResultSet rs ) 
+private List toStationList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -10206,7 +10099,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setPrimary_flag(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -10216,9 +10109,9 @@ Convert a ResultSet to a Vector of RiversideDB_TableLayout.
 @param rs ResultSet from a TableLayout table query.
 @throws Exception if an error occurs
 */
-private Vector toTableLayoutList ( ResultSet rs ) 
+private List toTableLayoutList ( ResultSet rs ) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -10238,7 +10131,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setDescription ( s.trim() );
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -10248,12 +10141,12 @@ Convert a ResultSet to a Vector of RiversideDB_Tables.
 @param rs ResultSet from a Tables table query.
 @throws Exception if an error occurs
 */
-private Vector toTablesList ( ResultSet rs ) 
+private List toTablesList ( ResultSet rs ) 
 throws Exception {
 	if ( rs == null ) {
 		return null;
 	}
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	Date d;
@@ -10337,7 +10230,7 @@ throws Exception {
 				data.setRecord_DBPermissions(s.trim());
 			}
 		}		
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -10355,7 +10248,7 @@ throws Exception {
     if ( rs == null ) {
         return null;
     }
-    Vector v = new Vector();
+    List v = new Vector();
     int index = 1;
     Date dt;
     double d;
@@ -10398,7 +10291,7 @@ throws Exception {
                 data._Creation_Time = new DateTime(dt);
             }
         }
-        v.addElement(data);
+        v.add(data);
     }
     return v;
 }
@@ -10414,7 +10307,7 @@ throws Exception {
     if ( rs == null ) {
         return null;
     }
-    Vector v = new Vector();
+    List v = new Vector();
     int index = 1;
     double d;
     int calYear = 0;
@@ -10437,7 +10330,7 @@ throws Exception {
                 dt.setMonth ( imon );
                 data._Val = d;
                 data._Date_Time = dt;
-                v.addElement(data);
+                v.add(data);
             }
         }
     }
@@ -10449,12 +10342,12 @@ Convert a ResultSet to a Vector of RiversideDB_TSProduct.
 @param rs ResultSet from a TSProduct table query.
 @throws Exception if an error occurs
 */
-private Vector toTSProductList ( ResultSet rs ) 
+private List toTSProductList ( ResultSet rs ) 
 throws Exception {
 	if ( rs == null ) {
 		return null;
 	}
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -10494,7 +10387,7 @@ throws Exception {
 		if (!rs.wasNull()) {
 			data.setDBPermissions(s.trim());
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -10504,12 +10397,12 @@ Convert a ResultSet to a Vector of RiversideDB_TSProductProps.
 @param rs ResultSet from a TSProductProps table query.
 @throws Exception if an error occurs
 */
-private Vector toTSProductPropsList ( ResultSet rs ) 
+private List toTSProductPropsList ( ResultSet rs ) 
 throws Exception {
 	if ( rs == null ) {
 		return null;
 	}
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -10538,7 +10431,7 @@ throws Exception {
 		if (!rs.wasNull()) {
 			data.setSequence(i);
 		}
-		v.addElement(data);
+		v.add(data);
 	}
 	return v;
 }
@@ -10888,7 +10781,7 @@ database.
 written
 @throws Exception if an error occurs.
 */
-public void writeDBUserMeasLocGroupRelation(Vector v) 
+public void writeDBUserMeasLocGroupRelation(List v) 
 throws Exception {
 	if (v == null) {
 		return;
@@ -10899,8 +10792,7 @@ throws Exception {
 		return;
 	}
 	
-	RiversideDB_DBUserMeasLocGroupRelation r = 
-		(RiversideDB_DBUserMeasLocGroupRelation)v.elementAt(0);
+	RiversideDB_DBUserMeasLocGroupRelation r = (RiversideDB_DBUserMeasLocGroupRelation)v.get(0);
 	int firstMLG = r.getMeasLocGroup_num();
 	
 	int currMLG = -1;
@@ -10909,7 +10801,7 @@ throws Exception {
 	boolean abort = false;
 
 	for (int i = 1; i < size; i++) {	
-		r = (RiversideDB_DBUserMeasLocGroupRelation)v.elementAt(i);
+		r = (RiversideDB_DBUserMeasLocGroupRelation)v.get(i);
 		currMLG = r.getMeasLocGroup_num();
 		if (currMLG != firstMLG) {
 			abort = true;
@@ -10918,16 +10810,16 @@ throws Exception {
 	}
 
 	if (abort) {
-		throw new Exception ("Not all records in the Vector had the "
+		throw new Exception ("Not all records in the list had the "
 			+ "same MeasLocGroup_num as the first element in the "
-			+ "Vector.  Records " + error + "had different "
+			+ "list.  Records " + error + "had different "
 			+ "MeasLocGroup_nums.");
 	}
 
 	deleteDBUserMeasLocGroupRelationForMeasLocGroup_num(firstMLG);	
 
 	for (int i = 0; i < size; i++) {	
-		r = (RiversideDB_DBUserMeasLocGroupRelation)v.elementAt(i);
+		r = (RiversideDB_DBUserMeasLocGroupRelation)v.get(i);
 		writeDBUserMeasLocGroupRelation(r);
 	}
 }
@@ -12375,7 +12267,7 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		createNew = true;
 		tsp = new RiversideDB_TSProduct();
 
-		Vector choices = null;
+		List choices = null;
 		try {
 			choices = RiversideDB_Util.getProductGroupsChoices(
 				this);
@@ -12548,7 +12440,7 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 	// returns all the properties, even the override properties, in one
 	// single Vector.  All the properties will be written as long as 
 	// they were not set as SET_AS_RUNTIME_DEFAULT props.
-	Vector v = tsproduct.getAllProps();
+	List v = tsproduct.getAllProps();
 	// v will never be null
 
 	int count = 1;		// used to keep track of the sequence number
@@ -12558,10 +12450,10 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 	String sql = null;
 
 	String error = "";
-	Vector exceptions = new Vector();
+	List exceptions = new Vector();
 
 	for (int i = 0; i < size; i++) {
-		p = (Prop)v.elementAt(i);
+		p = (Prop)v.get(i);
 		if (p.getHowSet() == Prop.SET_AS_RUNTIME_DEFAULT) {
 			// do not store properties that are runtime
 			// defaults.  They will be set automatically
@@ -12595,8 +12487,7 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		 	+ "properties to the database: \n" + error);
 		size = exceptions.size();
 		for (int i = 0; i < size; i++) {
-			Message.printWarning(3, routine,
-				(Exception)exceptions.elementAt(i));
+			Message.printWarning(3, routine, (Exception)exceptions.get(i));
 		}
 	}
 			
@@ -12719,15 +12610,15 @@ currently-logged in user can read, edit, or delete.  This method is
 from TSProductDMI.
 @return a list of the TSProducts in the database.
 */
-public Vector readTSProductDMITSProductList(boolean newProduct) {
+public List readTSProductDMITSProductList(boolean newProduct) {
 	try {
-		Vector v = readTSProductList();
+		List v = readTSProductList();
 		int size = v.size();
 		RiversideDB_TSProduct tsp = null;
-		Vector ret = new Vector();
+		List ret = new Vector();
 		
 		for (int i = 0; i < size; i++) {
-			tsp = (RiversideDB_TSProduct)v.elementAt(i);
+			tsp = (RiversideDB_TSProduct)v.get(i);
 			if (canDelete(tsp.getDBUser_num(), tsp.getDBGroup_num(),
 				tsp.getDBPermissions())
 			  ||canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(),
@@ -12850,13 +12741,13 @@ throws Exception {
 // How to query?
 //	q.addWhereClause("DataTestResults.DataTestNum = " + resultNum);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataTestResultsList(rs);
+	List v = toDataTestResultsList(rs);
 	closeResultSet(rs);
 	if (v == null || v.size() == 0) {
 		return null;
 	}
 	else {
-		return (DataTestResult)v.elementAt(0);
+		return (DataTestResult)v.get(0);
 	}
 }
 
@@ -12960,13 +12851,13 @@ throws Exception {
 		+ functionNum);
 }
 
-public Vector readActionTypes() 
+public List readActionTypes() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_ACTIONTYPE);
 	ResultSet rs = dmiSelect(q);
 	
-	Vector v = new Vector();
+	List v = new Vector();
 
 	while (rs.next()) {
 		v.add(rs.getString(1) + " - " + rs.getString(2));
@@ -12977,25 +12868,24 @@ throws Exception {
 	return v;
 }
 
-public Vector readAllDataTestDataModels() 
+public List readAllDataTestDataModels() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DATATEST);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toDataTestList(rs);
+	List v = toDataTestList(rs);
 	closeResultSet(rs);
 
 	DataTestDataModel model = null;
 	int[] actionNums = null;
 	int size = v.size();
-	Vector ret = new Vector();
+	List ret = new Vector();
 
 	for (int i = 0; i < size; i++) {
-		model = (DataTestDataModel)v.elementAt(i);
+		model = (DataTestDataModel)v.get(i);
 		actionNums = readDataTestActionNums(model.getDataTestNum());
 		model.setActionNums(actionNums);
-		model = readDataTestStatusForDataTestNum(model.getDataTestNum(),
-			model);
+		model = readDataTestStatusForDataTestNum(model.getDataTestNum(), model);
 		ret.add(model);
 	}
 
@@ -13025,12 +12915,12 @@ throws Exception {
 //	Message.printStatus(1, "", "" + w.toInsertString() + "\n\n\n");
 }
 
-public Vector readSeverityTypes() 
+public List readSeverityTypes() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_SEVERITYTYPES);
 	ResultSet rs = dmiSelect(q);
-	Vector v = toSeverityTypesList(rs);
+	List v = toSeverityTypesList(rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -13041,9 +12931,9 @@ Converts a ResultSet to a Vector of DataTestDataModels.
 @return a Vector of DataTestDataModels.
 @throws Exception if an error occurs.
 */
-private Vector toSeverityTypesList(ResultSet rs) 
+private List toSeverityTypesList(ResultSet rs) 
 throws Exception {
-	Vector v = new Vector();
+	List v = new Vector();
 	int index = 1;
 	int i;
 	String s;
@@ -13076,4 +12966,4 @@ throws Exception {
 	return v;
 }
 
-} // End RiversideDB_DMI
+}

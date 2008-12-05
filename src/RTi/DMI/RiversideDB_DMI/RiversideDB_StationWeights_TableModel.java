@@ -16,7 +16,7 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -56,8 +56,7 @@ MeasReducRelation tables.
 </TABLE> </PRE>
 @throws Exception if an invalid data or dmi was passed in.
 */
-public RiversideDB_StationWeights_TableModel(
-	RiversideDB_DMI rdmi, Vector data )
+public RiversideDB_StationWeights_TableModel( RiversideDB_DMI rdmi, List data )
 throws Exception {
 	
 	// _data is a Vector inherited from JWorksheet_AbstractRowTableModel.
@@ -171,7 +170,7 @@ public Object getValueAt(int row, int col) {
 	// for each column.  You can do a lot in here, I've done some really
 	// complicated stuff for some tables.  But for the most part,
 	// something simple like below will work
-	String [] arr = (String[])_data.elementAt(row);
+	String [] arr = (String[])_data.get(row);
 	switch (col) {
 		case  0:	return arr[0];
 
@@ -210,8 +209,7 @@ public boolean isCellEditable(int rowIndex, int columnIndex) {
 }
 
 /**
-Sets the value at the specified position to the specified
-value. 
+Sets the value at the specified position to the specified value. 
 @param value the value to set the cell to. 
 @param row the row of the cell for which to set the value. 
 @param col the col of the cell for which to set the value. 
@@ -227,9 +225,9 @@ public void setValueAt(Object value, int row, int col) {
 				s = "0" + s;
 			}
 			//else if ( s.startsWith("-." ) ) {}
-			String arr[] = (String[]) _data.elementAt(row);
+			String arr[] = (String[])_data.get(row);
 			arr[1] = s;
-			_data.setElementAt(arr, row);
+			_data.set(row, arr);
 			break;
 	}
 	super.setValueAt(value, row, col);

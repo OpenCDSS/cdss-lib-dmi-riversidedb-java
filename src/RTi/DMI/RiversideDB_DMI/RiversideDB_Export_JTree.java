@@ -60,6 +60,7 @@ package RTi.DMI.RiversideDB_DMI;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -105,11 +106,11 @@ private String __popup_AddExportGroup_String       =         "Add Export Group";
 private String __popup_DeleteExportGroup_String    =      "Delete Export Group";
 private String __popup_ExportGroupProperties_String=  "Export Group Properties";
 
-// REVISIT [LT] associated with __measLocGroup_vect
+// TODO [LT] associated with __measLocGroup_vect
 /**
 Holds MeasLocGroup objects NOT USED??? to populate the JTree.
 */
-private Vector __measLocGroup_vect = null;
+private List __measLocGroup_vect = null;
 
 /**
 RiversideDB_Export_JTree default constructor.
@@ -248,15 +249,13 @@ protected void initRiversideDB_DMI_Vectors()
 		__product_vect = __dmi.readExportProductList();
 	}
 	catch ( Exception e ) {
-		Message.printWarning( 2, routine,
-			"Unable to get a Vector of ExportProduct objects. "+ e);
-		__product_vect =  new Vector();
+		Message.printWarning( 2, routine, "Unable to get a Vector of ExportProduct objects. "+ e);
+		__product_vect = new Vector();
 	}
 
 	// Get List of Export ProductGroups
 	try {
-		__productGroup_vect = __dmi.
-			readProductGroupListForProductType( "EXPORT" );
+		__productGroup_vect = __dmi.readProductGroupListForProductType( "EXPORT" );
 	}
 	catch ( Exception e ) {
 		Message.printWarning( 2, routine,
@@ -295,8 +294,7 @@ public void populateTree()
 	RiversideDB_ProductGroup pg = null;
 	int top_grp_num =-999;
 	for ( int g=0; g<grp_size; g++ ) {
-		pg = (RiversideDB_ProductGroup)
-			__productGroup_vect.elementAt(g);
+		pg = (RiversideDB_ProductGroup)__productGroup_vect.get(g);
 		if ( pg == null ) continue;
 
 		boolean canReadProductGroup = false;
@@ -348,8 +346,7 @@ public void populateTree()
 
 		RiversideDB_ExportProduct ep = null;
 		for ( int p=0; p< obj_size; p++ ) {
-			ep = (RiversideDB_ExportProduct)
-				__product_vect.elementAt(p);
+			ep = (RiversideDB_ExportProduct)__product_vect.get(p);
 			if ( ep == null ) {
 				continue;
 			}
@@ -513,12 +510,10 @@ public void actionPerformed (ActionEvent event)
 					//Re-read database to create
 					//new Vector of Export Products
 					try {
-						__product_vect =	
-						__dmi.readExportProductList();
+						__product_vect = __dmi.readExportProductList();
 					}
 					catch ( Exception e ) {
-						Message.printWarning(
-							2, routine, e );
+						Message.printWarning(2, routine, e );
 
 						//create an empty vector
 						__product_vect = new Vector();
@@ -736,8 +731,7 @@ public void actionPerformed (ActionEvent event)
 		int mlg_num = -999;
 		RiversideDB_MeasLocGroup mlg = null;
 		if ( num > 0 ) {
-			mlg = (RiversideDB_MeasLocGroup)
-				__measLocGroup_vect.elementAt(0);
+			mlg = (RiversideDB_MeasLocGroup)__measLocGroup_vect.get(0);
 			mlg_num = mlg.getMeasLocGroup_num();
 		}
 		mlg = null;

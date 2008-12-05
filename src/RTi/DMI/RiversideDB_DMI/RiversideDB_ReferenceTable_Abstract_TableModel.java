@@ -57,6 +57,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.DMI.DMIUtil;
@@ -65,8 +66,7 @@ import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.String.StringUtil;
 
 /**
-Base class for all ReferenceTable editors
-  (RiversideDB_ReferenceTable_*_TableModel.java).
+Base class for all ReferenceTable editors (RiversideDB_ReferenceTable_*_TableModel.java).
 */
 public abstract class RiversideDB_ReferenceTable_Abstract_TableModel
 	extends JWorksheet_AbstractRowTableModel {
@@ -94,8 +94,7 @@ Constructor.
 this table model will be opened.
 @param editable whether the data is editable or not.
 */
-public RiversideDB_ReferenceTable_Abstract_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+public RiversideDB_ReferenceTable_Abstract_TableModel (	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	
 	// _data is a Vector inherited from JWorksheet_AbstractRowTableModel.
@@ -103,7 +102,7 @@ throws Exception {
 	if ( results == null ) {
 		results = new Vector();
 	}
-	_data     = results;
+	_data = results;
 	
 	// Connection to database
 	if ( rdmi == null ) {
@@ -130,8 +129,7 @@ Must be implemented in the derived classes.
 abstract public void backupData();
 
 /**
-Checks if the key field in the table already has a certain value, and if so,
-generates a unique value.
+Checks if the key field in the table already has a certain value, and if so, generates a unique value.
 @param stringKey the String to check for in the key field.
 @param row the row in which the given value is to be placed.
 @return a unique String (might be the one passed in) that can validly be
@@ -143,8 +141,7 @@ protected String checkTableField ( String stringKey, int row ) {
 }
 
 /**
-Checks if the key field in the table already has a certain value, and if so,
-generates a unique value.
+Checks if the key field in the table already has a certain value, and if so, generates a unique value.
 @param integerKey the integer to check for in the key field.
 @param row the row in which the given value is to be placed.
 @return a unique integer (might be the one passed in) that can validly be
@@ -252,8 +249,7 @@ public int getFieldColumnNumber( String fieldName )
 {
 	String s = fieldName.trim();
 	for ( int i = 0; i < _numberOfColumns; i++ ) {
-		if ( JWorksheet.convertColumnName(getColumnName(i)).
-			equalsIgnoreCase( s ) ) {
+		if ( JWorksheet.convertColumnName(getColumnName(i)).equalsIgnoreCase( s ) ) {
 			return i;
 		}
 	}
@@ -438,4 +434,3 @@ protected String trimString( String s, String delimiter )
 }
 
 }
-//------------------------------------------------------------------------------

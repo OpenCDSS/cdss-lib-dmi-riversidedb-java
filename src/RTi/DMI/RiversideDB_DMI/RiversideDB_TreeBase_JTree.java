@@ -41,6 +41,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -112,7 +113,7 @@ protected RiversideDB_DMI __dmi = null;
 Vectors of RiversideDB_* table objects. Used to check if user has permisssions
 to write records to a particular table.
 */
-protected Vector __riversideDB_TablesVector = null;
+protected List __riversideDB_TablesVector = null;
 
 /**
 Reference to the RiversideDB_WindowManager object that manages the windows of
@@ -124,13 +125,13 @@ protected RiversideDB_WindowManager __windowManager = null;
 Holds RiversideDB_product and RiversideDB_productGroup objects used to populate
 the JTrees for import and export product.
 */
-protected Vector __product_vect      = null;
-protected Vector __productGroup_vect = null;
+protected List __product_vect      = null;
+protected List __productGroup_vect = null;
 
 /**
 Write permissions flag. These flags are set during construction and are used
 while adding or removing adding and removing the menus from the popup menus.
-(in responce to mouseReleased event).
+(in response to mouseReleased event).
 */
 protected boolean __canWriteProduct       = false;
 protected boolean __canWriteProductGroup  = false;
@@ -174,8 +175,7 @@ public RiversideDB_TreeBase_JTree (
 		__riversideDB_TablesVector = __dmi.getRiversideDB_Tables();
 	} catch ( Exception e ) {
 		Message.printWarning( 2, routine, e );
-		Message.printWarning( 2, routine,
-			"Unable to get a list of Tables objects.");
+		Message.printWarning( 2, routine, "Unable to get a list of Tables objects.");
 		__riversideDB_TablesVector = new Vector();
 	}
 
@@ -275,14 +275,12 @@ protected boolean initTableWritePermission ( String table )
 		for ( int i = 0; i < __riversideDB_TablesVector.size(); i++ ) {
 
         		// Get the table at 'i'
-			dbTable = ( RiversideDB_Tables )
-				__riversideDB_TablesVector.elementAt(i);
+			dbTable = ( RiversideDB_Tables )__riversideDB_TablesVector.get(i);
 
 			// If our table, check for the write permission
 			if ( (dbTable != null) &&
 			     (table.equalsIgnoreCase(dbTable.getTable_name()))){
-				wPermission = RiversideDB_Util.canWrite (
-					__dmi, dbTable );
+				wPermission = RiversideDB_Util.canWrite ( __dmi, dbTable );
 			}
 		}
 	}

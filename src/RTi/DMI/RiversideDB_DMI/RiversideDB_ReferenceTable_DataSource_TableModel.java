@@ -66,7 +66,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
 Table model used for displaying the data editor for the table DataSource.
@@ -91,7 +91,7 @@ Default constructor.
 @param editable whether the data is editable or not.
 */
 public RiversideDB_ReferenceTable_DataSource_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;	
@@ -99,13 +99,12 @@ throws Exception {
 
 /**
 Stores a backup of each object so that the original values prior to any
-editing can be chcked later to find out if anything is different.
+editing can be checked later to find out if anything is different.
 */
 public void backupData()
 {
 	for (int i = 0; i < _rows; i++) {
-		RiversideDB_DataSource d2 =
-			(RiversideDB_DataSource) _data.elementAt(i);
+		RiversideDB_DataSource d2 = (RiversideDB_DataSource)_data.get(i);
 		d2.setOriginal(d2.cloneSelf());
 		d2.setDirty(false);	
 	}
@@ -125,7 +124,7 @@ protected String checkTableField( String s, int row)
 	RiversideDB_DataSource d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_DataSource)_data.elementAt(i);
+			d = (RiversideDB_DataSource)_data.get(i);
 			if (d.getSource_abbrev().trim().equals(s)) {
 				return checkTableField("X" + s, row);
 			}
@@ -233,8 +232,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_DataSource d =
-		(RiversideDB_DataSource)_data.elementAt(row);
+	RiversideDB_DataSource d = (RiversideDB_DataSource)_data.get(row);
 	switch (column) {
 		case COL_DATA_SOURCE_SOURCE_ABBREV:
 			return d.getSource_abbrev();
@@ -253,10 +251,8 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_DataSource d =
-		(RiversideDB_DataSource)_data.elementAt(row);
-	RiversideDB_DataSource d0 =
-		(RiversideDB_DataSource)d.getOriginal();
+	RiversideDB_DataSource d = (RiversideDB_DataSource)_data.get(row);
+	RiversideDB_DataSource d0 = (RiversideDB_DataSource)d.getOriginal();
 	String s;
 	switch (column) {
 		case COL_DATA_SOURCE_SOURCE_ABBREV:

@@ -66,7 +66,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
 Table model used for displaying the data editor for the reference table 
@@ -96,8 +96,7 @@ This constructor should simple run the base class constructor.
 @param results the results to show in the table.
 @param editable whether the data is editable or not.
 */
-public RiversideDB_ReferenceTable_SHEFType_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+public RiversideDB_ReferenceTable_SHEFType_TableModel ( RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;	
@@ -105,13 +104,12 @@ throws Exception {
 
 /**
 Stores a backup of each object so that the original values prior to any
-editing can be chcked later to find out if anything is different.
+editing can be checked later to find out if anything is different.
 */
 public void backupData()
 {
 	for (int i = 0; i < _rows; i++) {
-		RiversideDB_SHEFType s1 =
-			(RiversideDB_SHEFType)_data.elementAt(i);
+		RiversideDB_SHEFType s1 = (RiversideDB_SHEFType)_data.get(i);
 		s1.setOriginal(s1.cloneSelf());
 		s1.setDirty(false);
 	}
@@ -131,7 +129,7 @@ protected String checkTableField( String s, int row )
 	RiversideDB_SHEFType d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_SHEFType)_data.elementAt(i);
+			d = (RiversideDB_SHEFType)_data.get(i);
 			if (d.getSHEF_pe().trim().equals(s)) {
 				return checkTableField("X" + s, row);
 			}
@@ -259,8 +257,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_SHEFType s =
-		(RiversideDB_SHEFType)_data.elementAt(row);
+	RiversideDB_SHEFType s = (RiversideDB_SHEFType)_data.get(row);
 
 	switch (column) {
 		case COL_SHEF_TYPE_SHEF_PE:
@@ -313,10 +310,8 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_SHEFType rs =
-		(RiversideDB_SHEFType)_data.elementAt(row);
-	RiversideDB_SHEFType rs0 =
-		(RiversideDB_SHEFType)rs.getOriginal();
+	RiversideDB_SHEFType rs = (RiversideDB_SHEFType)_data.get(row);
+	RiversideDB_SHEFType rs0 = (RiversideDB_SHEFType)rs.getOriginal();
 	int i;
 	String s;
 	switch (column) {
@@ -381,4 +376,3 @@ protected Object setTableValueAt( Object value, int row, int column )
 }
 
 }
-//------------------------------------------------------------------------------

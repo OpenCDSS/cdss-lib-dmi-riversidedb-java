@@ -63,7 +63,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
 Table model used for displaying the data editor for the table DataDimension.
@@ -88,7 +88,7 @@ Default constructor.
 @param editable whether the data is editable or not.
 */
 public RiversideDB_ReferenceTable_DataDimension_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;
@@ -96,13 +96,12 @@ throws Exception {
 
 /**
 Stores a backup of each object so that the original values prior to any
-editing can be chcked later to find out if anything is different.
+editing can be checked later to find out if anything is different.
 */
 public void backupData()
 {
 	for ( int i = 0; i < _rows; i++ ) {
-		RiversideDB_DataDimension d1 =
-				(RiversideDB_DataDimension)_data.elementAt(i);
+		RiversideDB_DataDimension d1 = (RiversideDB_DataDimension)_data.get(i);
 		d1.setOriginal(d1.cloneSelf());
 		d1.setDirty(false);
 	}
@@ -122,7 +121,7 @@ protected String checkTableField( String s, int row )
 	RiversideDB_DataDimension d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_DataDimension)_data.elementAt(i);
+			d = (RiversideDB_DataDimension)_data.get(i);
 			if (d.getDimension().trim().equals(s)) {
 				return checkTableField("X" + s, row);
 			}
@@ -230,8 +229,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_DataDimension d =
-		(RiversideDB_DataDimension) _data.elementAt( row );
+	RiversideDB_DataDimension d = (RiversideDB_DataDimension)_data.get( row );
 	switch (column) {
 		case COL_DATA_DIMENSION_DIMENSION:   return d.getDimension();
 		case COL_DATA_DIMENSION_DESCRIPTION: return d.getDescription();
@@ -247,10 +245,8 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_DataDimension d =
-		(RiversideDB_DataDimension)_data.elementAt( row );
-	RiversideDB_DataDimension d0 =
-		(RiversideDB_DataDimension)d.getOriginal();
+	RiversideDB_DataDimension d = (RiversideDB_DataDimension)_data.get( row );
+	RiversideDB_DataDimension d0 = (RiversideDB_DataDimension)d.getOriginal();
 	String s;
 	switch ( column ) {
 		case COL_DATA_DIMENSION_DIMENSION:

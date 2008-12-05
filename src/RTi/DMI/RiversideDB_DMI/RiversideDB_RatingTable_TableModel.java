@@ -17,7 +17,7 @@ package RTi.DMI.RiversideDB_DMI;
 
 import RTi.Util.GUI.JWorksheet;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 
@@ -53,12 +53,10 @@ protected RiversideDB_DMI __rdmi = null;
 Constructor.  This builds the Model for displaying the given 
 RiversideDB_RatingTable_Table objects' information.
 @param dmi the dmi to use.
-@param data Vector of RiversideDB_RatingTable_Table objects for 
-which to display data.
+@param data Vector of RiversideDB_RatingTable_Table objects for which to display data.
 @throws Exception if an invalid data or dmi was passed in.
 */
-public RiversideDB_RatingTable_TableModel( RiversideDB_DMI rdmi,
-					   Vector data ) 
+public RiversideDB_RatingTable_TableModel( RiversideDB_DMI rdmi, List data ) 
 throws Exception {
 	
 	// _data is a Vector inherited from JWorksheet_AbstractRowTableModel.
@@ -77,8 +75,7 @@ throws Exception {
 	__rdmi = rdmi;	
 
 	//  _rows is an integer that contains the number of rows of
-	// data to be displayed in the table.  Make sure to set the 
-	// value 
+	// data to be displayed in the table.  Make sure to set the value 
 	_rows = _data.size();
 }
 
@@ -211,8 +208,7 @@ public Object getValueAt(int row, int col) {
 	// for each column.  You can do a lot in here, I've done some really
 	// complicated stuff for some tables.  But for the most part,
 	// something simple like below will work
-	RiversideDB_RatingTable table = 
-	(RiversideDB_RatingTable ) _data.elementAt(row);
+	RiversideDB_RatingTable table = (RiversideDB_RatingTable ) _data.get(row);
 
 	double num;
 	switch (col) {
@@ -287,20 +283,17 @@ public void setValueAt(Object value, int row, int col) {
  		case  0: 
 			dval = ((Double)value).doubleValue();
 			//update object
-			table = (RiversideDB_RatingTable) 
-			_data.elementAt( row );
+			table = (RiversideDB_RatingTable)_data.get( row );
 			table.setValue1( dval);
 			break;
  		case  1: dval = ((Double)value).doubleValue();
 			//update object
-			table = 
-			(RiversideDB_RatingTable) _data.elementAt( row );
+			table = (RiversideDB_RatingTable)_data.get( row );
 			table.setValue2( dval);
 			break;
  		case  2: dval = ((Double)value).doubleValue();
 			//update object
-			table = 
-			(RiversideDB_RatingTable) _data.elementAt( row );
+			table = (RiversideDB_RatingTable)_data.get( row );
 			table.setShift1( dval);
 			break;
 	}
@@ -308,8 +301,7 @@ public void setValueAt(Object value, int row, int col) {
 }
 
 /**
-Reference to the worksheet in which this table model
-manages the data. 
+Reference to the worksheet in which this table model manages the data. 
 */ 
 public void setWorksheet(JWorksheet worksheet) {
 	__worksheet = worksheet;

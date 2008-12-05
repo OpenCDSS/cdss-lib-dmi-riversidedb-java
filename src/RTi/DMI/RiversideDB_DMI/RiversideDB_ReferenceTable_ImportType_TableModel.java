@@ -66,7 +66,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
 Table model used for displaying the data editor for the table ImportType.
@@ -91,7 +91,7 @@ Default constructor.
 @param editable whether the data is editable or not.
 */
 public RiversideDB_ReferenceTable_ImportType_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;	
@@ -99,13 +99,12 @@ throws Exception {
 
 /**
 Stores a backup of each object so that the original values prior to any
-editing can be chcked later to find out if anything is different.
+editing can be checked later to find out if anything is different.
 */
 public void backupData()
 {
 	for (int i = 0; i < _rows; i++) {
-		RiversideDB_ImportType i1 =
-			(RiversideDB_ImportType)_data.elementAt(i);
+		RiversideDB_ImportType i1 = (RiversideDB_ImportType)_data.get(i);
 		i1.setOriginal(i1.cloneSelf());
 		i1.setDirty(false);
 	}
@@ -125,7 +124,7 @@ protected String checkTableField( String s, int row )
 	RiversideDB_ImportType d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_ImportType)_data.elementAt(i);
+			d = (RiversideDB_ImportType)_data.get(i);
 			if (d.getName().trim().equals(s)) {
 				return checkTableField("X" + s, row);
 			}
@@ -235,8 +234,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_ImportType i =
-		(RiversideDB_ImportType)_data.elementAt(row);
+	RiversideDB_ImportType i = (RiversideDB_ImportType)_data.get(row);
 	switch (column) {
 		case COL_IMPORT_TYPE_NAME:
 			return i.getName();
@@ -255,8 +253,7 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_ImportType i =
-		(RiversideDB_ImportType)_data.elementAt(row);
+	RiversideDB_ImportType i = (RiversideDB_ImportType)_data.get(row);
 	RiversideDB_ImportType i0 =
 		(RiversideDB_ImportType)i.getOriginal();
 	String s;

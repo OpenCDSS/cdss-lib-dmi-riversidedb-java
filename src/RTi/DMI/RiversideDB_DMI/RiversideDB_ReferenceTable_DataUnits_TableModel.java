@@ -66,7 +66,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
 Table model used for displaying the data editor for the table DataUnits.
@@ -97,7 +97,7 @@ Default constructor.
 @param editable whether the data is editable or not.
 */
 public RiversideDB_ReferenceTable_DataUnits_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;	
@@ -110,8 +110,7 @@ editing can be chcked later to find out if anything is different.
 public void backupData()
 {
 	for (int i = 0; i < _rows; i++) {
-		RiversideDB_DataUnits d4 =
-			(RiversideDB_DataUnits)_data.elementAt(i);
+		RiversideDB_DataUnits d4 = (RiversideDB_DataUnits)_data.get(i);
 		d4.setOriginal(d4.cloneSelf());
 		d4.setDirty(false);
 	}
@@ -131,7 +130,7 @@ protected String checkTableField( String s, int row )
 	RiversideDB_DataUnits d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_DataUnits)_data.elementAt(i);
+			d = (RiversideDB_DataUnits)_data.get(i);
 			if (d.getUnits_abbrev().trim().equals(s)) {
 				return checkTableField("X" + s, row);
 			}
@@ -269,8 +268,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_DataUnits d =
-		(RiversideDB_DataUnits)_data.elementAt(row);
+	RiversideDB_DataUnits d = (RiversideDB_DataUnits)_data.get(row);
 		
 	switch (column) {
 		case COL_DATA_UNITS_UNITS_ABBREV:
@@ -302,8 +300,7 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_DataUnits du =
-		(RiversideDB_DataUnits)_data.elementAt(row);
+	RiversideDB_DataUnits du = (RiversideDB_DataUnits)_data.get(row);
 	RiversideDB_DataUnits du0 =
 		(RiversideDB_DataUnits)du.getOriginal();
 	double d;

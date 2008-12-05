@@ -57,6 +57,7 @@ import  java.awt.event.ActionEvent;
 import  java.awt.event.ActionListener;
 import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
+import  java.util.List;
 import  java.util.Vector;
 
 import 	javax.swing.JCheckBox;
@@ -279,15 +280,15 @@ RiversideDB_ProductGroup __db_RTi_ProductGroup= null;
 RiversideDB_ProductGroup __gui_RTi_ProductGroup = null;
 
 //vector contain ProductGroup objects for a given ProductType.
-private Vector __productGroup_vect = null;
+private List __productGroup_vect = null;
 
 //Product types vector - holds strings representing available ProductTypes
 //Used for Drop-down list of Types (which is set to disabled currently).
-private Vector __productType_vect = new Vector();
+private List __productType_vect = new Vector();
 
 //Holds a Vector of status information-- each
 //field that has been changed is recored in this vector.
-private Vector __dirty_vect = new Vector();
+private List __dirty_vect = new Vector();
 
 //Flag to indicate if we are running in CAUTIOUS MODE---
 //aka, if we prompt the user for confirmation of changes
@@ -368,7 +369,7 @@ public RiversideDB_ProductGroup_JFrame(
 	}
 
 	// Get vector of all product types
-	Vector pt_vect = null;
+	List pt_vect = null;
 	try {
 		pt_vect = __dmi.readProductTypeList();
 	}
@@ -378,7 +379,7 @@ public RiversideDB_ProductGroup_JFrame(
  		// REVIST [LT] 2005-01-07 - ShowMessageDialog added here because
  		//         if the ProductType table is not in
 		//         the RiversideDB, which is the case for the test case
-		//	   (Polochic) nothing happing when trying to bring up
+		//	   (Polochic) nothing happening when trying to bring up
 		//	   the Import Group Properties editor.
 		JOptionPane.showMessageDialog(
 			this,  e, "Warning", JOptionPane.WARNING_MESSAGE );
@@ -391,11 +392,11 @@ public RiversideDB_ProductGroup_JFrame(
 	}
 	RiversideDB_ProductType pt = null;
 	for ( int i=0; i< size; i++ ) {
-		pt = (RiversideDB_ProductType) pt_vect.elementAt(i);
+		pt = (RiversideDB_ProductType) pt_vect.get(i);
 		if ( pt == null ) {
 			continue;
 		}
- 		__productType_vect.addElement( pt.getProductType() );
+ 		__productType_vect.add( pt.getProductType() );
 	}
 
 	// If Identifier is MISSING, we are creating a new ProductGroup
@@ -476,7 +477,7 @@ protected void checkRequiredInput() throws Exception {
 		RiversideDB_ProductGroup pg = null;
 		for ( int i=0; i<size; i++ ) {
 			pg = (RiversideDB_ProductGroup) 
- 			__productGroup_vect.elementAt(i);
+ 			__productGroup_vect.get(i);
 			if ( pg == null ) {
 				continue;
 			}
@@ -803,10 +804,10 @@ protected void update_database( ) throws Exception {
 	StringBuffer b = new StringBuffer();
 	for ( int i=0; i< __dirty_vect.size(); i++ ) {
 		if ( i == ( __dirty_vect.size()-1) ) {
-			b.append( (String) __dirty_vect.elementAt(i) );
+			b.append( (String) __dirty_vect.get(i) );
 		}
 		else {
-			b.append( (String) __dirty_vect.elementAt(i) + "\n" );
+			b.append( (String) __dirty_vect.get(i) + "\n" );
 		}
 	}
 
@@ -1003,7 +1004,7 @@ public void verify_fields() throws Exception {
 	
 	if ( ! db_id.equalsIgnoreCase( gui_id ) ) {
  		__gui_RTi_ProductGroup.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Identifier from \"" + db_id + 
 		"\" to \"" + gui_id + "\"");
 
@@ -1022,7 +1023,7 @@ public void verify_fields() throws Exception {
 
 	if ( ! db_enabled_str.equalsIgnoreCase( gui_enabled_str ) ) {
  		__gui_RTi_ProductGroup.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change IsEnabled (Y/N) from \"" + db_enabled_str + 
 		"\" to \"" + gui_enabled_str + "\"");
 
@@ -1037,7 +1038,7 @@ public void verify_fields() throws Exception {
 	
 	if ( ! db_name.equalsIgnoreCase( gui_name ) ) {
  		__gui_RTi_ProductGroup.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Name from \"" + db_name + 
 		"\" to \"" + gui_name + "\"");
 
@@ -1052,7 +1053,7 @@ public void verify_fields() throws Exception {
 	
 	if ( ! db_comment.equalsIgnoreCase( gui_comment ) ) {
  		__gui_RTi_ProductGroup.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Comment from \"" + db_comment + 
 		"\" to \"" + gui_comment + "\"");
 
@@ -1147,7 +1148,7 @@ public void actionPerformed (ActionEvent event) {
 				StringBuffer b = new StringBuffer();
 				for (int i=0;i< __dirty_vect.size(); i++ ) {
 					b.append( (String) 
- 					__dirty_vect.elementAt(i) + 
+ 					__dirty_vect.get(i) + 
 					"\n" );
 				}
 				//write out a confirmation message.

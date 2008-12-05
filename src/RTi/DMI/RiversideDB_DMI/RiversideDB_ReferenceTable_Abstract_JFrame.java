@@ -88,6 +88,7 @@ import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.List;
 import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -176,12 +177,12 @@ protected RiversideDB_WindowManager _windowManager = null;
 A Vector of records that were deleted from the GUI and which may need deleted
 from the database.
 */
-protected Vector _deletedRecords = null;
+protected List _deletedRecords = null;
 
 /**
 The results of the query that will be displayed in the table.
 */
-protected Vector _results = null;
+protected List _results = null;
 
 /*
 Window title.
@@ -339,7 +340,7 @@ protected void checkRecordsForChanges()
 
 	int size = _deletedRecords.size();
 	for (int i = 0; i < size; i++) {
-		ddo = (DMIDataObject)_deletedRecords.elementAt(i);
+		ddo = (DMIDataObject)_deletedRecords.get(i);
 		if (ddo.getOriginal () != null) {
 			setButtonsChanges();
 			return;
@@ -383,11 +384,11 @@ protected void deleteClicked()
 {
 	int[] rows = _worksheet.getSelectedRows();
 
-	Vector v = _worksheet.getRowData(rows);
+	List v = _worksheet.getRowData(rows);
 	_worksheet.deleteRows(rows);
 
 	for (int i = 0; i < v.size(); i++) {
-		_deletedRecords.add(v.elementAt(i));
+		_deletedRecords.add(v.get(i));
 	}
 }
 
@@ -496,12 +497,12 @@ protected void importFile(String filename, boolean fieldNames) {
 			return;
 		}
 
-		Vector fields = StringUtil.breakStringList(line, ",",
+		List fields = StringUtil.breakStringList(line, ",",
 			StringUtil.DELIM_ALLOW_STRINGS);
 		fieldNums = new int[fields.size()];
 		for (int i = 0; i < fields.size(); i++) {
 			fieldNums[i] = _model.getFieldColumnNumber(
-				(String)fields.elementAt(i));
+				(String)fields.get(i));
 		}
 	}
 	else {
@@ -529,7 +530,7 @@ protected void importFile(String filename, boolean fieldNames) {
 		return;
 	}
 
-	Vector v = null;
+	List v = null;
 	int lineNum = 2;
 	boolean skip = false;
 	while (line != null) {
@@ -591,7 +592,7 @@ Adds a new record to the worksheet with values read in from an import file.
 @param classes the classes for the fields.
 @return true if successful, false if not.
 */
-protected boolean importNewRecord( Vector values, int[] fieldNums,
+protected boolean importNewRecord( List values, int[] fieldNums,
 	Class[] classes)
 {
 	String routine = CLASS + ".importNewRecord";
@@ -606,7 +607,7 @@ protected boolean importNewRecord( Vector values, int[] fieldNums,
 	String s      = null;
 	for ( int i = 0; i < values.size(); i++ ) {
 
-		s = (String)values.elementAt(i);
+		s = (String)values.get(i);
 		s = s.trim();
 
 		try {
@@ -652,7 +653,7 @@ public boolean isDataDirty()
 
 	int size = _deletedRecords.size();
 	for (int i = 0; i < size; i++) {
-		ddo = (DMIDataObject)_deletedRecords.elementAt(i);
+		ddo = (DMIDataObject)_deletedRecords.get(i);
 		if (ddo.getOriginal () != null) {
 			return true;
 		}
@@ -770,8 +771,8 @@ protected void saveClicked()
 	String nl = System.getProperty( "line.separator" );
 
 	int rows = _worksheet.getRowCount();
-	Vector writeRecords = new Vector();
-	Vector pairs = new Vector();
+	List writeRecords = new Vector();
+	List pairs = new Vector();
 
 	// First go through all the records in the table and see if any
 	// have been changed.  This is done by checking the isDirty flag().
@@ -814,7 +815,7 @@ protected void saveClicked()
 	int size = _deletedRecords.size();
 	int deleteErrorCount = 0;
 	for (int i = 0; i < size; i++) {
-		ddo = (DMIDataObject)_deletedRecords.elementAt(i);
+		ddo = (DMIDataObject)_deletedRecords.get(i);
 		if (ddo.getOriginal() != null) {
 			try {
 				deleteRecord(ddo);
@@ -839,7 +840,7 @@ protected void saveClicked()
 	size = writeRecords.size();
 	for (int i = 0; i < size; i++) {
 		try {
-			ddo = (DMIDataObject)writeRecords.elementAt(i);
+			ddo = (DMIDataObject)writeRecords.get(i);
 			writeRecord(i, ddo, pairs);
 		}
 		catch (Exception e) {
@@ -1193,7 +1194,7 @@ written.
 @param pairs Vector that ties the record to be written to a row in the
 worksheet.
 */
-protected void writeRecord(int recordNum, DMIDataObject ddo, Vector pairs)
+protected void writeRecord(int recordNum, DMIDataObject ddo, List pairs)
 throws Exception
 {
 }

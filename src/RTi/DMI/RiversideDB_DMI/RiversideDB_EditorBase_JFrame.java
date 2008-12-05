@@ -25,6 +25,7 @@ package RTi.DMI.RiversideDB_DMI;
 
 import RTi.Util.Message.Message;
 
+import java.util.List;
 import java.util.Vector;
 import javax.swing.JFrame;
 
@@ -153,13 +154,12 @@ Adds the contents of one Vector to the contents of another vector.
 @param main_vect Vector to add to.
 @return Vector containing the original contents and the additions.
 */
-public static Vector addVectors( Vector vect_to_add, Vector main_vect )
+public static List addLists( List vect_to_add, List main_vect )
 {
 	String routine = __class + ".addVectors";
 
 	if ( main_vect == null ) {
-		Message.printWarning( 2, routine,
-			"Vector to add contents to is null." );
+		Message.printWarning( 2, routine, "List to add contents to is null." );
 		return new Vector();
 	}
 	int size = 0;
@@ -171,7 +171,7 @@ public static Vector addVectors( Vector vect_to_add, Vector main_vect )
 			"No data to add to main Vector." );
 	}
 	for ( int i=0; i<size; i++ ) {
-		main_vect.addElement( vect_to_add.elementAt(i) );
+		main_vect.add( vect_to_add.get(i) );
 	}
 	return main_vect;
 }
@@ -186,9 +186,9 @@ the entries in the New Vector that and not in the Old Vector
 @return a Vector containing only the entries in the New Vector that and not in
 the Old Vector.
 */
-public static Vector findAdditions( Vector vecOld, Vector vecNew )
+public static List findAdditions( List vecOld, List vecNew )
 {
-	Vector vecReturn = new Vector();
+	List vecReturn = new Vector();
 	for (int i = 0; i < vecNew.size(); i++) {
 		if ( !vecOld.contains(vecNew.get(i)) ) {
 			vecReturn.add(vecNew.get(i));
@@ -206,9 +206,9 @@ Strings that exist in the vecOld and not in the vecNew.
 @param vecNew the New Vector
 @return a Vector containing entries found in the Old Vector and not in New.
 */
-public static Vector findRemovals( Vector vecOld, Vector vecNew )
+public static List findRemovals( List vecOld, List vecNew )
 {
-	Vector vecReturn = new Vector();
+	List vecReturn = new Vector();
 	for (int i = 0; i < vecOld.size(); i++) {
 		if ( !vecNew.contains(vecOld.get(i)) ) {
 			vecReturn.add(vecOld.get(i));
@@ -223,9 +223,9 @@ Method used to remove any duplicate Strings from a Vector.
 @param v Vector to remove duplicate Strings from.
 @param return Vector containing non-duplicated Strings.
 */
-public static Vector removeDuplicateStringsFromVector( Vector v )
+public static List removeDuplicateStringsFromList( List v )
 {
-	Vector no_dupes_vect = new Vector();
+	List no_dupes_vect = new Vector();
 
 	int size = 0;
 	if ( v != null ) {
@@ -234,11 +234,11 @@ public static Vector removeDuplicateStringsFromVector( Vector v )
 	int last_ind = 0;
 	String s = null;
 	for ( int i=0; i<size; i++ ) {
-		s = (String) v.elementAt(i);
+		s = (String) v.get(i);
 		last_ind = v.lastIndexOf( s );
 		if ( last_ind == i ) {
 			//not a repeat
-			no_dupes_vect.addElement( s );
+			no_dupes_vect.add( s );
 		}
 	}
 

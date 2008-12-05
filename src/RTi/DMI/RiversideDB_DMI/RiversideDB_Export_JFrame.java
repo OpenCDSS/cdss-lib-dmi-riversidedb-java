@@ -131,6 +131,7 @@ import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
 import  java.io.File;
 import  java.util.Date;
+import  java.util.List;
 import  java.util.Vector;
 
 import 	javax.swing.BorderFactory;
@@ -599,7 +600,7 @@ private JTextField __new_group_tab_name_JTextField = null;
 
 //Holds RIVERSIDEDB OBJECTS and Vectors of the objects
 //Holds all the ExportProduct Objects
-private Vector __RTi_ExportProduct_vect = null;
+private List __RTi_ExportProduct_vect = null;
 
 //Holds the name of the Current ExportProduct Object being worked with!
 RiversideDB_ExportProduct __db_RTi_ExportProduct = null;
@@ -608,18 +609,18 @@ RiversideDB_ExportProduct __db_RTi_ExportProduct = null;
 long __db_ExportProduct_num = -999;
 
 //Holds all the ExportConf objects
-private Vector __db_RTi_ExportConf_vect = null;
-private Vector __worksheet_RTi_ExportConf_vect = null;
+private List __db_RTi_ExportConf_vect = null;
+private List __worksheet_RTi_ExportConf_vect = null;
 RiversideDB_ExportConf __db_RTi_ExportConf = null;
 
 //Holds all the MeasTypes
 //private Vector __all_MeasType_vect = null;
 
 //Holds all the MeasTypes WITH CREATE METHOD EXPORT!!!!!!!
-private Vector __leftList_MeasType_vect = null;
+private List __leftList_MeasType_vect = null;
 
 //vector of ExportTypes
-private Vector __RTi_ExportType_vect = null;
+private List __RTi_ExportType_vect = null;
 
 //holds text name of node being operated on
 private String __db_tree_node_str = null;
@@ -632,12 +633,12 @@ private JPanel __automation_tab_JPanel = null;
 
 //Holds objects with current, but uncommitted changes
 RiversideDB_ExportProduct __gui_RTi_ExportProduct = null;
-private Vector __gui_RTi_ExportConf_vect  = null;
+private List __gui_RTi_ExportConf_vect  = null;
 
 //data type vect
-private Vector __RTi_DataType_vect = null;
+private List __RTi_DataType_vect = null;
 //MeasLocGroup vector
-private Vector __RTi_MeasLocGroup_vect = null;
+private List __RTi_MeasLocGroup_vect = null;
 
 //HOlds the current ExportConf object selected in
 //the Right-hand JList
@@ -645,7 +646,7 @@ RiversideDB_ExportConf __gui_RTi_ExportConf = null;
 
 //Holds a Vector of status information-- each
 //field that has been changed is recored in this vector.
-private Vector __dirty_vect = new Vector();
+private List __dirty_vect = new Vector();
 
 //Flag to indicate if we are running in CAUTIOUS MODE---
 //aka, if we prompt the user for confirmation of changes
@@ -797,8 +798,7 @@ public RiversideDB_Export_JFrame(
 			readExportConfListForExportProduct_numByLocation(
 			(int) __db_ExportProduct_num );
 
- 			__gui_RTi_ExportConf_vect = __dmi.
-			readExportConfListForExportProduct_numByLocation(
+ 			__gui_RTi_ExportConf_vect = __dmi.readExportConfListForExportProduct_numByLocation(
 			(int) __db_ExportProduct_num );
 		}
 		catch ( Exception e ) {
@@ -821,12 +821,11 @@ public RiversideDB_Export_JFrame(
 		int size= 0;
 		size = __RTi_ExportType_vect.size();
 		RiversideDB_ExportType et = null;
-		Vector types_vect = new Vector();
+		List types_vect = new Vector();
 		String type = null;
 		String desc = null;
 		for ( int i=0; i<size;i++ ) {
-			et = ( RiversideDB_ExportType )
- 			__RTi_ExportType_vect.elementAt(i);
+			et = ( RiversideDB_ExportType )__RTi_ExportType_vect.get(i);
 			if ( et ==null ) {
 				continue;
 			}
@@ -837,7 +836,7 @@ public RiversideDB_Export_JFrame(
 				0, 50-(type.length())) +
 				"...";
 			}
-			types_vect.addElement( type + " - " + desc );
+			types_vect.add( type + " - " + desc );
 		}
 
 		String selectedValue = (new JComboBoxResponseJDialog(this,
@@ -939,7 +938,7 @@ public RiversideDB_Export_JFrame(
 		RiversideDB_MeasLocGroup mlg = null;
 		if ( num > 0 ) {
 			mlg = 	(RiversideDB_MeasLocGroup)
-			__RTi_MeasLocGroup_vect.elementAt(0);
+			__RTi_MeasLocGroup_vect.get(0);
 			__db_RTi_ExportProduct.setMeasLocGroup_num(
 			mlg.getMeasLocGroup_num() );
 		}
@@ -1030,8 +1029,8 @@ public JPanel assemble_tab_automation( ) {
 	"Required if automated: Select year" );
 
 	//year Combobox
-	Vector yr_vect = new Vector();
-	yr_vect.addElement( "* - All" );
+	List yr_vect = new Vector();
+	yr_vect.add( "* - All" );
  	__automation_tab_year_JComboBox = new SimpleJComboBox( yr_vect );
 
 	//month label "month"
@@ -1040,10 +1039,10 @@ public JPanel assemble_tab_automation( ) {
 	"Required if automated: Select month" );
 
 	//month JComboBox
-	Vector mo_vect = new Vector();
-	mo_vect.addElement( "* - All" );
+	List mo_vect = new Vector();
+	mo_vect.add( "* - All" );
 	for ( int i=1; i<=12; i++ ) {
-		mo_vect.addElement( String.valueOf(i) + " - " +
+		mo_vect.add( String.valueOf(i) + " - " +
 		TimeUtil.monthAbbreviation( i ) );
 	}
  	__automation_tab_month_JComboBox = new SimpleJComboBox( mo_vect );
@@ -1055,11 +1054,11 @@ public JPanel assemble_tab_automation( ) {
 	"Required if automated: Select day" );
 
 	//day JComboBox
-	Vector day_vect = new Vector();
-	day_vect.addElement("* - All" );
+	List day_vect = new Vector();
+	day_vect.add("* - All" );
 	//default, fill with 31
 	for ( int i=1; i<=31; i++ ) {
-		day_vect.addElement( String.valueOf(i) );
+		day_vect.add( String.valueOf(i) );
 	}
  	__automation_tab_day_JComboBox = new SimpleJComboBox( day_vect );
 
@@ -1069,10 +1068,10 @@ public JPanel assemble_tab_automation( ) {
 	"Required if automated: Select hour" );
 
 	//hour JComboBox
-	Vector hour_vect = new Vector();
-	hour_vect.addElement("* - All" );
+	List hour_vect = new Vector();
+	hour_vect.add("* - All" );
 	for ( int i=0; i<=23; i++ ) {
-		hour_vect.addElement( String.valueOf(i) );
+		hour_vect.add( String.valueOf(i) );
 	}
  	__automation_tab_hour_JComboBox = new SimpleJComboBox( hour_vect );
 
@@ -1082,10 +1081,10 @@ public JPanel assemble_tab_automation( ) {
 	"Required if automated: Select minute" );
 
 	//minute JCombobox
-	Vector min_vect = new Vector();
-	min_vect.addElement("* - All" );
+	List min_vect = new Vector();
+	min_vect.add("* - All" );
 	for ( int i=0; i<=59; i++ ) {
-		min_vect.addElement( String.valueOf(i) );
+		min_vect.add( String.valueOf(i) );
 	}
  	__automation_tab_minute_JComboBox = new SimpleJComboBox( min_vect );
 
@@ -1095,10 +1094,10 @@ public JPanel assemble_tab_automation( ) {
 	"Required if automated: Select second" );
 
 	//second JComboBox
-	Vector sec_vect = new Vector();
-	sec_vect.addElement("* - All" );
+	List sec_vect = new Vector();
+	sec_vect.add("* - All" );
 	for ( int i=0; i<=59; i++ ) {
-		sec_vect.addElement( String.valueOf(i) );
+		sec_vect.add( String.valueOf(i) );
 	}
  	__automation_tab_second_JComboBox = new SimpleJComboBox( sec_vect );
 
@@ -1110,10 +1109,10 @@ public JPanel assemble_tab_automation( ) {
 	//weekday combo box (days of week)
 	String [] arr_days = null;
 	arr_days = TimeUtil.DAY_NAMES;
-	Vector days_vect = new Vector();
-	days_vect.addElement( "* - All" );
+	List days_vect = new Vector();
+	days_vect.add( "* - All" );
 	for ( int i=0; i<arr_days.length; i++ ) {
-		days_vect.addElement( String.valueOf(i) + " - " + arr_days[i] );
+		days_vect.add( String.valueOf(i) + " - " + arr_days[i] );
 	}
  	__automation_tab_weekday_JComboBox = new SimpleJComboBox( days_vect );
 	JGUIUtil.setEnabled( __automation_tab_weekday_JComboBox, false );
@@ -1319,17 +1318,17 @@ public JPanel assemble_tab_files( ) {
 	"<BR>Wildcards will be appended to file name</HTML>");
 
 	//but make new SimpleJComboBox
-	Vector wild_vect = new Vector();
+	List wild_vect = new Vector();
 	//EXPORTS do not have source files...
 	//wild_vect.addElement("%F - Substitute file name, no extension, from Source File(s)");
 	//wild_vect.addElement("%E - Substitute extension given in Source File(s)");
-	wild_vect.addElement("%Y - Substitute current year (4 digits)" );
-	wild_vect.addElement("%2Y - Substitute current year (2 digits)" );
-	wild_vect.addElement("%M - Substitute current month (2 digits" );
-	wild_vect.addElement("%D - Substitute current day (2 digits)" );
-	wild_vect.addElement("%H - Substitute current hour (2 digits)" );
-	wild_vect.addElement("%N - Substitute current minute (2 digits)" );
-	wild_vect.addElement("%S - Substitute current second (2 digits)" );
+	wild_vect.add("%Y - Substitute current year (4 digits)" );
+	wild_vect.add("%2Y - Substitute current year (2 digits)" );
+	wild_vect.add("%M - Substitute current month (2 digits" );
+	wild_vect.add("%D - Substitute current day (2 digits)" );
+	wild_vect.add("%H - Substitute current hour (2 digits)" );
+	wild_vect.add("%N - Substitute current minute (2 digits)" );
+	wild_vect.add("%S - Substitute current second (2 digits)" );
 
 
  	__files_tab_dest_wild_JComboBox = new SimpleJComboBox( wild_vect );
@@ -1452,13 +1451,13 @@ public JPanel assemble_tab_properties( ) {
  	"2 is recommended" );
 
 	//TextField for Export Order
-	Vector order_vect = new Vector();
+	List order_vect = new Vector();
 	//Michael originally said to start at 2, but there is
 	//data in the db that starts with 1...
 	for ( int i=0;i<15;i++ ) {
-		order_vect.addElement( String.valueOf(i) );
+		order_vect.add( String.valueOf(i) );
 	}
-	order_vect.addElement("99");
+	order_vect.add("99");
  	__props_tab_export_order_JComboBox = new SimpleJComboBox( order_vect );
  	__props_tab_export_order_JComboBox.setSelectedIndex(3);
 
@@ -1482,17 +1481,17 @@ public JPanel assemble_tab_properties( ) {
 	" are disabled</HTML>");
 
 	//JComboBox with choices: "+" and "-"
-	Vector plus_minus_vect = new Vector();
-	plus_minus_vect.addElement("+");
-	plus_minus_vect.addElement("-");
+	List plus_minus_vect = new Vector();
+	plus_minus_vect.add("+");
+	plus_minus_vect.add("-");
 
  	__props_tab_export_start_plusminus_JComboBox = new SimpleJComboBox(
 	plus_minus_vect );
 
 	//Editable JComboBox with choices: 1-31
-	Vector numb_vect = new Vector();
+	List numb_vect = new Vector();
 	for ( int i=1; i<=31; i++ ) {
-		numb_vect.addElement( String.valueOf( i ) );
+		numb_vect.add( String.valueOf( i ) );
 	}
 
  	__props_tab_export_start_numb_JComboBox = new SimpleJComboBox(
@@ -1501,9 +1500,9 @@ public JPanel assemble_tab_properties( ) {
  	__props_tab_export_start_numb_JComboBox.addActionListener( this );
 
 	//JComboBox with choices: DAY and HOUR
-	Vector day_hr_vect = new Vector();
-	day_hr_vect.addElement( "DAY" );
-	day_hr_vect.addElement( "HOUR" );
+	List day_hr_vect = new Vector();
+	day_hr_vect.add( "DAY" );
+	day_hr_vect.add( "HOUR" );
 
  	__props_tab_export_start_dayhr_JComboBox = new SimpleJComboBox(
 	day_hr_vect );
@@ -1598,21 +1597,16 @@ public JPanel assemble_tab_properties( ) {
 
 	//all ExportProduct also have a property for
 	//DATE_FORMAT
-	Vector dateformats_vect = new Vector();
-	dateformats_vect.addElement( DEFAULT_str );
-	dateformats_vect.addElement( "FORMAT_MM_SLASH_DD_SLASH_YY - MM/DD/YY" );
-	dateformats_vect.addElement(
-	"FORMAT_MM_SLASH_DD_SLASH_YYYY - MM/DD/YYYY" );
-	dateformats_vect.addElement(
-	"FORMAT_MM_SLASH_DD_SLASH_YYYY_HH  - MM/DD/YYYY HH" );
-	dateformats_vect.addElement( "FORMAT_MM_DD_YYYY_HH - MM-DD-YYYY HH" );
-	dateformats_vect.addElement(
-	"FORMAT_MM_SLASH_DD_SLASH_YYYY_HH_mm - MM/DD/YYYY HH:mm" );
-	dateformats_vect.addElement( "FORMAT_YYYY_MM_DD_HH - YYYY-MM-DD HH" );
-	dateformats_vect.addElement(
-	"FORMAT_YYYY_MM_DD_HH_mm - YYYY-MM-DD HH:mm" );
-	dateformats_vect.addElement(
-	"FORMAT_YYYY_MM_DD_HHmm - YYYY-MM-DD HHmm" );
+	List dateformats_vect = new Vector();
+	dateformats_vect.add( DEFAULT_str );
+	dateformats_vect.add( "FORMAT_MM_SLASH_DD_SLASH_YY - MM/DD/YY" );
+	dateformats_vect.add( "FORMAT_MM_SLASH_DD_SLASH_YYYY - MM/DD/YYYY" );
+	dateformats_vect.add( "FORMAT_MM_SLASH_DD_SLASH_YYYY_HH  - MM/DD/YYYY HH" );
+	dateformats_vect.add( "FORMAT_MM_DD_YYYY_HH - MM-DD-YYYY HH" );
+	dateformats_vect.add( "FORMAT_MM_SLASH_DD_SLASH_YYYY_HH_mm - MM/DD/YYYY HH:mm" );
+	dateformats_vect.add( "FORMAT_YYYY_MM_DD_HH - YYYY-MM-DD HH" );
+	dateformats_vect.add( "FORMAT_YYYY_MM_DD_HH_mm - YYYY-MM-DD HH:mm" );
+	dateformats_vect.add( "FORMAT_YYYY_MM_DD_HHmm - YYYY-MM-DD HHmm" );
 
 	//PROPERTIES...
 	//LAST_OBS_REPORT Properties
@@ -1624,16 +1618,16 @@ public JPanel assemble_tab_properties( ) {
 		"Optional: Enter title for graph (default is blank)" );
 
 		// TSProduct
-		Vector tsProductString_vect = new Vector();
+		List tsProductString_vect = new Vector();
 		try {
-			Vector tsProduct_vect = __dmi.readTSProductList();
+			List tsProduct_vect = __dmi.readTSProductList();
 			if ( tsProduct_vect != null ) {
 				int nP = tsProduct_vect.size();
 				for ( int n=0; n<nP; n++) {
 					RiversideDB_TSProduct rdb_tsp =
 					   (RiversideDB_TSProduct)
-						tsProduct_vect.elementAt(n);
-					tsProductString_vect.addElement(rdb_tsp.getName() );	
+						tsProduct_vect.get(n);
+					tsProductString_vect.add(rdb_tsp.getName() );	
 				}
 			}
 		} catch ( Exception e ) {   
@@ -1726,9 +1720,9 @@ public JPanel assemble_tab_properties( ) {
 		"next to title.<br>Default is: YYYY-MM-DD hh:mm:ss</html>");
 
 		//format ascii text file or HTML
-		Vector format_vect = new Vector();
-		format_vect.addElement("HTML - HTML file");
-		format_vect.addElement("TXT - ASCII text file");
+		List format_vect = new Vector();
+		format_vect.add("HTML - HTML file");
+		format_vect.add("TXT - ASCII text file");
 		__props_format_obsreport_JComboBox = new SimpleJComboBox(
 		format_vect );
 
@@ -1774,9 +1768,9 @@ public JPanel assemble_tab_properties( ) {
  		__props_dateformat_table_JComboBox.setToolTipText(
 		"Optional: select date format for date display in exported table data." );
 		//LISTING_ORDER
-		Vector list_vect = new Vector();
-		list_vect.addElement( "DATE_DESCENDING" );
-		list_vect.addElement( "DATE_ASCENDING" );
+		List list_vect = new Vector();
+		list_vect.add( "DATE_DESCENDING" );
+		list_vect.add( "DATE_ASCENDING" );
  		__props_listorder_table_JComboBox = new SimpleJComboBox( list_vect);
  		__props_listorder_table_JComboBox.setToolTipText( "<HTML>"+
 		"Select \"DATE_DESCENDING\" to indicate that table lists " +
@@ -2580,7 +2574,7 @@ public JPanel assemble_tab_timeSeries() {
 	TSIdent tsid = null;
 	for ( int i=0; i< numb_all_MeasType; i++ ) {
 		rti_mt =  (RiversideDB_MeasType)
- 		__leftList_MeasType_vect.elementAt(i);
+ 		__leftList_MeasType_vect.get(i);
 		if ( rti_mt == null ) {
 			continue;
 		}
@@ -2632,7 +2626,7 @@ public JPanel assemble_tab_timeSeries() {
 	//data for list
 	//need vector of ExportConf objects and MeasType objects ,
 	//labels for worksheet and ImportProduct type
-	Vector mt_vect = new Vector();
+	List mt_vect = new Vector();
 
 	//from the Vector of ExportConf objects, get the
 	//the MeasType_nums for those objects.
@@ -2651,7 +2645,7 @@ public JPanel assemble_tab_timeSeries() {
 
 	for ( int i=0; i< numb_ec; i++ ) {
 		rti_ec = ( RiversideDB_ExportConf )
- 		__db_RTi_ExportConf_vect.elementAt( i );
+ 		__db_RTi_ExportConf_vect.get( i );
 
 		//now get the MeasType from the object...
 		mt_int = rti_ec.getMeasType_num();
@@ -2673,7 +2667,7 @@ public JPanel assemble_tab_timeSeries() {
 			continue;
 		}
 
-		mt_vect.addElement( rti_mt );
+		mt_vect.add( rti_mt );
 
 		rti_mt = null;
 		rti_ec = null;
@@ -2727,13 +2721,13 @@ public JPanel assemble_tab_timeSeries() {
 		//pass in Vector of ExportConf objects,
 		//Vector of MEasType objects, Arr of labels,
 		//import type
-		Vector v = new Vector();
+		List v = new Vector();
 
 		//NOTE:: if you pass in the actual vector:
 		//_db_RTi_ExportConf_vect, it will get added to deleted
 		//from from within the TableModel, which we do not want!
-		v.addElement( __worksheet_RTi_ExportConf_vect );
-		v.addElement( mt_vect);
+		v.add( __worksheet_RTi_ExportConf_vect );
+		v.add( mt_vect);
 
  		__table_model = new RiversideDB_ExportConf_TableModel(
 		v, __arrWorksheet_labels, __arrWorksheet_tooltips,
@@ -2892,7 +2886,7 @@ public void closeGUI() {
 	RiversideDB_ExportConf ec = null;
 	for ( int i=0; i<size; i++ ) {
 		ec = ( RiversideDB_ExportConf )
- 		__gui_RTi_ExportConf_vect.elementAt(i);
+ 		__gui_RTi_ExportConf_vect.get(i);
 		if ( ec == null ) {
 			continue;
 		}
@@ -2991,7 +2985,7 @@ protected void checkRequiredInput() throws Exception {
 		RiversideDB_ExportProduct ep = null;
 		for (int i=0; i<size; i++ ) {
 			ep = (RiversideDB_ExportProduct)
- 			__RTi_ExportProduct_vect.elementAt(i);
+ 			__RTi_ExportProduct_vect.get(i);
 			if ( (ep.getProduct_name()).equalsIgnoreCase( prodID ) ) {
 				//we found a product with that name already
 				buffer.append( "ExportProduct named: \""
@@ -3064,8 +3058,7 @@ protected void checkRequiredInput() throws Exception {
 	}
 	else {
 		//get the ExportConf Objects out of the worksheet
-		Vector table_data = __timeseries_tab_selTS_JWorksheet.
-		getAllData();
+		List table_data = __timeseries_tab_selTS_JWorksheet.getAllData();
 		//should be the same size as above
 		table_size = table_data.size();
 
@@ -3073,7 +3066,7 @@ protected void checkRequiredInput() throws Exception {
 		//long mt_num = -999;
 		for ( int i=0; i< table_size; i++ ) {
 			ec = (RiversideDB_ExportConf)
-			table_data.elementAt( i );
+			table_data.get( i );
 			if ( ec == null ) {
 				continue;
 			}
@@ -3117,9 +3110,9 @@ Checks the required properties for ExportProducts of type campbellscientific:
 @return Vector containing Strings.  Each String represents an
 error message encountered while checking the property fields.
 */
-protected Vector checkRequired_campbellsci_props() {
+protected List checkRequired_campbellsci_props() {
 
-	Vector error_vect = new Vector();
+	List error_vect = new Vector();
 	//Julianday - can't be null because is in an JComboBox
 	//TableID - can't be null because is in an JComboBox
 	//TIME - can't be null because is in an JComboBox
@@ -3154,7 +3147,7 @@ private void create_main_panel( ) {
 	product_info_group_JLabel.setToolTipText(
 	"Required: Select Product Group" );
 
-	Vector prodGrp_vect = null;
+	List prodGrp_vect = null;
 	try {
 		prodGrp_vect =
  		__dmi.readProductGroupListForProductType( "EXPORT" );
@@ -3162,7 +3155,7 @@ private void create_main_panel( ) {
 	catch (Exception e ) {
 		Message.printWarning( 2, routine, e );
 	}
-	Vector grp_names_vect = new Vector();
+	List grp_names_vect = new Vector();
 	RiversideDB_ProductGroup pg = null;
 	//go through vector and get list of just the Groups
 	int size = 0;
@@ -3170,11 +3163,11 @@ private void create_main_panel( ) {
 		size = prodGrp_vect.size();
 	}
 	for ( int i=0; i<size; i++ ) {
-		pg= (RiversideDB_ProductGroup) prodGrp_vect.elementAt(i);
+		pg= (RiversideDB_ProductGroup) prodGrp_vect.get(i);
 		if ( pg == null ) {
 			continue;
 		}
-		grp_names_vect.addElement( pg.getProductGroup_num() + " - " +
+		grp_names_vect.add( pg.getProductGroup_num() + " - " +
 		pg.getName() );
 	//	grp_names_vect.addElement( pg.getProductGroup_num() + " - " +
 	//	pg.getIdentifier() );
@@ -3191,12 +3184,12 @@ private void create_main_panel( ) {
 
 	//create JComboBox
 	//get vector of type names
-	Vector type_vect = new Vector();
+	List type_vect = new Vector();
 	RiversideDB_ExportType et = null;
 	String type = null;
 	for ( int i=0; i< __RTi_ExportType_vect.size(); i++ ) {
 		et = (RiversideDB_ExportType)
- 		__RTi_ExportType_vect.elementAt(i);
+ 		__RTi_ExportType_vect.get(i);
 		if ( et == null ) {
 			continue;
 		}
@@ -3207,7 +3200,7 @@ private void create_main_panel( ) {
 				(type.substring( 0, 80 ) + " ...").trim();
 			}
 			//add it to vector for drop-down list
-			type_vect.addElement( type );
+			type_vect.add( type );
 		}
 		type = null;
 		et = null;
@@ -3230,7 +3223,7 @@ private void create_main_panel( ) {
 
 	//Vector of MeasLocGroup objects that this user has access to
  	__dmi.setDumpSQLOnError(true );
-	Vector dbmlg_vect = null;
+	List dbmlg_vect = null;
 	try {
 		dbmlg_vect = __dmi.
 		readDBUserMeasLocGroupRelationListForDBUser_num(
@@ -3262,10 +3255,10 @@ private void create_main_panel( ) {
 	int mlg_num = -999;
 	//vector to hold items that go into comboBox - will
 	//have "MeasLocGroupNum - MeasLocGroup_ID - MeasLocGroup_Name"
-	Vector measlocgroup_vect = new Vector();
+	List measlocgroup_vect = new Vector();
 	for ( int i=0; i<size_dbmlg; i++ ) {
 		dbmlg = (RiversideDB_DBUserMeasLocGroupRelation)
-		dbmlg_vect.elementAt(i);
+		dbmlg_vect.get(i);
 		if ( dbmlg == null ) {
 			continue;
 		}
@@ -3274,13 +3267,13 @@ private void create_main_panel( ) {
 		//now use that to get MeasLocGroup object
 		for ( int j=0; j<size_mlg;j++ ) {
 			mlg = (RiversideDB_MeasLocGroup)
-			__RTi_MeasLocGroup_vect.elementAt(j);
+			__RTi_MeasLocGroup_vect.get(j);
 			if ( mlg == null ) {
 				continue;
 			}
 			if ( mlg.getMeasLocGroup_num() == mlg_num ) {
 				//found one
-				measlocgroup_vect.addElement(
+				measlocgroup_vect.add(
 				mlg.getMeasLocGroup_num() + " - " +
 				mlg.getIdentifier() + " - " +
 				mlg.getName() );
@@ -3511,7 +3504,7 @@ protected RiversideDB_MeasType getMeasTypeForMeasType_num ( long mt_num ) {
 	RiversideDB_MeasType mt = null;
 	for (int k=0; k<mt_size; k++ ) {
 		mt = ( RiversideDB_MeasType) __leftList_MeasType_vect.
-		elementAt(k);
+		get(k);
 		if ( mt == null ) {
 			continue;
 		}
@@ -3537,7 +3530,7 @@ protected String getTSIDForMeasType_num ( long mt_num ) {
 	RiversideDB_MeasType mt = null;
 	for (int k=0; k<mt_size; k++ ) {
 		mt = ( RiversideDB_MeasType) __leftList_MeasType_vect.
-		elementAt(k);
+		get(k);
 		if ( mt == null ) {
 			continue;
 		}
@@ -3573,7 +3566,7 @@ format of: item at (0)="Property Name" and at (1)="Property Value".
 RiversideDB_ExportProduct object passed in. Format of Vector:
 item at (0)="Property Name" and at (1)="Property Value".
 */
-protected Vector getVectorOfProperties( RiversideDB_ExportProduct ep ) {
+protected List getVectorOfProperties( RiversideDB_ExportProduct ep ) {
 	String routine = __class + ".getVectorOfProperties";
 
 	//get the properties string for the MeasReduction object
@@ -3592,8 +3585,8 @@ protected Vector getVectorOfProperties( RiversideDB_ExportProduct ep ) {
 	//make Vector of Vectors to hold the properties for
 	//the ExportProduct object -each item in the Vector is another
 	//vector with PropertyName as element 0 and PropertyValue as element 1
-	Vector all_props_vect = new Vector();
-	Vector tmp_props_vect = null;
+	List all_props_vect = new Vector();
+	List tmp_props_vect = null;
 	if ( tmp_props_str != null ) {
 		//break up string based on ";"s
 		if ( tmp_props_str.indexOf( ";" ) >= 0 ) {
@@ -3603,13 +3596,13 @@ protected Vector getVectorOfProperties( RiversideDB_ExportProduct ep ) {
 		else  {
 			// Have just 1 property-- add it to vector as is.
 			tmp_props_vect = new Vector();
-			tmp_props_vect.addElement( tmp_props_str );
+			tmp_props_vect.add( tmp_props_str );
 		}
 	}
 	else {
 		// There are no properties set, so add an empty vector
 	    tmp_props_vect = new Vector();
-		tmp_props_vect.addElement( new Vector() );
+		tmp_props_vect.add( new Vector() );
 	}
 
 	//we have a vector containing Strings - each string in format : "Propertyname=PropertyValue"
@@ -3623,7 +3616,7 @@ protected Vector getVectorOfProperties( RiversideDB_ExportProduct ep ) {
 	String str_name= null;
 	String str_val= null;
 	for ( int i=0; i<tmp_num; i++ )  {
-		str_with_eq = ( String) tmp_props_vect.elementAt(i);
+		str_with_eq = ( String) tmp_props_vect.get(i);
 		//break this string up based on the equal sign
 		int eq_ind = -999;
 		eq_ind = str_with_eq.indexOf("=");
@@ -3632,11 +3625,11 @@ protected Vector getVectorOfProperties( RiversideDB_ExportProduct ep ) {
 			str_val = (str_with_eq.substring(eq_ind+1)).trim();
 		}
 		//now make this a new vector
-		Vector brokenup_vect = new Vector();
-		brokenup_vect.addElement( str_name );
-		brokenup_vect.addElement( str_val );
+		List brokenup_vect = new Vector();
+		brokenup_vect.add( str_name );
+		brokenup_vect.add( str_val );
 		//now add this vector to the all_props_vet
-		all_props_vect.addElement( brokenup_vect );
+		all_props_vect.add( brokenup_vect );
 	}
 	return all_props_vect;
 } //end getVectorOfProperties
@@ -3817,10 +3810,10 @@ protected void update_database( ) throws Exception {
 	StringBuffer b = new StringBuffer();
 	for ( int i=0; i< __dirty_vect.size(); i++ ) {
 		if ( i == ( __dirty_vect.size()-1) ) {
-			b.append( (String) __dirty_vect.elementAt(i) );
+			b.append( (String) __dirty_vect.get(i) );
 		}
 		else {
-			b.append( (String) __dirty_vect.elementAt(i) + "\n" );
+			b.append( (String) __dirty_vect.get(i) + "\n" );
 		}
 
 
@@ -3835,7 +3828,7 @@ protected void update_database( ) throws Exception {
 	}
 	for ( int i=0; i<ec_size; i++ ) {
 		ec = ( RiversideDB_ExportConf )
- 		__gui_RTi_ExportConf_vect.elementAt(i);
+ 		__gui_RTi_ExportConf_vect.get(i);
 		if ( ec == null ) {
 			continue;
 		}
@@ -3976,7 +3969,7 @@ protected void update_database( ) throws Exception {
 		ec = null;
 		for ( int i=0; i<ec_size; i++ ) {
 			ec = ( RiversideDB_ExportConf )
- 			__gui_RTi_ExportConf_vect.elementAt(i);
+ 			__gui_RTi_ExportConf_vect.get(i);
 			if ( ec == null ) {
 				continue;
 			}
@@ -4108,8 +4101,8 @@ protected void update_RiversideDB_objects( ) throws Exception {
 	//clearn out GUI version and refill it
  	__gui_RTi_ExportConf_vect.clear();
 	for ( int i=0; i<s; i++ ) {
- 		__gui_RTi_ExportConf_vect.addElement(
- 		__db_RTi_ExportConf_vect.elementAt(i) );
+ 		__gui_RTi_ExportConf_vect.add(
+ 		__db_RTi_ExportConf_vect.get(i) );
 	}
 
 	boolean blnContinue = true;
@@ -4901,7 +4894,7 @@ protected void update_GUI_fields_propertiesTab( ) {
 	//Use getVectorOfProperties to get a Vector of Vectors where
 	//each Vector within the main Vector contains the property
 	//key at position 0 and value at position 1.
-	Vector props_vect = null;
+	List props_vect = null;
 	props_vect = getVectorOfProperties( __db_RTi_ExportProduct );
 
 	//set properties in GUI
@@ -4949,8 +4942,7 @@ of type COMMA_DELIMINATED.
 @param all_props_vect Vector containing all the properties for
 this ExportProduct.
 */
-protected void update_GUI_fields_propertiesTab_comma_props(
-				Vector all_props_vect ) {
+protected void update_GUI_fields_propertiesTab_comma_props(	List all_props_vect ) {
 	String routine = __class +
 	".update_GUI_fields_propertiesTab_comma_props";
 
@@ -4961,10 +4953,10 @@ protected void update_GUI_fields_propertiesTab_comma_props(
 	//go through each and set the appropriate components
 	String prop_str = null;
 	String prop_value_str = null;
-	Vector v = null;
+	List v = null;
 	for ( int i=0; i<size; i++ ) {
-		v = (Vector) all_props_vect.elementAt(i);
-		prop_str = (String) v.elementAt(0);
+		v = (List) all_props_vect.get(i);
+		prop_str = (String) v.get(0);
 		if ( prop_str == null ) {
 			continue;
 		}
@@ -4972,7 +4964,7 @@ protected void update_GUI_fields_propertiesTab_comma_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_dateformat_comma_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			try {
 				JGUIUtil.selectTokenMatches(
  				__props_dateformat_comma_JComboBox, true,
@@ -4985,7 +4977,7 @@ protected void update_GUI_fields_propertiesTab_comma_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_timestamp_comma_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			boolean blnTimeStamp = false;
 			if (( prop_value_str.equalsIgnoreCase( "Y" ) ) |
 			( prop_value_str.equalsIgnoreCase( "true" ) ) ) {
@@ -5006,7 +4998,7 @@ of type generic.
 this ExportProduct.
 */
 protected void update_GUI_fields_propertiesTab_generic_props(
-				Vector all_props_vect ) {
+				List all_props_vect ) {
 
 	//For now, the generic ExportProduct type just has
 	//one JTextField with props seperated by ";" just like in db
@@ -5023,19 +5015,19 @@ of type GRAPH_JPEG.
 this ExportProduct.
 */
 protected void update_GUI_fields_propertiesTab_graph_props(
-				Vector all_props_vect ) {
+				List all_props_vect ) {
 	String routine = __class +
 	".update_GUI_fields_propertiesTab_graph_props";
 	
 	// Set the TSProduct
 	int tsProductNum = __db_RTi_ExportProduct.getTSProduct_num();
 	try {
-		Vector tsProduct_vect = __dmi.readTSProductList();
+		List tsProduct_vect = __dmi.readTSProductList();
 		if ( tsProduct_vect != null ) {
 			int nP = tsProduct_vect.size();
 			for ( int n=0; n<nP; n++) {
 				RiversideDB_TSProduct rdb_tsp = (RiversideDB_TSProduct)
-					tsProduct_vect.elementAt(n);
+					tsProduct_vect.get(n);
 				if( rdb_tsp.getTSProduct_num() == tsProductNum ) {
 					String TSProductName = rdb_tsp.getName();	
 					__props_tsProduct_graph_JComboBox.select(
@@ -5056,10 +5048,10 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 	//go through each and set the appropriate components
 	String prop_str = null;
 	String prop_value_str = null;
-	Vector v = null;
+	List v = null;
 	for ( int i=0; i<size; i++ ) {
-		v = (Vector) all_props_vect.elementAt(i);
-		prop_str = (String) v.elementAt(0);
+		v = (List) all_props_vect.get(i);
+		prop_str = (String) v.get(0);
 		if ( prop_str == null ) {
 			continue;
 		}
@@ -5068,7 +5060,7 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_title_graph_JLabel_str ) ) {
 			//set title in GUI if there is one
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
  			__props_title_graph_JTextField.setText(
 			prop_value_str );
 		}
@@ -5077,7 +5069,7 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_creationtime_graph_JLabel_str ) ) {
 			//then get its value to set in the JCheckBox
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			if (( prop_value_str != null ) &&
 			( prop_value_str.equalsIgnoreCase( "false" ) ) ) {
  				__props_creationtime_graph_JCheckBox.
@@ -5092,7 +5084,7 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_timestamp_graph_JLabel_str ) ) {
 			//then get its value to set in the JCheckBox
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			if ( prop_value_str.equalsIgnoreCase( "true" ) ) {
  				__props_timestamp_graph_JCheckBox.
 				setSelected( true );
@@ -5106,19 +5098,19 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_windowdim_graph_JLabel_str ) ) {
 			//then get its value to set in the JTextFields
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			//this can be nothing or 2 values
 			if ( prop_value_str.length() > 0 ) {
 				//break it up into 2 values
-				Vector tmp_v = null;
+				List tmp_v = null;
 				tmp_v = StringUtil.breakStringList(
 				prop_value_str, ",",
 				StringUtil.DELIM_SKIP_BLANKS );
 				if ( tmp_v.size() == 2 ) {
  					__props_windowdim_w_graph_JTextField.
-					setText( (String) tmp_v.elementAt(0 ));
+					setText( (String) tmp_v.get(0 ));
  					__props_windowdim_h_graph_JTextField.
-					setText( (String) tmp_v.elementAt(1 ));
+					setText( (String) tmp_v.get(1 ));
 				}
 
 			}
@@ -5127,7 +5119,7 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 		//DATE FORMAT
 		else if ( prop_str.equalsIgnoreCase(
  		__props_dateformat_graph_JLabel_str ) ) {
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			//then get its value to set in the combobox
 			try {
 				JGUIUtil.selectTokenMatches(
@@ -5142,7 +5134,7 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 		//annotation lines
 		else if ( prop_str.equalsIgnoreCase(
  		__props_annotationline_graph_JLabel_str ) ) {
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			if ( prop_value_str == null ) {
 				//nothing to set
 			}
@@ -5153,7 +5145,7 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 				int ind = -999;
 				ind = prop_value_str.indexOf(",");
 				if ( ind > 0 ) {
-					Vector tmp_vect = null;
+					List tmp_vect = null;
 					//break up the numbers
 					tmp_vect = StringUtil.breakStringList(
 					prop_value_str, ",",
@@ -5161,10 +5153,10 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 					if ( tmp_vect.size() == 2 ) {
 						__props_annotationline_1_graph_JTextField.
 						setText( (String) tmp_vect.
-						elementAt(0) );
+						get(0) );
 						__props_annotationline_2_graph_JTextField.
 						setText( (String) tmp_vect.
-						elementAt(1) );
+						get(1) );
 					}
 				}
 				else {
@@ -5178,7 +5170,7 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 		//annotation text
 		else if ( prop_str.equalsIgnoreCase(
  		__props_annotationtext_graph_JLabel_str ) ) {
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			if ( prop_value_str == null ) {
 				//nothing to set
 			}
@@ -5189,7 +5181,7 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 				int ind = -999;
 				ind = prop_value_str.indexOf(",");
 				if ( ind > 0 ) {
-					Vector tmp_vect = null;
+					List tmp_vect = null;
 					//break up the numbers
 					tmp_vect = StringUtil.breakStringList(
 					prop_value_str, ",",
@@ -5197,10 +5189,10 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 					if ( tmp_vect.size() == 2 ) {
 						__props_annotationtext_1_graph_JTextField.
 						setText( (String) tmp_vect.
-						elementAt(0) );
+						get(0) );
 						__props_annotationtext_2_graph_JTextField.
 						setText( (String) tmp_vect.
-						elementAt(1) );
+						get(1) );
 					}
 				}
 				else {
@@ -5215,19 +5207,19 @@ protected void update_GUI_fields_propertiesTab_graph_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_range_graph_JLabel_str ) ) {
 			//then get its value to set in the JTextFields
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			//this can be nothing or 2 values
 			if ( prop_value_str.length() > 0 ) {
 				//break it up into 2 values
-				Vector tmp_v = null;
+				List tmp_v = null;
 				tmp_v = StringUtil.breakStringList(
 				prop_value_str, ",",
 				StringUtil.DELIM_SKIP_BLANKS );
 				if ( tmp_v.size() == 2 ) {
  					__props_range_lo_graph_JTextField.
-					setText( (String) tmp_v.elementAt(0 ));
+					setText( (String) tmp_v.get(0 ));
  					__props_range_hi_graph_JTextField.
-					setText( (String) tmp_v.elementAt(1 ));
+					setText( (String) tmp_v.get(1 ));
 				}
 
 			}
@@ -5245,7 +5237,7 @@ of type LAST_OBS_REPORT.
 this ExportProduct.
 */
 protected void update_GUI_fields_propertiesTab_obsreport_props(
-				Vector all_props_vect ) {
+				List all_props_vect ) {
 	String routine = __class +
 	".update_GUI_fields_propertiesTab_obsreport_props";
 
@@ -5256,10 +5248,10 @@ protected void update_GUI_fields_propertiesTab_obsreport_props(
 	//go through each and set the appropriate components
 	String prop_str = null;
 	String prop_value_str = null;
-	Vector v = null;
+	List v = null;
 	for ( int i=0; i<size; i++ ) {
-		v = (Vector) all_props_vect.elementAt(i);
-		prop_str = (String) v.elementAt(0);
+		v = (List) all_props_vect.get(i);
+		prop_str = (String) v.get(0);
 		if ( prop_str == null ) {
 			continue;
 		}
@@ -5267,7 +5259,7 @@ protected void update_GUI_fields_propertiesTab_obsreport_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_timestamp_obsreport_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			boolean blnTimeStamp = false;
 			if (( prop_value_str.equalsIgnoreCase( "Y" ) ) ||
 			(prop_value_str.equalsIgnoreCase("true" ) ) ) {
@@ -5280,7 +5272,7 @@ protected void update_GUI_fields_propertiesTab_obsreport_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_title_obsreport_JLabel_str ) ) {
 			//then get its value to set in the JTextField
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			if ( prop_value_str != null ) {
  				__props_title_obsreport_JTextField.
 				setText( prop_value_str );
@@ -5290,7 +5282,7 @@ protected void update_GUI_fields_propertiesTab_obsreport_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_dateformat_obsreport_JLabel_str ) ) {
 			//then get its value to set in the JComboBox
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			if ( prop_value_str != null ) {
 				try {
 					JGUIUtil.selectTokenMatches(
@@ -5306,7 +5298,7 @@ protected void update_GUI_fields_propertiesTab_obsreport_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_format_obsreport_JLabel_str ) ) {
 			//then get its value to set in the JComboBox
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			if ( prop_value_str != null ) {
 				try {
 					JGUIUtil.selectTokenMatches(
@@ -5322,7 +5314,7 @@ protected void update_GUI_fields_propertiesTab_obsreport_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_deliminiter_obsreport_JLabel_str ) ) {
 			//then get its value to set in the JComboBox
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			if ( prop_value_str != null ) {
  				__props_deliminiter_obsreport_JTextField.
 				setText( prop_value_str );
@@ -5340,7 +5332,7 @@ of type SHEF.A.
 this ExportProduct.
 */
 protected void update_GUI_fields_propertiesTab_shef_props(
-				Vector all_props_vect ) {
+				List all_props_vect ) {
 	String routine = __class +
 	".update_GUI_fields_propertiesTab_shef_props";
 
@@ -5351,10 +5343,10 @@ protected void update_GUI_fields_propertiesTab_shef_props(
 	//go through each and set the appropriate components
 	String prop_str = null;
 	String prop_value_str = null;
-	Vector v = null;
+	List v = null;
 	for ( int i=0; i<size; i++ ) {
-		v = (Vector) all_props_vect.elementAt(i);
-		prop_str = (String) v.elementAt(0);
+		v = (List) all_props_vect.get(i);
+		prop_str = (String) v.get(0);
 		if ( prop_str == null ) {
 			continue;
 		}
@@ -5362,7 +5354,7 @@ protected void update_GUI_fields_propertiesTab_shef_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_timestamp_shef_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			boolean blnTimeStamp = false;
 			if ( ( prop_value_str.equalsIgnoreCase( "Y" ) ) |
 			( prop_value_str.equalsIgnoreCase( "true" ) ) ) {
@@ -5375,7 +5367,7 @@ protected void update_GUI_fields_propertiesTab_shef_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_usehour_shef_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			boolean blnUseHour = true;
 			if ( prop_value_str.equalsIgnoreCase( "N" ) ) {
 				blnUseHour = false;
@@ -5388,7 +5380,7 @@ protected void update_GUI_fields_propertiesTab_shef_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_append_shef_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			boolean blnAppend = true;
 			if ( prop_value_str.equalsIgnoreCase( "false" ) ) {
 				blnAppend = false;
@@ -5400,7 +5392,7 @@ protected void update_GUI_fields_propertiesTab_shef_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_dateformat_shef_JLabel_str ) ) {
 
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			//then get its value to set in the combobox/
 			try {
 				JGUIUtil.selectTokenMatches(
@@ -5423,7 +5415,7 @@ of type TABLE_REPORT.
 this ExportProduct.
 */
 protected void update_GUI_fields_propertiesTab_table_props(
-				Vector all_props_vect ) {
+				List all_props_vect ) {
 	String routine = __class +
 	".update_GUI_fields_propertiesTab_table_props";
 
@@ -5434,10 +5426,10 @@ protected void update_GUI_fields_propertiesTab_table_props(
 	//go through each and set the appropriate components
 	String prop_str = null;
 	String prop_value_str = null;
-	Vector v = null;
+	List v = null;
 	for ( int i=0; i<size; i++ ) {
-		v = (Vector) all_props_vect.elementAt(i);
-		prop_str = (String) v.elementAt(0);
+		v = (List) all_props_vect.get(i);
+		prop_str = (String) v.get(0);
 		if ( prop_str == null ) {
 			continue;
 		}
@@ -5445,7 +5437,7 @@ protected void update_GUI_fields_propertiesTab_table_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_timestamp_table_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			boolean blnTimeStamp = false;
 			if ( prop_value_str.equalsIgnoreCase( "true" ) ) {
 				blnTimeStamp = true;
@@ -5457,7 +5449,7 @@ protected void update_GUI_fields_propertiesTab_table_props(
 		else if ( prop_str.equalsIgnoreCase(
  		__props_hidemissing_table_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 
 			boolean blnhideMissing = true;
 			if (prop_value_str.equalsIgnoreCase("false" ) ) {
@@ -5469,7 +5461,7 @@ protected void update_GUI_fields_propertiesTab_table_props(
 		//DATE FORMAT
 		else if ( prop_str.equalsIgnoreCase(
  		__props_dateformat_table_JLabel_str ) ) {
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			//then get its value to set in the combobox/
 			try {
 				JGUIUtil.selectTokenMatches(
@@ -5483,7 +5475,7 @@ protected void update_GUI_fields_propertiesTab_table_props(
 		//LIST DESC
 		else if ( prop_str.equalsIgnoreCase(
  		__props_listorder_table_JLabel_str ) ) {
-			prop_value_str = (String)v.elementAt(1);
+			prop_value_str = (String)v.get(1);
 			//then get its value to set in the combobox/
 			try {
 				JGUIUtil.selectTokenMatches(
@@ -5628,7 +5620,7 @@ public void verify_automation_tab() throws Exception {
 		if ( ! db_isAuto_str.equalsIgnoreCase( gui_isAuto_str ) ) {
 			//mark as dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change IsAutomated from \"" + db_isAuto_str +
 			"\" to \"" + gui_isAuto_str + "\"");
 
@@ -5657,7 +5649,7 @@ public void verify_automation_tab() throws Exception {
 		if ( ! db_everyInt_str.equalsIgnoreCase( gui_everyInt_str) ) {
 			//mark as dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Every Interval from \"" + db_everyInt_str +
 			"\" to \"" + gui_everyInt_str + "\"");
 
@@ -5677,7 +5669,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_year_str.equalsIgnoreCase( gui_year_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Year from \"" + db_year_str +
 				"\" to \"" + gui_year_str + "\"");
 
@@ -5698,7 +5690,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_month_str.equalsIgnoreCase( gui_month_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Month from \"" + db_month_str +
 				"\" to \"" + gui_month_str + "\"");
 
@@ -5718,7 +5710,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_day_str.equalsIgnoreCase( gui_day_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Day from \"" + db_day_str +
 				"\" to \"" + gui_day_str + "\"");
 
@@ -5738,7 +5730,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_hour_str.equalsIgnoreCase( gui_hour_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Hour from \"" + db_hour_str +
 				"\" to \"" + gui_hour_str + "\"");
 
@@ -5758,7 +5750,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_minute_str.equalsIgnoreCase( gui_minute_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Minute from \"" + db_minute_str +
 				"\" to \"" + gui_minute_str + "\"");
 
@@ -5778,7 +5770,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_second_str.equalsIgnoreCase( gui_second_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Second from \"" + db_second_str +
 				"\" to \"" + gui_second_str + "\"");
 
@@ -5799,7 +5791,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_weekday_str.equalsIgnoreCase( gui_weekday_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Weekday from \"" + db_weekday_str +
 				"\" to \"" + gui_weekday_str + "\"");
 
@@ -5815,7 +5807,7 @@ public void verify_automation_tab() throws Exception {
 		//compare value to what was originally in db
 		if ( !db_isAuto_str.equalsIgnoreCase( gui_isAuto_str )){
  		__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change IsAutomated from \"" + db_isAuto_str +
 				"\" to \"" + gui_isAuto_str + "\"");
 
@@ -5826,7 +5818,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_year_str.equalsIgnoreCase( gui_year_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Year from \"" + db_year_str +
 				"\" to \"" + gui_year_str + "\"");
 
@@ -5836,7 +5828,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_month_str.equalsIgnoreCase( gui_month_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Month from \"" + db_month_str +
 				"\" to \"" + gui_month_str + "\"");
 
@@ -5846,7 +5838,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_day_str.equalsIgnoreCase( gui_day_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Day from \"" + db_day_str +
 				"\" to \"" + gui_day_str + "\"");
 
@@ -5856,7 +5848,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_hour_str.equalsIgnoreCase( gui_hour_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Hour from \"" + db_hour_str +
 				"\" to \"" + gui_hour_str + "\"");
 
@@ -5866,7 +5858,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_minute_str.equalsIgnoreCase( gui_minute_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Minute from \"" + db_minute_str +
 				"\" to \"" + gui_minute_str + "\"");
 
@@ -5876,7 +5868,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_second_str.equalsIgnoreCase( gui_second_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Second from \"" + db_second_str +
 				"\" to \"" + gui_second_str + "\"");
 
@@ -5886,7 +5878,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_weekday_str.equalsIgnoreCase( gui_weekday_str )){
 				//set Dirty
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Weekday from \"" + db_weekday_str +
 				"\" to \"" + gui_weekday_str + "\"");
 
@@ -5935,7 +5927,7 @@ public void verify_files_tab() throws Exception {
 	if ( !db_dest_dir.equalsIgnoreCase( gui_dest_dir )){
 			//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change Destination Directory from \"" + db_dest_dir +
 			"\" to \"" + gui_dest_dir + "\"");
 
@@ -5953,7 +5945,7 @@ public void verify_files_tab() throws Exception {
 	if ( !db_dest_file.equalsIgnoreCase( gui_dest_file )){
 			//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change Destination File(s) from \"" + db_dest_file +
 			"\" to \"" + gui_dest_file + "\"");
 
@@ -6019,7 +6011,7 @@ public void verify_properties_tab() throws Exception {
 	if ( db_exp_order != gui_exp_order ) {
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Export Order from \"" + db_exp_order  +
 		"\" to \"" + gui_exp_order  + "\"");
 
@@ -6045,7 +6037,7 @@ public void verify_properties_tab() throws Exception {
 	if ( ! db_exp_start_str.equalsIgnoreCase( gui_exp_start_str ) ) {
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Export Start from \"" + db_exp_start_str  +
 		"\" to \"" + gui_exp_start_str  + "\"");
 
@@ -6071,7 +6063,7 @@ public void verify_properties_tab() throws Exception {
 	if ( ! db_exp_end_str.equalsIgnoreCase( gui_exp_end_str ) ) {
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Export End from \"" + db_exp_end_str  +
 		"\" to \"" + gui_exp_end_str  + "\"");
 
@@ -6100,7 +6092,7 @@ public void verify_properties_tab() throws Exception {
 		//using the DateTime.equals method
 		if ( ! db_next_DateTime.equals( gui_next_DateTime ) ) {
  			__gui_RTi_ExportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Next Date from \"" +
 			db_next_DateTime.toString() +
 			"\" to \"" + gui_next_DateTime.toString()  + "\"");
@@ -6217,7 +6209,7 @@ public void verify_properties_tab_comma_props() throws Exception {
 	if ( !db_props_str.equalsIgnoreCase( gui_props_str ) ){
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from:\n \"" + db_props_str  +
 		"\"\nto:\n \"" + gui_props_str  + "\"");
 
@@ -6251,7 +6243,7 @@ public void verify_properties_tab_generic_props() throws Exception {
 	if ( !db_props.equalsIgnoreCase( gui_props ) ) {
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from:\n \"" + db_props +
 		"\"\n to:\n \"" + gui_props + "\"");
 
@@ -6305,7 +6297,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 	String gui_range_hi_str = "";
 	String gui_range_str = "";
 
-	Vector exception_vect = new Vector();
+	List exception_vect = new Vector();
 
 	// title
 	gui_title_str = __props_title_graph_JTextField.getText();
@@ -6326,13 +6318,13 @@ public void verify_properties_tab_graph_props() throws Exception {
 	
 	// Using the Product number get the product name.
 	try {
-		Vector tsProduct_vect = __dmi.readTSProductList();
+		List tsProduct_vect = __dmi.readTSProductList();
 		if ( tsProduct_vect != null ) {
 			int nP = tsProduct_vect.size();
 			for ( int n=0; n<nP; n++) {
 				RiversideDB_TSProduct rdb_tsp =
 				   (RiversideDB_TSProduct)
-					tsProduct_vect.elementAt(n);
+					tsProduct_vect.get(n);
 				if( rdb_tsp.getTSProduct_num() == db_TSPNum ) {
 					db_TSPName = rdb_tsp.getName();
 					break;
@@ -6347,19 +6339,19 @@ public void verify_properties_tab_graph_props() throws Exception {
 	String gui_TSPName = (String) __props_tsProduct_graph_JComboBox.getSelected();
 	if ( !db_TSPName.equalsIgnoreCase( gui_TSPName ) ) {
  		__gui_RTi_ExportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Export Product TSProduct  "+
 		"from \"" + db_TSPName +"\" to \"" +gui_TSPName+"\"");
 
 		// set in memory
 		try {
-			Vector tsProduct_vect = __dmi.readTSProductList();
+			List tsProduct_vect = __dmi.readTSProductList();
 			if ( tsProduct_vect != null ) {
 				int nP = tsProduct_vect.size();
 				for ( int n=0; n<nP; n++) {
 					RiversideDB_TSProduct rdb_tsp =
 					   (RiversideDB_TSProduct)
-						tsProduct_vect.elementAt(n);
+						tsProduct_vect.get(n);
 					if( rdb_tsp.getName().equalsIgnoreCase(
 							gui_TSPName ) ) {
 						Message.printWarning (1,routine,"yes");		
@@ -6412,7 +6404,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 		gui_windowdim_str = null;
 	}
 	else if  ( ! StringUtil.isInteger ( gui_windowdim_w_str ) ) {
-		exception_vect.addElement
+		exception_vect.add
 		( "Must have integer for Window Dimension width.\n" );
 	}
 	else { //try to get the second field (height)
@@ -6420,7 +6412,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 		getText()).trim();
 		if (( gui_windowdim_h_str.length() <= 0 ) ||
 		(! StringUtil.isInteger ( gui_windowdim_h_str ) ) ) {
-			exception_vect.addElement
+			exception_vect.add
 			( "Must have integer for Window Dimension height.\n" );
 		}
 		else {
@@ -6472,7 +6464,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 		//check that values are longs
 		if (( ! StringUtil.isDouble ( gui_annline_1_str ) ) ||
 		 ( ! StringUtil.isDouble ( gui_annline_2_str ) ) ) {
-			exception_vect.addElement
+			exception_vect.add
 			( "Must have a number for Reference Line 1 and 2 or no values at all (neither field is required).\n" );
 		}
 		else { //get their values
@@ -6513,7 +6505,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 		//check that values are longs
 		if (( ! StringUtil.isDouble ( gui_anntext_1_str ) ) ||
 		 ( ! StringUtil.isDouble ( gui_anntext_2_str ) ) ) {
-			exception_vect.addElement
+			exception_vect.add
 			( "Must have a number for Reference Line 1 and 2 or no values at all (neither field is required).\n" );
 		}
 		else { //get their values
@@ -6546,7 +6538,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 		gui_range_str = null;
 	}
 	else if  ( ! StringUtil.isDouble ( gui_range_lo_str ) ) {
-		exception_vect.addElement
+		exception_vect.add
 		( "Must have a number for the lower bound of the Range field.\n" );
 	}
 	else {
@@ -6554,7 +6546,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 		(__props_range_hi_graph_JTextField.getText()).trim();
 		if ( ( gui_range_hi_str.length() <= 0 ) ||
 		( ! StringUtil.isDouble ( gui_range_hi_str ) ) ) {
-			exception_vect.addElement
+			exception_vect.add
 			( "Must have a number for the upper bound of the Range field.\n" );
 		}
 		else {
@@ -6574,7 +6566,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 		b.append( "Errors verifying the properties tab " +
 		"of the Export Product.\n" );
 		for ( int i=0; i<num_errs; i++ ) {
-			b.append( (String) exception_vect.elementAt(i) );
+			b.append( (String) exception_vect.get(i) );
 		}
 		if ( b.length() >0 ) {
 			Message.printWarning( 1, routine, b.toString(),
@@ -6629,7 +6621,7 @@ public void verify_properties_tab_graph_props() throws Exception {
 	if ( !db_props_str.equalsIgnoreCase( gui_props_str ) ) {
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from:\n \"" + db_props_str  +
 		"\"\nto:\n \"" + gui_props_str  + "\"");
 
@@ -6759,7 +6751,7 @@ public void verify_properties_tab_obsreport_props() throws Exception {
 	if ( !db_props_str.equalsIgnoreCase( gui_props_str ) ){
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from:\n \"" + db_props_str  +
 		"\"\nto:\n \"" + gui_props_str  + "\"");
 
@@ -6862,7 +6854,7 @@ public void verify_properties_tab_shef_props() throws Exception {
 	if ( !db_props_str.equalsIgnoreCase( gui_props_str ) ){
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from:\n \"" + db_props_str  +
 		"\"\nto:\n \"" + gui_props_str  + "\"");
 
@@ -6996,7 +6988,7 @@ public void verify_properties_tab_table_props() throws Exception {
 	if ( !db_props_str.equalsIgnoreCase( gui_props_str ) ){
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from:\n \"" + db_props_str  +
 		"\"\nto:\n \"" + gui_props_str  + "\"");
 
@@ -7038,7 +7030,7 @@ public void verify_security_tab() throws Exception {
 	if ( !db_user_login_str.equalsIgnoreCase( gui_user_login_str )){
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change User Login from \"" + db_user_login_str  +
 		"\" to \"" + gui_user_login_str  + "\"");
 
@@ -7054,7 +7046,7 @@ public void verify_security_tab() throws Exception {
 	if ( !db_user_passwd_str.equalsIgnoreCase( gui_user_passwd_str )){
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change User Password from \"" + db_user_passwd_str  +
 		"\" to \"" + gui_user_passwd_str  + "\"");
 
@@ -7070,7 +7062,7 @@ public void verify_security_tab() throws Exception {
 	if ( !db_firewall_login_str.equalsIgnoreCase( gui_firewall_login_str )){
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Firewall Login from \"" + db_firewall_login_str  +
 		"\" to \"" + gui_firewall_login_str  + "\"");
 
@@ -7086,7 +7078,7 @@ public void verify_security_tab() throws Exception {
 	if ( !db_firewall_passwd_str.equalsIgnoreCase(gui_firewall_passwd_str)){
 		//set Dirty
  		__gui_RTi_ExportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Firewall Password from \"" + db_firewall_passwd_str +
 		"\" to \"" + gui_firewall_passwd_str  + "\"");
 
@@ -7152,7 +7144,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 	}
 	for ( int i=0; i<orig_num; i++ ) {
 		ec = (RiversideDB_ExportConf) __gui_RTi_ExportConf_vect.
-		elementAt(i);
+		get(i);
 		if ( ec == null ) {
 			continue;
 		}
@@ -7166,7 +7158,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 	}
 
 	//read in all data currently in worksheet.
-	Vector table_vect = null;
+	List table_vect = null;
 	table_vect = __timeseries_tab_selTS_JWorksheet.getAllData();
 
 	//compare original number of ExportConf objects
@@ -7181,8 +7173,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 	}
 
 	if ( rows > 0 ) {
-		gui_buffer.append( "ExportConf objects currently " +
-		"associated with this ExportProduct: \n" );
+		gui_buffer.append( "ExportConf objects currently associated with this ExportProduct: \n" );
 	}
 
 	if ( rows != orig_num ) {
@@ -7207,7 +7198,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 		ec = null;
 		for ( int i=0; i<rows; i++ ) {
 			ec = (RiversideDB_ExportConf)
-			table_vect.elementAt(i);
+			table_vect.get(i);
 			if ( ec == null ) {
 				continue;
 			}
@@ -7215,7 +7206,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
  			__gui_RTi_ExportProduct.setDirty( true );
 			//add to Vector
 
- 			__gui_RTi_ExportConf_vect.addElement( ec );
+ 			__gui_RTi_ExportConf_vect.add( ec );
 
 			long mt_num = -999;
 			mt_num = ec.getMeasType_num();
@@ -7226,7 +7217,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 			gui_buffer.append( tsid_str + "\n" );
 		}
 
- 		__dirty_vect.addElement( "Update ExportConf objects " +
+ 		__dirty_vect.add( "Update ExportConf objects " +
 		"associated with ExportProduct? \n" + db_buffer.toString() +
 		"\n" + gui_buffer.toString() );
 
@@ -7255,7 +7246,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 		boolean blnNewEC = false;
 		for ( int i=0; i<rows; i++ ) {
 			table_ec = (RiversideDB_ExportConf)
-			table_vect.elementAt(i);
+			table_vect.get(i);
 			if ( table_ec == null ) {
 				continue;
 			}
@@ -7267,7 +7258,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 			//now go through original vector of RTi_ExportConf
 			for ( int j=0; j<orig_num;j++ ) {
 				orig_ec = (RiversideDB_ExportConf)
- 				__db_RTi_ExportConf_vect.elementAt(j);
+ 				__db_RTi_ExportConf_vect.get(j);
 				if ( orig_ec == null ) {
 					continue;
 				}
@@ -7302,7 +7293,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						table_ec.setDirty( true );
  						__gui_RTi_ExportProduct.setDirty(
 						true );
- 						__dirty_vect.addElement(
+ 						__dirty_vect.add(
 						"Update " +
 						"Export ID from:\n \"" +
 						db_exp_id + "\" to: \"" +
@@ -7331,7 +7322,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						table_ec.setDirty( true );
  						__gui_RTi_ExportProduct.setDirty(
 						true );
- 						__dirty_vect.addElement(
+ 						__dirty_vect.add(
 						"Update " +
 						"Data Units from:\n \"" +
 						db_exp_units + "\" to: \"" +
@@ -7354,7 +7345,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						table_ec.setDirty( true );
  						__gui_RTi_ExportProduct.setDirty(
 						true );
- 						__dirty_vect.addElement(
+ 						__dirty_vect.add(
 						"Update ImportConf " +
 						"IsActive field from:\n \"" +
 						db_isActive + "\" to: \"" +
@@ -7367,7 +7358,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 					//ExportConf object back to
 					//Vector of ExportConfs
 
- 					__gui_RTi_ExportConf_vect.addElement(
+ 					__gui_RTi_ExportConf_vect.add(
 					table_ec );
 
 						break;
@@ -7394,12 +7385,12 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 				//so this one must be a new addition
 				table_ec.setDirty( true );
  				__gui_RTi_ExportProduct.setDirty( true );
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Add ExportConf object \"" +
 				tsid_str + "\" to selected ExportProduct?" );
 
 				//update vector of GUI ExportConf objects
- 				__gui_RTi_ExportConf_vect.addElement( table_ec );
+ 				__gui_RTi_ExportConf_vect.add( table_ec );
 				table_ec = null;
 				orig_ec = null;
 			}
@@ -7493,7 +7484,7 @@ public void verify_top_fields() throws Exception {
 	db_id = __db_RTi_ExportProduct.getProduct_name();
 	if ( ! db_id.equalsIgnoreCase( gui_id) ) {
  		__gui_RTi_ExportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Product Identifier from:\n \"" +
 		db_id +"\"\n to:\n \"" +gui_id+"\"");
  		__gui_RTi_ExportProduct.setProduct_name( gui_id );
@@ -7519,7 +7510,7 @@ public void verify_top_fields() throws Exception {
 	//if ( ! db_grp.equalsIgnoreCase( gui_grp )) {}
 	if ( db_grp_num !=  gui_grp_num ) {
  		__gui_RTi_ExportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Product Group Number from:\n \"" +
 		db_grp_num +"\"\n to:\n \"" +gui_grp_num+"\"");
  		__gui_RTi_ExportProduct.setProductGroup_num(gui_grp_num );
@@ -7541,7 +7532,7 @@ public void verify_top_fields() throws Exception {
 	if ( ! db_type.equalsIgnoreCase( gui_type ) ) {
 		//mark dirty
  		__gui_RTi_ExportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Product Type from:\n \"" +
 		db_type +"\"\n to:\n \"" +gui_type+"\"");
  		__gui_RTi_ExportProduct.setProduct_type( gui_type );
@@ -7567,7 +7558,7 @@ public void verify_top_fields() throws Exception {
 	if ( db_mlg_num != gui_mlg_num ) {
 		//mark object as dirty
  		__gui_RTi_ExportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change MeasLocGroup_num from \"" +
 		db_mlg_num +"\" to \"" +gui_mlg_num+"\"");
 		//set in memory
@@ -7587,7 +7578,7 @@ public void verify_top_fields() throws Exception {
 	//compare
 	if ( !db_isAct_str.equalsIgnoreCase( gui_isAct_str )) {
  		__gui_RTi_ExportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Export Product Is Enabled (Y/N) (see top of gui) "+
 		"from \"" + db_isAct_str +"\" to \"" +gui_isAct_str+"\"");
 
@@ -7671,8 +7662,7 @@ public void actionPerformed (ActionEvent event) {
 
  				__gui_RTi_ExportConf_vect.clear();
 				for ( int i=0; i<s; i++ ) {
- 					__gui_RTi_ExportConf_vect.addElement(
- 					__db_RTi_ExportConf_vect.elementAt(i) );
+ 					__gui_RTi_ExportConf_vect.add(__db_RTi_ExportConf_vect.get(i) );
 				}
 
  				__dirty_vect.clear();
@@ -7697,9 +7687,9 @@ public void actionPerformed (ActionEvent event) {
 			RiversideDB_ExportConf ec = null;
 			for ( int i=0; i<s; i++ ) {
 				ec = (RiversideDB_ExportConf)
- 				__gui_RTi_ExportConf_vect.elementAt(i);
+ 				__gui_RTi_ExportConf_vect.get(i);
 				ec.setDirty( false);
- 				__db_RTi_ExportConf_vect.addElement( ec );
+ 				__db_RTi_ExportConf_vect.add( ec );
 			}
 		}
 	}
@@ -7848,7 +7838,7 @@ public void actionPerformed (ActionEvent event) {
 				b = new StringBuffer();
 				for (int i=0;i< __dirty_vect.size();i++) {
 					b.append( (String)
- 					__dirty_vect.elementAt(i)+"\n" );
+ 					__dirty_vect.get(i)+"\n" );
 				}
 
 				//write out a confirmation message.
@@ -8016,10 +8006,10 @@ public void actionPerformed (ActionEvent event) {
 
 		//make vector of selected MeasType objects and corresponding
 		//Vector of ExportConf objects
-		Vector mt_vect = new Vector();
-		Vector ec_vect = new Vector();
+		List mt_vect = new Vector();
+		List ec_vect = new Vector();
 		//read in all ExportConf objects
-		Vector all_ExportConf_vect = null;
+		List all_ExportConf_vect = null;
 		try {
 			all_ExportConf_vect =
  			__dmi.readExportConfList();
@@ -8100,7 +8090,7 @@ public void actionPerformed (ActionEvent event) {
 				for ( int j=0;j<num_ec;j++ ) {
 					ec =(RiversideDB_ExportConf)
 					all_ExportConf_vect.
-					elementAt(j);
+					get(j);
 					if ( ec == null ) {
 						continue;
 					}
@@ -8154,7 +8144,7 @@ public void actionPerformed (ActionEvent event) {
 			//add it to the Vector of
 			//MeasType objects
 			if ( blnMove ) {
-				mt_vect.addElement( sel_mt );
+				mt_vect.add( sel_mt );
 
 				RiversideDB_ExportConf new_ec =
 				new RiversideDB_ExportConf();
@@ -8165,7 +8155,7 @@ public void actionPerformed (ActionEvent event) {
 
 				new_ec.setIsActive( "Y" );
 
-				ec_vect.addElement( new_ec );
+				ec_vect.add( new_ec );
 
  				__table_model.addMeasType( sel_mt );
  				__timeseries_tab_selTS_JWorksheet.

@@ -31,6 +31,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
+import java.util.List;
 import java.util.Vector;
 import RTi.DMI.DMIDataObject;
 import RTi.Util.Message.Message;
@@ -167,8 +168,7 @@ Adds a new record to the worksheet with values read in from an import file.
 @param classes the classes for the fields.
 @return true if successful, false if not.
 */
-protected boolean importNewRecord(
-	Vector values, int[] fieldNums, Class[] classes )
+protected boolean importNewRecord( List values, int[] fieldNums, Class[] classes )
 {
 	_worksheet.addRow(new RiversideDB_DataType());
 
@@ -243,12 +243,12 @@ protected void setupComboBoxes()
 	String routine = CLASS + ".setupComboBoxes";
 
 	try {
-		Vector v = _dmi.readDataDimensionList();
+		List v = _dmi.readDataDimensionList();
 		int size = v.size();
-		Vector values = new Vector();
+		List values = new Vector();
 		RiversideDB_DataDimension dd = null;
 		for ( int i = 0; i < size; i++ ) {
-			dd = (RiversideDB_DataDimension)v.elementAt(i);
+			dd = (RiversideDB_DataDimension)v.get(i);
 			values.add(dd.getDimension  ().trim() + " - "
 				 + dd.getDescription().trim());
 		}
@@ -260,12 +260,12 @@ protected void setupComboBoxes()
 	}
 
 	try {
-		Vector v = _dmi.readMeasTimeScaleList();
+		List v = _dmi.readMeasTimeScaleList();
 		int size = v.size();
-		Vector values = new Vector();
+		List values = new Vector();
 		RiversideDB_MeasTimeScale mts = null;
 		for ( int i = 0; i < size; i++ ) {
-			mts = (RiversideDB_MeasTimeScale)v.elementAt(i);
+			mts = (RiversideDB_MeasTimeScale)v.get(i);
 			values.add(mts.getScale      ().trim() + " - "
 				 + mts.getDescription().trim());
 		}
@@ -277,12 +277,12 @@ protected void setupComboBoxes()
 	}
 
 	try {
-		Vector v = _dmi.readMeasLocTypeList();
+		List v = _dmi.readMeasLocTypeList();
 		int size = v.size();
-		Vector values = new Vector();
+		List values = new Vector();
 		RiversideDB_MeasLocType mlt = null;
 		for ( int i = 0; i < size; i++ ) {
-			mlt = (RiversideDB_MeasLocType)v.elementAt(i);
+			mlt = (RiversideDB_MeasLocType)v.get(i);
 			values.add(mlt.getType()       .trim() + " - "
 				 + mlt.getDescription().trim());
 		}
@@ -294,12 +294,12 @@ protected void setupComboBoxes()
 	}
 
 	try {
-		Vector v = _dmi.readSHEFTypeList();
+		List v = _dmi.readSHEFTypeList();
 		int size = v.size();
-		Vector values = new Vector();
+		List values = new Vector();
 		RiversideDB_SHEFType st = null;
 		for ( int i = 0; i < size; i++ ) {
-			st = (RiversideDB_SHEFType)v.elementAt(i);
+			st = (RiversideDB_SHEFType)v.get(i);
 			values.add(st.getSHEF_pe().trim());
 		}
 		values.add( "" );
@@ -318,15 +318,12 @@ Writes a record to the database.
 @param pairs Vector that ties the record to be written to a row in the
 worksheet.
 */
-protected void writeRecord( int recordNum, DMIDataObject ddo, Vector pairs )
+protected void writeRecord( int recordNum, DMIDataObject ddo, List pairs )
 throws Exception
 {
-	RiversideDB_DataType dt  = (RiversideDB_DataType)
-					ddo;
-	RiversideDB_DataType dt0 = (RiversideDB_DataType)
-					dt.getOriginal();
-	RiversideDB_DataType dtr =
-		_dmi.readDataTypeForDataType( dt.getDataType() );
+	RiversideDB_DataType dt  = (RiversideDB_DataType)ddo;
+	RiversideDB_DataType dt0 = (RiversideDB_DataType)dt.getOriginal();
+	RiversideDB_DataType dtr = _dmi.readDataTypeForDataType( dt.getDataType() );
 
 	if ( shouldWrite(
 		dt, dt0, dtr, "Data Type", dt.getDataType() ) ) {

@@ -16,6 +16,7 @@ package RTi.DMI.RiversideDB_DMI;
 
 import RTi.Util.GUI.JWorksheet;
 
+import java.util.List;
 import java.util.Vector;
 
 import RTi.TS.TSIdent;
@@ -29,8 +30,7 @@ import RTi.Util.Message.Message;
 //import RTi.DMI.RiversideDB_DataType;
 
 /**
-This class is a table model for displaying data from 
-RiversideDB_ExportConf and MeasType objects.
+This class is a table model for displaying data from RiversideDB_ExportConf and MeasType objects.
 */
 public class RiversideDB_ExportConf_TableModel 
 extends JWorksheet_AbstractRowTableModel {
@@ -46,10 +46,10 @@ Reference to table worksheet this tablemodel is for.
 private JWorksheet __worksheet;
 
 /**
-Vector of MeasTypes ordered corresponding to the
+List of MeasTypes ordered corresponding to the
 order of the ExportConf objects passed in.
 */
-Vector __measType_vect = null;
+List __measType_vect = null;
 
 /**
 Array of Strings to use for the labels of the worksheet pertaining to
@@ -65,7 +65,7 @@ String[] __arrToolTips = null;
 
 //Vector containing values for field - this is a JComboBox
 //(all the choices for field will be the same for the entire column)
-Vector _field_vect = null;
+List _field_vect = null;
 
 //Connection to database to query 
 RiversideDB_DMI __rdmi;
@@ -73,7 +73,7 @@ RiversideDB_DMI __rdmi;
 //To get JComboBox for units (which will contain different items 
 //depending on the data type of the selected product), need to
 //query the vector of DataTypes
-Vector __dataType_vect = null;
+List __dataType_vect = null;
 
 //ROWs
 private final static int __tsid = 0;
@@ -85,7 +85,7 @@ private final static int __exp_units = 4;
 /**
 Constructor.  This builds the Model for displaying the given 
 RiversideDB_ExportConf objects' information.
-@param v Vector of Vectors.  First Vector is Vector of 
+@param v List of Vectors.  First Vector is Vector of 
 RiversideDB_ExportConf objects for which to display data.  
 The ExportConf object itself knows about the related 
 RiversideDB_MeasType object. The second Vector is
@@ -98,23 +98,22 @@ ExportConf object fields:
 [1] Export Units
 [2] IsActive
 @param dmi Connection to open DMI.
-@param dataType_vect Vector of DataType objects used to create unit choices 
+@param dataType_vect List of DataType objects used to create unit choices 
 in units JComboBox
 @throws Exception if an invalid data or dmi was passed in.
 */
-public RiversideDB_ExportConf_TableModel(Vector v, 
+public RiversideDB_ExportConf_TableModel(List v, 
 String [] arrLabels, String [] arrToolTips, 
-RiversideDB_DMI dmi, Vector dataType_vect ) throws Exception {
+RiversideDB_DMI dmi, List dataType_vect ) throws Exception {
 	if (v.size() != 2 ) {
 		throw new Exception ("Need to pass in a Vector of size " +
 		"2 containing, 1) a Vector of ExportConf objects and " +
 		"2), a Vector of MeasType objects" );
 	}
 	// ( _data is a Vector inherited from
-	// JWorksheet_AbstractRowTableModel.  It stores the Vector of data
-	// that you'll show in the table. )
-	_data = (Vector)v.elementAt(0);
-	__measType_vect = (Vector)v.elementAt(1);
+	// JWorksheet_AbstractRowTableModel.  It stores the Vector of data that you'll show in the table. )
+	_data = (List)v.get(0);
+	__measType_vect = (List)v.get(1);
 
 	if (_data == null) {
 		throw new Exception ("Null data Vector passed to " 
@@ -162,7 +161,7 @@ public void deleteMeasType ( String tsid_str ) {
 	RiversideDB_MeasType mt = null;
 	String s = null;
 	for ( int i=0; i< num_mt; i++ ) {
-		mt =(RiversideDB_MeasType) __measType_vect.elementAt(i);
+		mt =(RiversideDB_MeasType) __measType_vect.get(i);
 		if ( mt == null ) {
 			continue;
 		}
@@ -176,7 +175,7 @@ public void deleteMeasType ( String tsid_str ) {
 			s = "";
 		}
 		if ( s.equals( tsid_str ) ) {
-			__measType_vect.removeElementAt(i);
+			__measType_vect.remove(i);
 		}
 	}
 }
@@ -263,8 +262,7 @@ public int getRowCount() {
 
 /**
 Returns the data that should be placed in the JTable at the given row and 
-column.  This method is inherited from the very base-most Java TableModel
-class and is required.
+column.  This method is inherited from the very base-most Java TableModel class and is required.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -283,12 +281,11 @@ public Object getValueAt(int row, int col) {
 	// for each column.  You can do a lot in here, I've done some really
 	// complicated stuff for some tables.  But for the most part,
 	// something simple like below will work
-	RiversideDB_ExportConf table = 
-	(RiversideDB_ExportConf ) _data.elementAt(row);
+	RiversideDB_ExportConf table = (RiversideDB_ExportConf )_data.get(row);
 
 	String s ="";
 	RiversideDB_MeasType mt = null;
-	mt = ( RiversideDB_MeasType ) __measType_vect.elementAt(row);
+	mt = ( RiversideDB_MeasType ) __measType_vect.get(row);
 	switch (col) {
 		case  __tsid:	//tsid	
 				if ( mt == null ) { 
@@ -414,14 +411,12 @@ public void setValueAt(Object value, int row, int col) {
 			break;
  		case  __ts_active: //enabled
 			s = (String) value;
-			table = 
-			(RiversideDB_ExportConf) _data.elementAt( row );
+			table = (RiversideDB_ExportConf) _data.get( row );
 			table.setIsActive( s.toUpperCase() );
 			break;
  		case  __exp_id: //export id
 			s = (String) value;
-			table = 
-			(RiversideDB_ExportConf) _data.elementAt( row );
+			table = (RiversideDB_ExportConf) _data.get( row );
 			table.setExport_id( s.toUpperCase() );
 			break;
  		case  __exp_units: //units
@@ -429,8 +424,7 @@ public void setValueAt(Object value, int row, int col) {
 			if ( s.equals("SAME") ) {
 				s = "";
 			}
-			table = 
-			(RiversideDB_ExportConf) _data.elementAt( row );
+			table = (RiversideDB_ExportConf) _data.get( row );
 			table.setExport_units( s.toUpperCase() );
 			break;
 	}
@@ -440,8 +434,7 @@ public void setValueAt(Object value, int row, int col) {
 }
 
 /**
-Reference to the worksheet in which this table model
-manages the data. 
+Reference to the worksheet in which this table model manages the data. 
 */ 
 public void setWorksheet(JWorksheet worksheet) {
 	__worksheet = worksheet;
@@ -457,9 +450,9 @@ JComboBox which contains: Y/N options.
 */
 public void updateWorksheet( ) {
 	//make comboBox for isActive YES or NO
-	Vector active_vect = new Vector();
-	active_vect.addElement( "Y" );
-	active_vect.addElement( "N" );
+	List active_vect = new Vector();
+	active_vect.add( "Y" );
+	active_vect.add( "N" );
 
 	//set column for to use this (choices do not change )
 	__worksheet.setColumnJComboBoxValues( __ts_active, active_vect );
@@ -477,8 +470,8 @@ public void updateWorksheet( ) {
 	String type = null;
 	int size_dt = __dataType_vect.size();
 	for ( int i=0; i<_rows; i++ ) {
-		Vector units_vect= new Vector();
-		mt = (RiversideDB_MeasType) __measType_vect.elementAt(i);
+		List units_vect= new Vector();
+		mt = (RiversideDB_MeasType) __measType_vect.get(i);
 		if ( mt == null ) {	
 			continue;
 		}
@@ -492,16 +485,14 @@ public void updateWorksheet( ) {
 		type = tsid.getType();
 		RiversideDB_DataType dt =null;
 		String dim = "";
-		Vector du_vect = null;
+		List du_vect = null;
 		//use type to get DataType object
 		for ( int j=0; j<size_dt; j++ ) {
-			dt = (RiversideDB_DataType) __dataType_vect.
-			elementAt(j);
+			dt = (RiversideDB_DataType)__dataType_vect.get(j);
 			if ( dt == null ) {	
 				continue;
 			}	
-			if ( (type != null ) && 
-			(dt.getDataType().equals( type ) )) {
+			if ( (type != null ) && (dt.getDataType().equals( type ) )) {
 				//use this to get the Dimension
 				dim = dt.getDimension();
 				break;
@@ -510,8 +501,7 @@ public void updateWorksheet( ) {
 		dt= null;
 
 		//use Dimension to find units
-		du_vect = DataUnits.lookupUnitsForDimension(
-		IOUtil.getPropValue("UNITS_SYSTEM"), dim );
+		du_vect = DataUnits.lookupUnitsForDimension( IOUtil.getPropValue("UNITS_SYSTEM"), dim );
 
 		if ( du_vect == null ) {	
 			continue;
@@ -519,16 +509,16 @@ public void updateWorksheet( ) {
 		int du_size = du_vect.size();
 		DataUnits du = null;
 		for ( int k=0; k<du_size; k++ ) {
-			du =(DataUnits) du_vect.elementAt(k);
+			du =(DataUnits) du_vect.get(k);
 			if ( du == null ) {	
 				continue;
 			}
-			units_vect.addElement( du.getAbbreviation() );
+			units_vect.add( du.getAbbreviation() );
 			du = null;
 		//set this to be the items in the cell specific JComboBox
 	
 			if ( k == du_size-1 ) {
-				units_vect.addElement( "SAME" );
+				units_vect.add( "SAME" );
 			}
 
 			__worksheet.

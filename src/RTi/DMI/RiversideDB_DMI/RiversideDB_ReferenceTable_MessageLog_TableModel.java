@@ -66,7 +66,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.Time.DateTime;
 import RTi.DMI.DMIUtil;
@@ -98,7 +98,7 @@ Default constructor.
 @param editable whether the data is editable or not.
 */
 public RiversideDB_ReferenceTable_MessageLog_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;	
@@ -106,13 +106,12 @@ throws Exception {
 
 /**
 Stores a backup of each object so that the original values prior to any
-editing can be chcked later to find out if anything is different.
+editing can be checked later to find out if anything is different.
 */
 public void backupData()
 {
 	for (int i = 0; i < _rows; i++) {
-		RiversideDB_MessageLog m6 =
-			(RiversideDB_MessageLog)_data.elementAt(i);
+		RiversideDB_MessageLog m6 = (RiversideDB_MessageLog)_data.get(i);
 		m6.setOriginal(m6.cloneSelf());
 		m6.setDirty(false);
 	}
@@ -131,7 +130,7 @@ protected int checkTableField( int integerKey, int row )
 	RiversideDB_MessageLog d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_MessageLog)_data.elementAt(i);
+			d = (RiversideDB_MessageLog)_data.get(i);
 			if ( d.getMessage_num() == integerKey ) {
 				return checkTableField( integerKey + 1, row );
 			}
@@ -259,8 +258,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_MessageLog m =
-		(RiversideDB_MessageLog)_data.elementAt(row);
+	RiversideDB_MessageLog m = (RiversideDB_MessageLog)_data.get(row);
 		
 	switch (column) {
 		case COL_MESSAGE_LOG_MESSAGE_NUM:
@@ -289,10 +287,8 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_MessageLog m =
-		(RiversideDB_MessageLog)_data.elementAt(row);
-	RiversideDB_MessageLog m0 =
-		(RiversideDB_MessageLog)m.getOriginal();
+	RiversideDB_MessageLog m = (RiversideDB_MessageLog)_data.get(row);
+	RiversideDB_MessageLog m0 = (RiversideDB_MessageLog)m.getOriginal();
 	String s;
 	int i;
 	switch (column) {

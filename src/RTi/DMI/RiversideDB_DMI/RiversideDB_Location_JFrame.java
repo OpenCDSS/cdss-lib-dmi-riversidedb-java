@@ -121,6 +121,7 @@ import  java.awt.event.ItemEvent;
 import  java.awt.event.ItemListener;
 import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
+import  java.util.List;
 import  java.util.Vector;
 
 import 	javax.swing.BorderFactory;
@@ -486,12 +487,12 @@ private String __preselected_ID_string = null;
 RiversideDB_Geoloc __db_RTi_GeoLoc = null;
 //MeasLoc object that is currently being used...
 RiversideDB_MeasLoc __db_RTi_MeasLoc = null;
-private Vector __RTi_MeasLoc_vect = null;
+private List __RTi_MeasLoc_vect = null;
 //StageDischargeRating vector
-private Vector __stageDischargeRating_vect = null;
+private List __stageDischargeRating_vect = null;
 
 //Vector of JWOrksheets containing data from RatingTable table
-private Vector __ratingTable_worksheet_vect = new Vector();
+private List __ratingTable_worksheet_vect = new Vector();
 
 //StageDischargeRating Object previously selected on the RATINGS tab
 RiversideDB_StageDischargeRating __previous_RTi_StageDischargeRating = null;
@@ -521,9 +522,9 @@ private JTextField __area_tab_name_JTextField = null;
 private JTextField __area_tab_area_JTextField = null;
 private SimpleJComboBox __area_tab_units_JComboBox = null;
 
-//Holds a Vector of status information-- each
+//Holds a list of status information-- each
 //field that has been changed is recored in this vector.
-private Vector __dirty_vect = new Vector();
+private List __dirty_vect = new Vector();
 
 //Holds objects with current, but uncommitted changes
 RiversideDB_MeasLoc __gui_RTi_MeasLoc = null;
@@ -805,24 +806,23 @@ public JPanel assemble_tab_area() {
 		Message.printDebug( 2, routine, "System units set to: \"" + system_units +"\"" );
 	}
 
-	Vector units_vect = new Vector();
+	List units_vect = new Vector();
 	//get units for areas
-	Vector v = DataUnits.lookupUnitsForDimension( __system_units, "L2" );
+	List v = DataUnits.lookupUnitsForDimension( __system_units, "L2" );
 	int size = 0;
 	if ( v != null ) {
 		size = v.size();
 	}
 	DataUnits du = null;
 	for ( int i=0; i< size; i++ ) {
-		du = (DataUnits)v.elementAt(i);
-		units_vect.addElement( du.getAbbreviation() +
-		" - " + du.getLongName() );
+		du = (DataUnits)v.get(i);
+		units_vect.add( du.getAbbreviation() + " - " + du.getLongName() );
 	}
 	if ( size == 0 ) {
-		units_vect.addElement( "      " );
+		units_vect.add( "      " );
 	}
 	//now sort the units
-	Vector sorted_units_vect = null;
+	List sorted_units_vect = null;
 	sorted_units_vect = StringUtil.sortStringList( units_vect,
 		StringUtil.SORT_ASCENDING, null, false, true );
 	units_vect = null;
@@ -976,8 +976,8 @@ public JPanel assemble_tab_geographic() {
 	JLabel geog_tab_units_JLabel = new JLabel( "Elev. Units:" );
 	geog_tab_units_JLabel.setToolTipText("Units for elevation of location (required if elevation filled in)" );
 
-	Vector units_vect = new Vector();
-	Vector v = DataUnits.lookupUnitsForDimension( __system_units, "L" );
+	List units_vect = new Vector();
+	List v = DataUnits.lookupUnitsForDimension( __system_units, "L" );
 	int size = 0;
 	if ( v != null ) {
 		size = v.size();
@@ -989,13 +989,12 @@ public JPanel assemble_tab_geographic() {
 	}
 	DataUnits du = null;
 	for ( int i=0; i< size; i++ ) {
-		du = (DataUnits)v.elementAt(i);
-		units_vect.addElement( du.getAbbreviation() +
-		" - " + du.getLongName() );
+		du = (DataUnits)v.get(i);
+		units_vect.add( du.getAbbreviation() + " - " + du.getLongName() );
 	}
 	v = null;
 	//now sort vector alphabetically
-	Vector sorted_units_vect = null;
+	List sorted_units_vect = null;
 	sorted_units_vect = StringUtil.sortStringList( units_vect,
 	StringUtil.SORT_ASCENDING, null, false, true );
 	units_vect = null;
@@ -1199,28 +1198,28 @@ public JPanel assemble_tab_rating() {
  	__rating_tab_datum_JTextField =new JTextField( 5 );
 
 	//get units for LENGTH
-	Vector length_units_vect = new Vector();
+	List length_units_vect = new Vector();
 	//get units for lengths
-	Vector v = DataUnits.lookupUnitsForDimension( __system_units, "L" );
+	List v = DataUnits.lookupUnitsForDimension( __system_units, "L" );
 	int size = 0;
 	if ( v != null ) {
 		size = v.size();
 	}
 	DataUnits du = null;
 	for ( int i=0; i< size; i++ ) {
-		du = (DataUnits)v.elementAt(i);
+		du = (DataUnits)v.get(i);
 		if ( du == null ) {
 			continue;
 		}
-		length_units_vect.addElement( du.getAbbreviation() +
+		length_units_vect.add( du.getAbbreviation() +
 		" - " + du.getLongName() );
 		du = null;
 	}
 	if ( size == 0 ) {
-		length_units_vect.addElement( "      " );
+		length_units_vect.add( "      " );
 	}
 	//now sort the units
-	Vector sorted_length_units_vect = null;
+	List sorted_length_units_vect = null;
 	sorted_length_units_vect = StringUtil.sortStringList( length_units_vect,
 		StringUtil.SORT_ASCENDING, null, false, true );
 	length_units_vect = null;
@@ -1243,9 +1242,9 @@ public JPanel assemble_tab_rating() {
  	__rating_tab_flood_stage_JTextField =new JTextField( 5 );
 
 	//"Interpoloation method";
-	Vector interpol_vect = new Vector();
-	interpol_vect.addElement( "LINEAR" );
-	interpol_vect.addElement( "LOGARITHMIC" );
+	List interpol_vect = new Vector();
+	interpol_vect.add( "LINEAR" );
+	interpol_vect.add( "LOGARITHMIC" );
 	JLabel rating_tab_interpol_JLabel = new JLabel( "Interpolation Method: " );
 	rating_tab_interpol_JLabel.setToolTipText("Choose Interpolation method");
  	__rating_tab_interpol_JComboBox =new SimpleJComboBox( interpol_vect );
@@ -1258,7 +1257,7 @@ public JPanel assemble_tab_rating() {
 
 	//"Discharge Units";
 	//get units for FLOW
-	Vector flow_units_vect = new Vector();
+	List flow_units_vect = new Vector();
 	//get units for flow_
 	v = null;
 	v = DataUnits.lookupUnitsForDimension( __system_units, "L3/T" );
@@ -1268,19 +1267,19 @@ public JPanel assemble_tab_rating() {
 	}
 	du = null;
 	for ( int i=0; i< size; i++ ) {
-		du = (DataUnits)v.elementAt(i);
+		du = (DataUnits)v.get(i);
 		if ( du == null ) {
 			continue;
 		}
-		flow_units_vect.addElement( du.getAbbreviation() +
+		flow_units_vect.add( du.getAbbreviation() +
 		" - " + du.getLongName() );
 		du = null;
 	}
 	if ( size == 0 ) {
-		flow_units_vect.addElement( "      " );
+		flow_units_vect.add( "      " );
 	}
 	//now sort the units
-	Vector sorted_flow_units_vect = null;
+	List sorted_flow_units_vect = null;
 	sorted_flow_units_vect = StringUtil.sortStringList( flow_units_vect,
 		StringUtil.SORT_ASCENDING, null, false, true );
 	flow_units_vect = null;
@@ -1719,7 +1718,7 @@ public void closeGUI( ) {
 		RiversideDB_StageDischargeRating sdr =null;
 		for ( int i=0;i<numb_sdr;i++ ) {
 			sdr = (RiversideDB_StageDischargeRating)
- 			__stageDischargeRating_vect.elementAt(i);
+ 			__stageDischargeRating_vect.get(i);
 			if ( sdr == null ) {
 				continue;
 			}
@@ -1814,40 +1813,40 @@ protected JDialog createNewDatesJDialog( ) {
  	__rating_tab_popup_start_YYYY_JTextField = new JTextField(5);
  	__rating_tab_popup_end_YYYY_JTextField = new JTextField(5);
 	//MM
-	Vector months_vect = new Vector();
+	List months_vect = new Vector();
 	for ( int i=1; i<13; i++ ) {
-		months_vect.addElement( StringUtil.formatString (
+		months_vect.add( StringUtil.formatString (
 		String.valueOf( i ), "%02d") );
 	}
  	__rating_tab_popup_start_MM_JComboBox = new SimpleJComboBox( months_vect );
  	__rating_tab_popup_end_MM_JComboBox = new SimpleJComboBox( months_vect );
 
 	//DD
-	Vector days_vect = new Vector();
+	List days_vect = new Vector();
 	for ( int i=1; i<31; i++ ) {
-		days_vect.addElement( StringUtil.formatString (
+		days_vect.add( StringUtil.formatString (
 		String.valueOf( i ), "%02d") );
 	}
- 	__rating_tab_popup_start_DD_model = new DefaultComboBoxModel(days_vect);
- 	__rating_tab_popup_end_DD_model = new DefaultComboBoxModel(days_vect);
+ 	__rating_tab_popup_start_DD_model = new DefaultComboBoxModel(new Vector(days_vect));
+ 	__rating_tab_popup_end_DD_model = new DefaultComboBoxModel(new Vector(days_vect));
  	__rating_tab_popup_start_DD_JComboBox = new JComboBox(
  	__rating_tab_popup_start_DD_model );
  	__rating_tab_popup_end_DD_JComboBox = new JComboBox(
  	__rating_tab_popup_end_DD_model );
 
 	//HH
-	Vector hours_vect = new Vector();
+	List hours_vect = new Vector();
 	for ( int i=1; i<25; i++ ) {
-		hours_vect.addElement( StringUtil.formatString (
+		hours_vect.add( StringUtil.formatString (
 		String.valueOf( i ), "%02d") );
 	}
  	__rating_tab_popup_start_HH_JComboBox = new SimpleJComboBox( hours_vect );
  	__rating_tab_popup_end_HH_JComboBox = new SimpleJComboBox( hours_vect );
 
 	//mm
-	Vector min_vect = new Vector();
+	List min_vect = new Vector();
 	for ( int i=1; i<61; i++ ) {
-		min_vect.addElement( StringUtil.formatString (
+		min_vect.add( StringUtil.formatString (
 		String.valueOf( i ), "%02d") );
 	}
  	__rating_tab_popup_start_mm_JComboBox = new SimpleJComboBox( min_vect );
@@ -2143,7 +2142,7 @@ private void create_top_panel() {
 	station_source_JLabel.setToolTipText( "Primary data source for location (required)" );
 
 	//SOURCE
-	Vector RTi_DataSource_vect = null;
+	List RTi_DataSource_vect = null;
 	try {
 		RTi_DataSource_vect = __dmi.readDataSourceList();
 	}
@@ -2158,9 +2157,9 @@ private void create_top_panel() {
 	//to use to make a list of Source choices.
 	RiversideDB_DataSource ds = null;
 	String source_str = null;
-	Vector source_vect = new Vector();
+	List source_vect = new Vector();
 	for ( int i=0; i<RTi_DataSource_vect.size(); i++ ) {
-		ds = (RiversideDB_DataSource) RTi_DataSource_vect.elementAt(i);
+		ds = (RiversideDB_DataSource) RTi_DataSource_vect.get(i);
 		if ( ds == null ) {
 			continue;
 		}
@@ -2172,7 +2171,7 @@ private void create_top_panel() {
 				source_str = source_str.substring(0,45)+ " ...";
 			}
 
-			source_vect.addElement( source_str );
+			source_vect.add( source_str );
 		}
 
 		source_str = null;
@@ -2210,7 +2209,7 @@ private void create_top_panel() {
 	JLabel station_measlocgrp_JLabel = new JLabel( "Location Group:" );
 	station_measlocgrp_JLabel.setToolTipText("Non-editable field." );
 
-	Vector mlg_vect = null;
+	List mlg_vect = null;
 	try {
 		mlg_vect = __dmi.readMeasLocGroupList();
 	}
@@ -2226,11 +2225,11 @@ private void create_top_panel() {
 		"Total Number of MeasLocGroup objects = " + size_mlg );
 	}
 	//go through and pull out number, ID, name
-	Vector measlocgrp_vect = new Vector();
+	List measlocgrp_vect = new Vector();
 	RiversideDB_MeasLocGroup mlg = null;
 	String mlg_str = null;
 	for ( int i=0; i<size_mlg; i++ ) {
-		mlg = (RiversideDB_MeasLocGroup) mlg_vect.elementAt(i);
+		mlg = (RiversideDB_MeasLocGroup) mlg_vect.get(i);
 		if ( mlg == null ) {
 			continue;
 		}
@@ -2241,7 +2240,7 @@ private void create_top_panel() {
 			mlg_str = mlg_str.substring( 0, 45 ) + "...";
 		}
 
-		measlocgrp_vect.addElement( mlg_str );
+		measlocgrp_vect.add( mlg_str );
 		mlg =null;
 	}
 
@@ -2371,16 +2370,16 @@ boolean fromConstructor) {
 	}
 
 	//get related RatingTable items to put in JWorksheets
- 	__ratingTable_worksheet_vect.removeAllElements( );
+ 	__ratingTable_worksheet_vect.clear( );
 	int size  = __stageDischargeRating_vect.size();
 	RiversideDB_StageDischargeRating sdr = null;
 	for ( int i=0; i<size; i++ ) {
 		sdr = (RiversideDB_StageDischargeRating)
- 		__stageDischargeRating_vect.elementAt(i);
+ 		__stageDischargeRating_vect.get(i);
 		if ( sdr == null ) {
 			continue;
 		}
-		Vector v = null;
+		List v = null;
 		try {
 			v = __dmi.readRatingTableListForRatingTable_num(
 			sdr.getRatingTable_num() );
@@ -2412,7 +2411,7 @@ boolean fromConstructor) {
 		tmr.setWorksheet( worksheet );
 
 		//add JWorksheet to global vector
- 		__ratingTable_worksheet_vect.addElement( worksheet );
+ 		__ratingTable_worksheet_vect.add( worksheet );
 		worksheet=null;
 		v= null;
 	}
@@ -2640,7 +2639,7 @@ protected void set_rating_tab_fields( RiversideDB_StageDischargeRating sdr,int i
 
 		//update JWorksheet
  		__rating_JWorksheet = (JWorksheet) __ratingTable_worksheet_vect.
-		elementAt( index );
+		get( index );
 		//update Jscrollpane
 		if ( __rating_JWorksheet != null  ) {
  			__rating_worksheet_JScrollPane.setViewportView(
@@ -2674,10 +2673,10 @@ protected void update_database( ) throws Exception {
 	StringBuffer b = new StringBuffer();
 	for ( int i=0; i< __dirty_vect.size(); i++ ) {
 		if ( i == ( __dirty_vect.size()-1) ) {
-			b.append( (String) __dirty_vect.elementAt(i) );
+			b.append( (String) __dirty_vect.get(i) );
 		}
 		else {
-			b.append( (String) __dirty_vect.elementAt(i) + "\n" );
+			b.append( (String) __dirty_vect.get(i) + "\n" );
 		}
 	}
 
@@ -2689,7 +2688,7 @@ protected void update_database( ) throws Exception {
 		RiversideDB_StageDischargeRating sdr =null;
 		for ( int i=0;i<numb_sdr;i++ ) {
 			sdr = (RiversideDB_StageDischargeRating)
- 			__stageDischargeRating_vect.elementAt(i);
+ 			__stageDischargeRating_vect.get(i);
 			if ( sdr == null ) {
 				continue;
 			}
@@ -2894,7 +2893,7 @@ protected void update_database( ) throws Exception {
 		RiversideDB_StageDischargeRating sdr = null;
 		for ( int i=0; i< numb_sdr; i++ ) {
 			sdr = (RiversideDB_StageDischargeRating)
- 			__stageDischargeRating_vect.elementAt(i);
+ 			__stageDischargeRating_vect.get(i);
 			if ( sdr == null ) {
 				continue;
 			}
@@ -2932,16 +2931,15 @@ protected void update_database( ) throws Exception {
 			//now write all from the GUI back to the database
 			//get worksheet associated with this same SDR obj
 			JWorksheet worksheet = (JWorksheet)
- 			__ratingTable_worksheet_vect.elementAt( i );
+ 			__ratingTable_worksheet_vect.get( i );
 
 			//now get data from worksheet
-			Vector v = worksheet.getAllData();
+			List v = worksheet.getAllData();
 			int numb_rt = v.size();
 			RiversideDB_RatingTable rt = null;
 			for ( int k=0; k< numb_rt; k++ ) {
 				try {
-					rt = (RiversideDB_RatingTable)
-					v.elementAt(k);
+					rt = (RiversideDB_RatingTable)v.get(k);
  					__dmi.writeRatingTable(rt);
 					//(RiversideDB_RatingTable)
 					//v.elementAt(k) );
@@ -3031,7 +3029,7 @@ protected void update_previous_StageDischargeRating_obj( ) {
 	int ind = 0;
 	for ( int i=0; i<size; i++ ) {
 		sdr = (RiversideDB_StageDischargeRating)
- 		__stageDischargeRating_vect.elementAt(i);
+ 		__stageDischargeRating_vect.get(i);
 		DateTime s = new DateTime(sdr.getStart_Date());
 		DateTime e = new DateTime(sdr.getEnd_Date());
 		if( ( start_dt.equals( s,
@@ -3040,11 +3038,8 @@ protected void update_previous_StageDischargeRating_obj( ) {
 		DateTime.PRECISION_MINUTE ) ) ) {
 			//we found the object in the Vector
 			//that we need to update
- 			__stageDischargeRating_vect.
-			removeElementAt(i);
- 			__stageDischargeRating_vect.
-			insertElementAt(
- 			__previous_RTi_StageDischargeRating, i);
+ 			__stageDischargeRating_vect.remove(i);
+ 			__stageDischargeRating_vect.add(i, __previous_RTi_StageDischargeRating);
 			s = null;
 			e = null;
 			ind = i;
@@ -3058,13 +3053,12 @@ protected void update_previous_StageDischargeRating_obj( ) {
 	//it has changed.
 	if ( __rating_JWorksheet.isDirty() ) {
  		__rating_JWorksheet = (JWorksheet)
- 		__ratingTable_worksheet_vect.elementAt(ind);
+ 		__ratingTable_worksheet_vect.get(ind);
 
 		//get worksheet and
 		//replace it in global Vector of Vector that
 		//contains the RatingTable objects.
- 		__ratingTable_worksheet_vect.
-		removeElementAt(ind);
+ 		__ratingTable_worksheet_vect.remove(ind);
 
 		/*
 		//DEBUGGINg
@@ -3074,8 +3068,7 @@ protected void update_previous_StageDischargeRating_obj( ) {
 
 		}
 		*/
- 		__ratingTable_worksheet_vect.
-		insertElementAt( __rating_JWorksheet, ind );
+ 		__ratingTable_worksheet_vect.add( ind, __rating_JWorksheet );
 	}
 
 } //end update_previous_StageDischargeRating_obj
@@ -3344,8 +3337,8 @@ String end_str ) throws Exception {
 	//StageDischargeRating object
 	RiversideDB_RatingTable rt = new RiversideDB_RatingTable();
 	rt.setRatingTable_num( rt_num);
-	Vector v = new Vector();
-	v.addElement( rt );
+	List v = new Vector();
+	v.add( rt );
 	JWorksheet worksheet = null;
 	RiversideDB_RatingTable_TableModel tmr = null;
 	try {
@@ -3374,10 +3367,10 @@ String end_str ) throws Exception {
 	if ( size <= 0 ) {
 		//adding first stagedischargerating object.
 		//add this to the Global vector
- 		__stageDischargeRating_vect.addElement( sdr );
+ 		__stageDischargeRating_vect.add( sdr );
 
 		//add worksheet
- 		__ratingTable_worksheet_vect.addElement( worksheet );
+ 		__ratingTable_worksheet_vect.add( worksheet );
 		v = null;
 	}
 	else {
@@ -3386,7 +3379,7 @@ String end_str ) throws Exception {
 		//new start date we are adding.
 		RiversideDB_StageDischargeRating sdr_old =
 		(RiversideDB_StageDischargeRating)
- 		__stageDischargeRating_vect.elementAt(0);
+ 		__stageDischargeRating_vect.get(0);
 
 		DateTime new_end_date= DateTime.parse(
 		start_str, DateTime.FORMAT_YYYY_MM_DD_HH_mm);
@@ -3395,16 +3388,15 @@ String end_str ) throws Exception {
 		//set this as end date in object
 		sdr_old.setEnd_Date( new_end_date.getDate() );
 		//update vectors
- 		__stageDischargeRating_vect.removeElementAt(0);
- 		__stageDischargeRating_vect.insertElementAt(sdr_old,0);
+ 		__stageDischargeRating_vect.remove(0);
+ 		__stageDischargeRating_vect.add(0,sdr_old);
 		//now add the completely new object with the new date range
- 		__stageDischargeRating_vect.insertElementAt(sdr,0);
+ 		__stageDischargeRating_vect.add(0,sdr);
 
 		//make sure we update Vector of RatingTable worksheets too.
 		//add entirely new JWorksheet
 		//Vector v = __rating_JWorksheet.getAllData();
- 		__ratingTable_worksheet_vect.insertElementAt(
-		worksheet, 0 );
+ 		__ratingTable_worksheet_vect.add(0, worksheet );
 	}
 
 	//update JComboBox field in GUI accordingly
@@ -3417,7 +3409,7 @@ String end_str ) throws Exception {
 	DateTime ed= null;
 	for ( int i=0; i<size; i++ ) {
 		new_sdr = (RiversideDB_StageDischargeRating)
- 		__stageDischargeRating_vect.elementAt(i);
+ 		__stageDischargeRating_vect.get(i);
 		if ( new_sdr == null ) {
 			continue;
 		}
@@ -3650,7 +3642,7 @@ protected void update_GUI_fields( ) {
 		DateTime ed= null;
 		for ( int i=0; i<size; i++ ) {
 			new_sdr = (RiversideDB_StageDischargeRating)
- 			__stageDischargeRating_vect.elementAt(i);
+ 			__stageDischargeRating_vect.get(i);
 			if ( new_sdr == null ) {
 				continue;
 			}
@@ -3678,7 +3670,7 @@ protected void update_GUI_fields( ) {
 		if ( __stageDischargeRating_vect.size() > 0 ) {
 			set_rating_tab_fields(
 			(RiversideDB_StageDischargeRating)
- 			__stageDischargeRating_vect.elementAt(0), 0 );
+ 			__stageDischargeRating_vect.get(0), 0 );
 		}
 		/* should not be
 		else {
@@ -3756,7 +3748,7 @@ public void verify_geography_tab() throws Exception {
 		if ( !DMIUtil.isMissing( db_lat ) ) {
 			//there is a difference
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change latitude from \"" + db_lat + "\" to \"" +
 			DMIUtil.MISSING_DOUBLE + "\"");
 
@@ -3772,7 +3764,7 @@ public void verify_geography_tab() throws Exception {
 			//there is a difference because we have a value in the
 			//gui and not in the database
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change latitude from \"" + DMIUtil.MISSING_DOUBLE +
 			"\" to \"" + gui_lat_str + "\"");
 
@@ -3791,7 +3783,7 @@ public void verify_geography_tab() throws Exception {
 			if (! formatted_gui_str.equalsIgnoreCase( formatted_db_str ) ) {
 				//update object
  				__gui_RTi_GeoLoc.setDirty( true );
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Change latitude from \"" + db_lat +
 				"\" to \"" + gui_lat + "\"");
 
@@ -3825,7 +3817,7 @@ public void verify_geography_tab() throws Exception {
 		if ( db_lon != DMIUtil.MISSING_DOUBLE ) {
 			//there is a difference
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change longitude from \"" + db_lon + "\" to \"" +
 			DMIUtil.MISSING_DOUBLE + "\"");
 
@@ -3841,7 +3833,7 @@ public void verify_geography_tab() throws Exception {
 			//there is a difference because we have a value in the
 			//gui and not in the database
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change longitude from \"" + DMIUtil.MISSING_DOUBLE +
 			"\" to \"" + gui_lon_str + "\"");
 
@@ -3860,7 +3852,7 @@ public void verify_geography_tab() throws Exception {
 			if (! formatted_gui_str.equalsIgnoreCase( formatted_db_str ) ) {
 				//update object
  				__gui_RTi_GeoLoc.setDirty( true );
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Change longitude from \"" + db_lon +
 				"\" to \"" + gui_lon +"\"" );
 
@@ -3895,7 +3887,7 @@ public void verify_geography_tab() throws Exception {
 		if ( !DMIUtil.isMissing( db_x  ) ) {
 			//there is a difference
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change X from \"" + db_x + "\" to \"" +
 			DMIUtil.MISSING_DOUBLE + "\"");
 
@@ -3911,7 +3903,7 @@ public void verify_geography_tab() throws Exception {
 			//there is a difference because we have a value in the
 			//gui and not in the database
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change X from \"" + DMIUtil.MISSING_DOUBLE +
 			"\" to \"" + gui_x_str + "\"" );
 
@@ -3930,7 +3922,7 @@ public void verify_geography_tab() throws Exception {
 			if (! formatted_gui_str.equalsIgnoreCase( formatted_db_str ) ) {
 				//update object
  				__gui_RTi_GeoLoc.setDirty( true );
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Change X from \"" + db_x +
 				"\" to \"" + gui_x + "\"" );
 
@@ -3964,7 +3956,7 @@ public void verify_geography_tab() throws Exception {
 		if ( db_y != DMIUtil.MISSING_LONG ) {
 			//there is a difference
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Y from \"" + db_y + "\" to \"" +
 			DMIUtil.MISSING_LONG + "\"");
 
@@ -3980,7 +3972,7 @@ public void verify_geography_tab() throws Exception {
 			//there is a difference because we have a value in the
 			//gui and not in the database
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Y from \"" + DMIUtil.MISSING_LONG +
 			"\" to \"" + gui_y_str + "\"");
 
@@ -4000,7 +3992,7 @@ public void verify_geography_tab() throws Exception {
 
 				//update object
  				__gui_RTi_GeoLoc.setDirty( true );
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Change Y from \"" + db_y +
 				"\" to \"" + gui_y + "\"");
 
@@ -4021,7 +4013,7 @@ public void verify_geography_tab() throws Exception {
 		if ( !DMIUtil.isMissing( db_country ) ) {
 			//object dirty
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Country from \"" + db_country +
 			"\" to \"" + gui_country + "\"" );
 
@@ -4033,7 +4025,7 @@ public void verify_geography_tab() throws Exception {
 		( !db_country.equalsIgnoreCase( gui_country ) ) ) {
 
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Country from \"" + db_country +
 			"\" to \"" + gui_country + "\"" );
 
@@ -4052,7 +4044,7 @@ public void verify_geography_tab() throws Exception {
 		if ( ! DMIUtil.isMissing( db_state ) ) {
 			//object dirty
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change State from \"" + db_state +
 			" to \"" + gui_state + "\"");
 
@@ -4064,7 +4056,7 @@ public void verify_geography_tab() throws Exception {
 		( !db_state.equalsIgnoreCase( gui_state ) ) ) {
 
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change State from \"" + db_state +
 			"\" to \"" + gui_state + "\"");
 
@@ -4082,7 +4074,7 @@ public void verify_geography_tab() throws Exception {
 		if ( ! DMIUtil.isMissing( db_county ) ) {
 			//object dirty
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change County from \"" + db_county +
 			"\" to \"" + gui_county + "\"" );
 
@@ -4094,7 +4086,7 @@ public void verify_geography_tab() throws Exception {
 		( !db_county.equalsIgnoreCase( gui_county ) ) ) {
 
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change County from \"" + db_county +
 			"\" to \"" + gui_county +"\"" );
 
@@ -4128,7 +4120,7 @@ public void verify_geography_tab() throws Exception {
 		//if ( db_elev != DMIUtil.MISSING_LONG ) {}
 			//there is a difference
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Elevation from \"" + db_elev + "\" to \"" +
 			DMIUtil.MISSING_LONG + "\"");
 
@@ -4145,7 +4137,7 @@ public void verify_geography_tab() throws Exception {
 			//there is a difference because we have a value in the
 			//gui and not in the database
  			__gui_RTi_GeoLoc.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Elevation from \"" + DMIUtil.MISSING_LONG +
 			"\" to \"" + gui_elev_str +"\"" );
 
@@ -4165,7 +4157,7 @@ public void verify_geography_tab() throws Exception {
 
 				//update object
  				__gui_RTi_GeoLoc.setDirty( true );
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Change Elevation from \"" + db_elev +
 				"\" to \"" + gui_elev +"\"" );
 
@@ -4189,7 +4181,7 @@ public void verify_geography_tab() throws Exception {
 	( !db_units.equalsIgnoreCase( gui_units ) ) ) {
 		//mark dirty
  		__gui_RTi_GeoLoc.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Elevation Units from \"" +
 		db_units + "\" to \"" + gui_units + "\"" );
 
@@ -4216,7 +4208,7 @@ public void verify_rating_tab() throws Exception {
 
 	//reread in Vector from Database to compare to the
 	//vector of stage discharge rating objects we have in the GUI now.
-	Vector db_sdr_vect = null;
+	List db_sdr_vect = null;
 	try {
 		db_sdr_vect =
  		__dmi.readStageDischargeRatingListForMeasLoc_num(
@@ -4242,7 +4234,7 @@ public void verify_rating_tab() throws Exception {
 	boolean gui_dirty = false;
 	if ( gui_sdr_size != db_sdr_size ) {
 		//know we changed things, so just globally update
- 		__dirty_vect.addElement( "Save changes to " +
+ 		__dirty_vect.add( "Save changes to " +
 		"StageDischargeRating objects." );
 		gui_dirty = true;
 		return;
@@ -4252,7 +4244,7 @@ public void verify_rating_tab() throws Exception {
 	for ( int i=0; i< gui_sdr_size; i++ ) {
 		RiversideDB_StageDischargeRating gui_sdr = null;
 		gui_sdr =(RiversideDB_StageDischargeRating)
- 		__stageDischargeRating_vect.elementAt(i);
+ 		__stageDischargeRating_vect.get(i);
 
 		//get Start date - this is the one date that
 		//distinguishes if a new StageDischargeRating object has
@@ -4264,7 +4256,7 @@ public void verify_rating_tab() throws Exception {
 		for ( int k=0; k < db_sdr_size; k++ ) {
 			RiversideDB_StageDischargeRating db_sdr = null;
 			db_sdr =(RiversideDB_StageDischargeRating)
-			db_sdr_vect.elementAt(i);
+			db_sdr_vect.get(i);
 
 			DateTime db_start_date = new DateTime(
 			db_sdr.getStart_Date() );
@@ -4275,7 +4267,7 @@ public void verify_rating_tab() throws Exception {
 				//so mark all objects as dirty
 				gui_sdr.setDirty( true );
 				gui_dirty = true;
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Add new StageDischargeRating object " +
 				" and RatingTable values " +
 				"with dates: \"" + gui_start_date.toString() +
@@ -4290,7 +4282,7 @@ public void verify_rating_tab() throws Exception {
 			db_sdr.getEnd_Date() );
 			if (!db_end_date.equals( gui_end_date,
 			DateTime.PRECISION_MINUTE ) ) {
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Update StageDischargeRating object: " +
 				"with dates: \"" +
 				gui_start_date.toString() +
@@ -4306,7 +4298,7 @@ public void verify_rating_tab() throws Exception {
 			//discharge units
 			if ( !db_sdr.getDischarge_Units().equalsIgnoreCase(
 			gui_sdr.getDischarge_Units() )) {
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Update StageDischargeRating object: " +
 				"with dates: \"" +
 				gui_start_date.toString() +
@@ -4322,7 +4314,7 @@ public void verify_rating_tab() throws Exception {
 			if ( db_sdr.getFlood_Level() !=
 			gui_sdr.getFlood_Level() ) {
 				gui_dirty = true;
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Update StageDischargeRating object: " +
 				"with dates: \"" +
 				gui_start_date.toString() +
@@ -4335,7 +4327,7 @@ public void verify_rating_tab() throws Exception {
 			if ( !db_sdr.getGage_Datum_Units().equalsIgnoreCase(
 			gui_sdr.getGage_Datum_Units() )) {
 				gui_dirty = true;
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Update StageDischargeRating object: " +
 				"with dates: \"" +
 				gui_start_date.toString() +
@@ -4348,7 +4340,7 @@ public void verify_rating_tab() throws Exception {
 			if ( db_sdr.getGage_Zero_Datum() !=
 			gui_sdr.getGage_Zero_Datum() ) {
 				gui_dirty = true;
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Update StageDischargeRating object: " +
 				"with dates: \"" +
 				gui_start_date.toString() +
@@ -4361,7 +4353,7 @@ public void verify_rating_tab() throws Exception {
 			if ( !db_sdr.getInterpolation_Method().equalsIgnoreCase(
 			gui_sdr.getInterpolation_Method() )) {
 				gui_dirty = true;
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Update StageDischargeRating object: " +
 				"with dates: \"" +
 				gui_start_date.toString() +
@@ -4375,7 +4367,7 @@ public void verify_rating_tab() throws Exception {
 			if ( !db_sdr.getStage_Units().equalsIgnoreCase(
 			gui_sdr.getStage_Units() )) {
 				gui_dirty = true;
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Update StageDischargeRating object: " +
 				"with dates: \"" +
 				gui_start_date.toString() +
@@ -4388,7 +4380,7 @@ public void verify_rating_tab() throws Exception {
 			if ( db_sdr.getWarning_Level() !=
 			gui_sdr.getWarning_Level() ) {
 				gui_dirty = true;
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Update StageDischargeRating object: " +
 				"with dates: \"" +
 				gui_start_date.toString() +
@@ -4400,7 +4392,7 @@ public void verify_rating_tab() throws Exception {
 
 			//now go through the RatingTable objects
 			//RiversideDB_RatingTable rt = null;
-			Vector db_rt_v = null;
+			List db_rt_v = null;
 			try {
 				db_rt_v = __dmi.
 				readRatingTableListForRatingTable_num(
@@ -4411,9 +4403,7 @@ public void verify_rating_tab() throws Exception {
 				//rt = new RiversideDB_RatingTable();
 			}
 
-			Vector gui_rt_v =( (JWorksheet)
- 			__ratingTable_worksheet_vect.elementAt( i ) ).
-			getAllData();
+			List gui_rt_v =( (JWorksheet)__ratingTable_worksheet_vect.get( i ) ).getAllData();
 
 			//compare the data in the 2 vectors
 			int gui_rt_size = 0;
@@ -4425,7 +4415,7 @@ public void verify_rating_tab() throws Exception {
 				db_rt_size = db_rt_v.size();
 			}
 			if ( gui_rt_size != db_rt_size ) {
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Save changes to the RatingTable for " +
 				"StageDischargeRating object "+
 				"with dates: \"" +
@@ -4442,11 +4432,11 @@ public void verify_rating_tab() throws Exception {
 				for ( int p=0; p<db_rt_size;p++ ) {
 					db_rt =
 					(RiversideDB_RatingTable)
-					db_rt_v.elementAt(p);
+					db_rt_v.get(p);
 
 					gui_rt =
 					(RiversideDB_RatingTable)
-					gui_rt_v.elementAt(p);
+					gui_rt_v.get(p);
 
 					//compare fields
 					double gui_v1 =-999;
@@ -4464,7 +4454,7 @@ public void verify_rating_tab() throws Exception {
 					if (( gui_v1 != db_v1) ||
 					(gui_v2 != db_v2) ||
 					(gui_s1 != db_s1 ) ) {
- 						__dirty_vect.addElement(
+ 						__dirty_vect.add(
 						"Save changes to the "+
 						"data of the " +
 						"RatingTable for " +
@@ -4498,12 +4488,12 @@ public void verify_rating_tab() throws Exception {
 		for ( int i=0; i< gui_sdr_size; i++ ) {
 			RiversideDB_StageDischargeRating gui_sdr = null;
 			gui_sdr =(RiversideDB_StageDischargeRating)
- 			__stageDischargeRating_vect.elementAt(i);
+ 			__stageDischargeRating_vect.get(i);
 			gui_sdr.setDirty( true );
 
 			//update vector
- 			__stageDischargeRating_vect.removeElementAt(i);
- 			__stageDischargeRating_vect.insertElementAt(gui_sdr, i);
+ 			__stageDischargeRating_vect.remove(i);
+ 			__stageDischargeRating_vect.add(i, gui_sdr);
 
 		}
 	}
@@ -4582,8 +4572,7 @@ public void verify_top_fields() throws Exception {
 		RiversideDB_MeasLoc ml = null;
 		String ml_id= null;
 		for ( int i=0; i<size; i++ ) {
-			ml =( RiversideDB_MeasLoc)
- 			__RTi_MeasLoc_vect.elementAt(i);
+			ml =( RiversideDB_MeasLoc)__RTi_MeasLoc_vect.get(i);
 
 			//get measloc_ids
 			ml_id =ml.getIdentifier();
@@ -4611,7 +4600,7 @@ public void verify_top_fields() throws Exception {
 		//else we have a new and unique id, so can continue on.
 		//set object dirty
  		__gui_RTi_MeasLoc.setDirty( true );
- 		__dirty_vect.addElement("Change Identifier from \"" +
+ 		__dirty_vect.add("Change Identifier from \"" +
 		db_id + "\" to \"" + gui_id + "\"" );
 
 		//set the new value in memory
@@ -4631,7 +4620,7 @@ public void verify_top_fields() throws Exception {
 
 		//mark dirty
  		__gui_RTi_MeasLoc.setDirty( true );
- 		__dirty_vect.addElement("Change Name from \"" +
+ 		__dirty_vect.add("Change Name from \"" +
 		db_name + "\" to \"" + gui_name + "\"" );
 
 		//set the new value in memory
@@ -4653,7 +4642,7 @@ public void verify_top_fields() throws Exception {
 	( !db_source.equalsIgnoreCase( gui_source ) ) ) {
 		//mark dirty
  		__gui_RTi_MeasLoc.setDirty( true );
- 		__dirty_vect.addElement("Change Type from \"" +
+ 		__dirty_vect.add("Change Type from \"" +
 		db_source + "\" to \"" + gui_source + "\"" );
 
 		//set the new value in memory
@@ -4772,7 +4761,7 @@ public void actionPerformed (ActionEvent event) {
 				RiversideDB_StageDischargeRating sdr =null;
 				for ( int i=0;i<numb_sdr;i++ ) {
 					sdr = (RiversideDB_StageDischargeRating)
- 					__stageDischargeRating_vect.elementAt(i);
+ 					__stageDischargeRating_vect.get(i);
 					if ( sdr == null ) {
 						continue;
 					}
@@ -4790,7 +4779,7 @@ public void actionPerformed (ActionEvent event) {
 				StringBuffer b = new StringBuffer();
 				for ( int i=0; i< __dirty_vect.size(); i++ ) {
 					b.append( (String)
- 					__dirty_vect.elementAt(i) + "\n" );
+ 					__dirty_vect.get(i) + "\n" );
 				}
 
 				//write out a confirmation message.
@@ -5020,8 +5009,7 @@ public void itemStateChanged ( ItemEvent event ) {
 
 			int ind = 0;
 			for ( int i=0; i<size; i++ ) {
-				sdr = (RiversideDB_StageDischargeRating)
- 				__stageDischargeRating_vect.elementAt(i);
+				sdr = (RiversideDB_StageDischargeRating)__stageDischargeRating_vect.get(i);
 				DateTime s = new DateTime(sdr.getStart_Date());
 				DateTime e = new DateTime(sdr.getEnd_Date());
 				if( ( start_dt.equals( s,

@@ -50,6 +50,7 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.awt.Dimension;
 import java.io.File;
+import java.util.List;
 import java.util.Vector;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -146,7 +147,7 @@ public static boolean canWrite ( RiversideDB_DMI dmi, String table )
 
 	// Get the vector of RiversideDB_Tables table objects.
 	// If null return false.
-	Vector tablesVector = dmi.getRiversideDB_Tables();
+	List tablesVector = dmi.getRiversideDB_Tables();
 	if ( tablesVector == null ) return writePermission;
 
 	// Or loop through the vector looking for a match for 'table'
@@ -156,7 +157,7 @@ public static boolean canWrite ( RiversideDB_DMI dmi, String table )
 	for ( int i = 0; i < tablesVector.size(); i++ ) {
 		
 		// RiversideDB_Tables table object at 'i'
-		dbTable = ( RiversideDB_Tables ) tablesVector.elementAt(i);
+		dbTable = ( RiversideDB_Tables ) tablesVector.get(i);
 		
 		if ( dbTable != null ) {
 			
@@ -311,7 +312,7 @@ public static void createHTMLTimeseriesList ( JFrame jFrame,
 	} 
 	
 	// Re-read database to get latest list
-	Vector allTS_vect = new Vector();
+	List allTS_vect = new Vector();
 	try {
 		allTS_vect = dmi.readMeasTypeListByLocation();
 	} catch ( Exception e ) {
@@ -344,7 +345,7 @@ public static void createHTMLTimeseriesList ( JFrame jFrame,
 		}
 		
 		// RiversideDB_MeasType
-		mt = (RiversideDB_MeasType) allTS_vect.elementAt(i);
+		mt = (RiversideDB_MeasType) allTS_vect.get(i);
 		if ( mt == null ) continue;
 		
 		// TSIdent
@@ -401,7 +402,7 @@ Returns a Vector of the product groups in the database, in the form:<br>
 [ProductGroup_num] - [ProductGroup Identifier] - [ProductGroup Name]
 @return a Vector of the product groups in the database.
 */
-protected static Vector getProductGroupsChoices(RiversideDB_DMI dmi) 
+protected static List getProductGroupsChoices(RiversideDB_DMI dmi) 
 throws Exception {
 /*
 JTS - 2005-08-24
@@ -418,14 +419,14 @@ See comment below.
 	int groupNum = dbuser.getPrimaryDBGroup_num();
 */
 
-	Vector groups = new Vector();
+	List groups = new Vector();
 
-	Vector v = dmi.readProductGroupList();
+	List v = dmi.readProductGroupList();
 	
 	int size = v.size();
 	RiversideDB_ProductGroup pg = null;
 	for (int i = 0; i < size; i++) {
-		pg = (RiversideDB_ProductGroup)v.elementAt(i);
+		pg = (RiversideDB_ProductGroup)v.get(i);
 		//pgGroupNum = pg.getDBGroup_num();
 		//pgUserNum = pg.getDBUser_num();
 

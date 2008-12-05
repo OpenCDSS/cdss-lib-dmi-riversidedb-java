@@ -66,7 +66,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
 Table model used for displaying the data editor for the table MeasReductionType.
@@ -91,7 +91,7 @@ Default constructor.
 @param editable whether the data is editable or not.
 */
 public RiversideDB_ReferenceTable_MeasReductionType_TableModel (
-	RiversideDB_DMI rdmi, Vector results, boolean editable )
+	RiversideDB_DMI rdmi, List results, boolean editable )
 throws Exception {
 	super ( rdmi, results, editable );
 	_numberOfColumns = NUMBER_OF_COLUMNS;	
@@ -99,13 +99,12 @@ throws Exception {
 
 /**
 Stores a backup of each object so that the original values prior to any
-editing can be chcked later to find out if anything is different.
+editing can be checked later to find out if anything is different.
 */
 public void backupData()
 {
 	for (int i = 0; i < _rows; i++) {
-		RiversideDB_MeasReductionType m3 =
-			(RiversideDB_MeasReductionType) _data.elementAt(i);
+		RiversideDB_MeasReductionType m3 = (RiversideDB_MeasReductionType)_data.get(i);
 		m3.setOriginal(m3.cloneSelf());
 		m3.setDirty(false);
 	}
@@ -125,7 +124,7 @@ protected String checkTableField( String s, int row )
 	RiversideDB_MeasReductionType d;
 	for (int i = 0; i < _rows; i++) {
 		if (i != row) {
-			d = (RiversideDB_MeasReductionType)_data.elementAt(i);
+			d = (RiversideDB_MeasReductionType)_data.get(i);
 			if (d.getType().trim().equals(s)) {
 				return checkTableField("X" + s, row);
 			}
@@ -235,8 +234,7 @@ Returns the value stored at the specified cell ( row, column )
 */
 protected Object getTableValueAt( int row, int column )
 {
-	RiversideDB_MeasReductionType m =
-		(RiversideDB_MeasReductionType)_data.elementAt(row);
+	RiversideDB_MeasReductionType m = (RiversideDB_MeasReductionType)_data.get(row);
 	switch (column) {
 		case COL_MEAS_REDUCTION_TYPE_TYPE:
 			return m.getType();
@@ -255,10 +253,8 @@ Sets the table value at the specified cell ( row, column ).
 */
 protected Object setTableValueAt( Object value, int row, int column )
 {
-	RiversideDB_MeasReductionType m =
-		(RiversideDB_MeasReductionType)_data.elementAt(row);
-	RiversideDB_MeasReductionType m0 =
-		(RiversideDB_MeasReductionType)m.getOriginal();
+	RiversideDB_MeasReductionType m = (RiversideDB_MeasReductionType)_data.get(row);
+	RiversideDB_MeasReductionType m0 = (RiversideDB_MeasReductionType)m.getOriginal();
 	String s;
 	switch (column) {
 		case COL_MEAS_REDUCTION_TYPE_TYPE:

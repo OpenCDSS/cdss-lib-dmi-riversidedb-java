@@ -43,6 +43,7 @@ package RTi.DMI.RiversideDB_DMI;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -128,9 +129,9 @@ private String __popup_LocationGroupProperties_String
 Holds RiversideDB_MeasLoc, RiversideDB_MeasLocType and RiversideDB_MeasLocGroup
 objects used to populate the JTree.
 */
-private Vector __measLoc_vect      = null;
-private Vector __measLocType_vect  = null;
-private Vector __measLocGroup_vect = null;
+private List __measLoc_vect      = null;
+private List __measLocType_vect  = null;
+private List __measLocGroup_vect = null;
 
 /**
 Write permissions flag. These flags are set during construction and are used
@@ -407,7 +408,7 @@ public void populateTree()
 
 	for ( int i=0; i<size_measlocgrps; i++ ) {
 		mlg = (RiversideDB_MeasLocGroup)
-			__measLocGroup_vect.elementAt(i);
+			__measLocGroup_vect.get(i);
 		if ( mlg == null ) continue;
 
 		SimpleJTree_Node measlocgrp_node = new SimpleJTree_Node(
@@ -465,7 +466,7 @@ public void populateTree()
 		// go through and add MeasLocTypes at the next level
 		for ( int j=0; j<size_measloctypes; j++ ) {
 			mlt = ( RiversideDB_MeasLocType )
-			__measLocType_vect.elementAt( j );
+			__measLocType_vect.get( j );
 			if ( mlt == null ) {
 				continue;
 			}
@@ -504,7 +505,7 @@ public void populateTree()
 			// go through and add the MeasLocs for this MeasLocGroup
 			for ( int k=0; k<size_measlocs; k++ ) {
 				ml = (RiversideDB_MeasLoc) __measLoc_vect.
-				elementAt(k);
+				get(k);
 				if ( ml == null ) {
 					continue;
 				}
@@ -582,7 +583,7 @@ public void populateTree()
 				//with this MeasLoc
 				String measloc_id = null;
 				measloc_id = ml.getIdentifier();
-				Vector mt_vect = null;
+				List mt_vect = null;
 				try {
 					mt_vect =__dmi.
 					readMeasTypeListForMeasLoc_num(
@@ -609,7 +610,7 @@ public void populateTree()
 				//get the time series for each MeasLoc.
 				for ( int l=0; l<size_meastypes; l++ ) {
 					mt = ( RiversideDB_MeasType )
-					mt_vect.elementAt(l);
+					mt_vect.get(l);
 					if ( mt == null ) {
 						continue;
 					}
@@ -2608,10 +2609,10 @@ public void updateMeasTypeNode( RiversideDB_MeasType new_mt,
 	}
 
 	//get child which is the Create_method
-	Vector v = getChildrenVector( new_node );
+	List v = getChildrenList( new_node );
 	SimpleJTree_Node child_node =null;
 	if ( ( v != null ) && ( v.size() == 1 )) {
-		child_node = (SimpleJTree_Node )v.elementAt(0);
+		child_node = (SimpleJTree_Node )v.get(0);
 	}
 	String child_name = "";
 	if ( child_node != null ) {
@@ -2661,10 +2662,10 @@ public void updateReductionNode( RiversideDB_MeasType old_mt,
 		"time series should appear correctly in the tree." );
 	}
 
-	Vector v = getChildrenVector( existing_node );
+	List v = getChildrenList( existing_node );
 	// Should only be 1 child node at this point.
 	SimpleJTree_Node existing_child_node =
-		(SimpleJTree_Node) v.elementAt(0);
+		(SimpleJTree_Node) v.get(0);
 	v = null;
 
 	// Get the TSID for new node

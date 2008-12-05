@@ -176,6 +176,7 @@ import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
 import  java.io.File;
 import  java.util.Date;
+import  java.util.List;
 import  java.util.Vector;
 import 	javax.swing.BorderFactory;
 import 	javax.swing.border.Border;
@@ -591,7 +592,7 @@ private  JTextField __new_group_tab_name_JTextField = null;
 
 //Holds RIVERSIDEDB OBJECTS and private Vectors of the objects
 //Holds all the ImportProduct Objects
-private Vector __RTi_ImportProduct_vect = null;
+private List __RTi_ImportProduct_vect = null;
 
 //Holds the name of the Current ImportProduct Object being worked with!
 private RiversideDB_ImportProduct __db_RTi_ImportProduct = null;
@@ -600,17 +601,17 @@ private RiversideDB_ImportProduct __db_RTi_ImportProduct = null;
 private long __db_ImportProduct_num = -999;
 
 //Holds all the ImportConf objects
-private Vector __db_RTi_ImportConf_vect = null;
-private Vector __worksheet_RTi_ImportConf_vect = null;
+private List __db_RTi_ImportConf_vect = null;
+private List __worksheet_RTi_ImportConf_vect = null;
 
 //Holds all the MeasTypes
-private Vector __all_MeasType_vect = null;
+private List __all_MeasType_vect = null;
 
 //Holds all the MeasTypes WITH CREATE METHOD Import or Unknown
-private Vector __leftList_MeasType_vect = new Vector();
+private List __leftList_MeasType_vect = new Vector();
 
 //private Vector of ImportTypes 
-private Vector __RTi_ImportType_vect = null;
+private List __RTi_ImportType_vect = null;
 
 //holds text name of node being operated on 
 private String __db_tree_node_str = null;
@@ -627,18 +628,18 @@ private  JPanel __automation_tab_JPanel = null;
 private  JPanel __archiving_tab_JPanel = null;
 
 //DataType
-private Vector __RTi_DataType_vect = null;
+private List __RTi_DataType_vect = null;
 
 //Measlocgroup vector
-private Vector __RTi_MeasLocGroup_vect = null;
+private List __RTi_MeasLocGroup_vect = null;
 
 //Holds objects with current, but uncommitted changes 
 RiversideDB_ImportProduct __gui_RTi_ImportProduct = null;
-private Vector __gui_RTi_ImportConf_vect  = null;
+private List __gui_RTi_ImportConf_vect  = null;
 
 //Holds a private Vector of status information-- each
 //field that has been changed is recored in this private Vector.
-private Vector __dirty_vect = new Vector();
+private List __dirty_vect = new Vector();
 
 //Flag to indicate if we are running in CAUTIOUS MODE---
 //aka, if we prompt the user for confirmation of changes
@@ -812,12 +813,12 @@ public RiversideDB_Import_JFrame(
 		Object options[]=null;
 		if (!IOUtil.testing() ) {
 			//add campbell sci
-			Vector types_vect = new Vector();
-			types_vect.addElement("CAMPBELLSCI " +
+			List types_vect = new Vector();
+			types_vect.add("CAMPBELLSCI " +
 			"- Campbell Scientific Datalogger Comma De...");
 
 			//add shef
-			types_vect.addElement("SHEF_A " +
+			types_vect.add("SHEF_A " +
 			"- Standard Hydrologic Exchange Format...");
 
 			options= types_vect.toArray();
@@ -827,12 +828,12 @@ public RiversideDB_Import_JFrame(
 			int size= 0;
 			size = __RTi_ImportType_vect.size();
 			RiversideDB_ImportType it = null;
-			Vector types_vect = new Vector();
+			List types_vect = new Vector();
 			String type = null;
 			String desc = null;
 			for ( int i=0; i<size;i++ ) { 
 				it = ( RiversideDB_ImportType ) 
- 				__RTi_ImportType_vect.elementAt(i);
+ 				__RTi_ImportType_vect.get(i);
 				if ( it ==null ) {
 					continue;
 				}
@@ -842,7 +843,7 @@ public RiversideDB_Import_JFrame(
 					desc = desc.substring( 
 					0, 50-(type.length())) + "...";
 				}
-				types_vect.addElement( type + " - " + desc );
+				types_vect.add( type + " - " + desc );
 			}
 	
 			options= types_vect.toArray();
@@ -948,7 +949,7 @@ public RiversideDB_Import_JFrame(
 		RiversideDB_MeasLocGroup mlg = null;
 		if ( num > 0 ) {
 			mlg = 	(RiversideDB_MeasLocGroup)
-			__RTi_MeasLocGroup_vect.elementAt(0);
+			__RTi_MeasLocGroup_vect.get(0);
 			__db_RTi_ImportProduct.setMeasLocGroup_num( 
 			mlg.getMeasLocGroup_num() );
 		}
@@ -1059,11 +1060,11 @@ public JPanel assemble_tab_archiving( ) {
 	"append to Import Product file name" );
 
 	//ComboBox to select wildcards
-	Vector v = new Vector();
+	List v = new Vector();
 //DELETE	v.addElement("");
-	v.addElement("*   - Match all");
-	v.addElement(".*  - Match Extension");
-	v.addElement("*.  - Match Beginning");
+	v.add("*   - Match all");
+	v.add(".*  - Match Extension");
+	v.add("*.  - Match Beginning");
  	__archive_tab_wild_JComboBox = new SimpleJComboBox( v );
 	__archive_tab_wild_JComboBox.addActionListener( this );
 
@@ -1181,8 +1182,8 @@ public JPanel assemble_tab_automation( ) {
 	automation_tab_year_JLabel.setToolTipText("Required if automated: Select year");
 
 	//year Combobox
-	Vector yr_vect = new Vector();
-	yr_vect.addElement( "* - All" );
+	List yr_vect = new Vector();
+	yr_vect.add( "* - All" );
  	__automation_tab_year_JComboBox = new SimpleJComboBox( yr_vect );
 
 	//month label "month"
@@ -1190,10 +1191,10 @@ public JPanel assemble_tab_automation( ) {
 	automation_tab_month_JLabel.setToolTipText("Required if automated: Select month");
 
 	//month JComboBox
-	Vector mo_vect = new Vector();
-	mo_vect.addElement( "* - All" );
+	List mo_vect = new Vector();
+	mo_vect.add( "* - All" );
 	for ( int i=1; i<=12; i++ ) {
-		mo_vect.addElement( String.valueOf(i) + " - " +
+		mo_vect.add( String.valueOf(i) + " - " +
 		TimeUtil.monthAbbreviation( i ) );
 	}
  	__automation_tab_month_JComboBox = new SimpleJComboBox( mo_vect );
@@ -1204,11 +1205,11 @@ public JPanel assemble_tab_automation( ) {
 	automation_tab_day_JLabel.setToolTipText("Required if automated: Select day");
 
 	//day JComboBox
-	Vector day_vect = new Vector();
-	day_vect.addElement("* - All" );
+	List day_vect = new Vector();
+	day_vect.add("* - All" );
 	//default, fill with 31
 	for ( int i=1; i<=31; i++ ) {
-		day_vect.addElement( String.valueOf(i) );
+		day_vect.add( String.valueOf(i) );
 	}
  	__automation_tab_day_JComboBox = new SimpleJComboBox( day_vect );
 
@@ -1217,10 +1218,10 @@ public JPanel assemble_tab_automation( ) {
 	automation_tab_hour_JLabel.setToolTipText("Required if automated: Select hour");
 
 	//hour JComboBox 
-	Vector hour_vect = new Vector();
-	hour_vect.addElement("* - All" );
+	List hour_vect = new Vector();
+	hour_vect.add("* - All" );
 	for ( int i=0; i<=23; i++ ) {
-		hour_vect.addElement( String.valueOf(i) );
+		hour_vect.add( String.valueOf(i) );
 	}
  	__automation_tab_hour_JComboBox = new SimpleJComboBox( hour_vect );
 
@@ -1229,10 +1230,10 @@ public JPanel assemble_tab_automation( ) {
 	automation_tab_minute_JLabel.setToolTipText("Required if automated: Select minute");
 
 	//minute JCombobox
-	Vector min_vect = new Vector();
-	min_vect.addElement("* - All" );
+	List min_vect = new Vector();
+	min_vect.add("* - All" );
 	for ( int i=0; i<=59; i++ ) {
-		min_vect.addElement( String.valueOf(i) );
+		min_vect.add( String.valueOf(i) );
 	}
  	__automation_tab_minute_JComboBox = new SimpleJComboBox( min_vect );
 
@@ -1241,10 +1242,10 @@ public JPanel assemble_tab_automation( ) {
 	automation_tab_second_JLabel.setToolTipText("Required if automated: Select second");
 
 	//second JComboBox
-	Vector sec_vect = new Vector();
-	sec_vect.addElement("* - All" );
+	List sec_vect = new Vector();
+	sec_vect.add("* - All" );
 	for ( int i=0; i<=59; i++ ) {
-		sec_vect.addElement( String.valueOf(i) );
+		sec_vect.add( String.valueOf(i) );
 	}
  	__automation_tab_second_JComboBox = new SimpleJComboBox( sec_vect );
 
@@ -1255,10 +1256,10 @@ public JPanel assemble_tab_automation( ) {
 	//weekday combo box (days of week)
 	String [] arr_days = null;
 	arr_days = TimeUtil.DAY_NAMES;
-	Vector days_vect = new Vector();
-	days_vect.addElement( "* - All" );
+	List days_vect = new Vector();
+	days_vect.add( "* - All" );
 	for ( int i=0; i<arr_days.length; i++ ) {
-		days_vect.addElement( String.valueOf(i) + " - " + arr_days[i] );
+		days_vect.add( String.valueOf(i) + " - " + arr_days[i] );
 	}
  	__automation_tab_weekday_JComboBox = new SimpleJComboBox( days_vect );
  	JGUIUtil.setEnabled(__automation_tab_weekday_JComboBox, false );
@@ -1267,13 +1268,13 @@ public JPanel assemble_tab_automation( ) {
 	JLabel automation_tab_delay_JLabel = new JLabel( "Delay: " );
 	automation_tab_delay_JLabel.setToolTipText("Required if automated: Select delay");
 
-	Vector delay_unit_vect = new Vector();
-	delay_unit_vect.addElement( "DAY" );
-	delay_unit_vect.addElement( "HOUR" );
-	delay_unit_vect.addElement( "MINUTE" );
-	delay_unit_vect.addElement( "MONTH" );
-	delay_unit_vect.addElement( "SECOND" );
-	delay_unit_vect.addElement( "YEAR" );
+	List delay_unit_vect = new Vector();
+	delay_unit_vect.add( "DAY" );
+	delay_unit_vect.add( "HOUR" );
+	delay_unit_vect.add( "MINUTE" );
+	delay_unit_vect.add( "MONTH" );
+	delay_unit_vect.add( "SECOND" );
+	delay_unit_vect.add( "YEAR" );
 
  	__automation_tab_delay_unit_JComboBox = new SimpleJComboBox( 
 	delay_unit_vect );
@@ -1493,10 +1494,10 @@ public JPanel assemble_tab_files( ) {
 	"Wildcards will be appended to file name. </html>");
 
 	//make combo box with wildcard choices
-	Vector v = new Vector();
-	v.addElement("*   - Match all");
-	v.addElement(".*  - Match Extension");
-	v.addElement("*.  - Match Beginning");
+	List v = new Vector();
+	v.add("*   - Match all");
+	v.add(".*  - Match Extension");
+	v.add("*.  - Match Beginning");
  	__files_tab_source_wild_JComboBox = new SimpleJComboBox( v );
  	JGUIUtil.setEnabled(__files_tab_source_wild_JComboBox, true );
 	__files_tab_source_wild_JComboBox.addActionListener( this );
@@ -1532,17 +1533,17 @@ public JPanel assemble_tab_files( ) {
 	"Wildcards will be appended to file name. </html>");
 
 	//but make new SimpleJComboBox
-	Vector wild_vect = new Vector();
+	List wild_vect = new Vector();
 //DELETE	wild_vect.addElement("");
-	wild_vect.addElement("%F - Substitute file name, no extension, from Source File(s)");
-	wild_vect.addElement("%E - Substitute extension given in Source File(s)");
-	wild_vect.addElement("%Y - Substitute current year (4 digits)" );
-	wild_vect.addElement("%2Y - Substitute current year (2 digits)" );
-	wild_vect.addElement("%M - Substitute current month (2 digits" );
-	wild_vect.addElement("%D - Substitute current day (2 digits)" );
-	wild_vect.addElement("%H - Substitute current hour (2 digits)" );
-	wild_vect.addElement("%N - Substitute current minute (2 digits)" );
-	wild_vect.addElement("%S - Substitute current second (2 digits)" );
+	wild_vect.add("%F - Substitute file name, no extension, from Source File(s)");
+	wild_vect.add("%E - Substitute extension given in Source File(s)");
+	wild_vect.add("%Y - Substitute current year (4 digits)" );
+	wild_vect.add("%2Y - Substitute current year (2 digits)" );
+	wild_vect.add("%M - Substitute current month (2 digits" );
+	wild_vect.add("%D - Substitute current day (2 digits)" );
+	wild_vect.add("%H - Substitute current hour (2 digits)" );
+	wild_vect.add("%N - Substitute current minute (2 digits)" );
+	wild_vect.add("%S - Substitute current second (2 digits)" );
 
  	__files_tab_dest_wild_JComboBox = new SimpleJComboBox( wild_vect );
  	JGUIUtil.setEnabled(__files_tab_dest_wild_JComboBox, true );
@@ -1711,13 +1712,13 @@ public JPanel assemble_tab_properties( ) {
 	JLabel props_tab_import_order_desc_JLabel = new JLabel( "2 is recommended" ) ;
 
 	//TextField for Import Order
-	Vector order_vect = new Vector();
+	List order_vect = new Vector();
 	//Michael originally said to start at 2, but there is 
 	//data in the db that starts with 1...
 	for ( int i=1;i<15;i++ ) {
-		order_vect.addElement( String.valueOf(i) );
+		order_vect.add( String.valueOf(i) );
 	}
-	order_vect.addElement("99");
+	order_vect.add("99");
  	__props_tab_import_order_JComboBox = new SimpleJComboBox( order_vect );
 
 	//Label for Import Window
@@ -1730,13 +1731,13 @@ public JPanel assemble_tab_properties( ) {
 	"Recent period to process" );
 
 	//TextField for Import Window
-	Vector window_unit_vect = new Vector();
-	window_unit_vect.addElement( "DAY" );
-	window_unit_vect.addElement( "HOUR" );
-	window_unit_vect.addElement( "MINUTE" );
-	window_unit_vect.addElement( "MONTH" );
-	window_unit_vect.addElement( "SECOND" );
-	window_unit_vect.addElement( "YEAR" );
+	List window_unit_vect = new Vector();
+	window_unit_vect.add( "DAY" );
+	window_unit_vect.add( "HOUR" );
+	window_unit_vect.add( "MINUTE" );
+	window_unit_vect.add( "MONTH" );
+	window_unit_vect.add( "SECOND" );
+	window_unit_vect.add( "YEAR" );
 
  	__props_tab_import_window_unit_JComboBox = new SimpleJComboBox( 
 	window_unit_vect );
@@ -1825,10 +1826,10 @@ public JPanel assemble_tab_properties( ) {
 	"Wildcards will be appended to file name. </html>");
 
 	//make combo box with wildcard choices
-	Vector v = new Vector();
-	v.addElement("*   - Match all");
-	v.addElement(".*  - Match Extension");
-	v.addElement("*.  - Match Beginning");
+	List v = new Vector();
+	v.add("*   - Match all");
+	v.add(".*  - Match Extension");
+	v.add("*.  - Match Beginning");
  	__props_tab_add_source_wild_JComboBox = new SimpleJComboBox( v );
  	JGUIUtil.setEnabled(__props_tab_add_source_wild_JComboBox, true );
 	__props_tab_add_source_wild_JComboBox.addActionListener( this );
@@ -1846,9 +1847,9 @@ public JPanel assemble_tab_properties( ) {
 	JLabel props_tab_props_1_campbellsci_desc_JLabel = new JLabel(
  	__props_1_campbellsci_desc_JLabel_str );
 
-	Vector prop1_v = new Vector();
+	List prop1_v = new Vector();
 	for ( int i=1; i<=50; i++ ) {
-		prop1_v.addElement( String.valueOf(i) );
+		prop1_v.add( String.valueOf(i) );
 	}
  	__props_1_campbellsci_JComboBox = new SimpleJComboBox( prop1_v );
 
@@ -1882,9 +1883,9 @@ public JPanel assemble_tab_properties( ) {
 	JLabel props_tab_props_3_campbellsci_desc_JLabel = new JLabel(
  	__props_3_campbellsci_desc_JLabel_str );
 
-	Vector prop3_v = new Vector();
+	List prop3_v = new Vector();
 	for ( int i=1; i<=50; i++ ) {
-		prop3_v.addElement( String.valueOf(i) );
+		prop3_v.add( String.valueOf(i) );
 	}
  	__props_3_campbellsci_JComboBox = new SimpleJComboBox( prop3_v );
 	
@@ -1898,9 +1899,9 @@ public JPanel assemble_tab_properties( ) {
 	JLabel props_tab_props_4_campbellsci_desc_JLabel = new JLabel(
  	__props_4_campbellsci_desc_JLabel_str ); 
 
-	Vector prop4_v = new Vector();
+	List prop4_v = new Vector();
 	for ( int i=1; i<=50; i++ ) {
-		prop4_v.addElement( String.valueOf(i) );
+		prop4_v.add( String.valueOf(i) );
 	}
  	__props_4_campbellsci_JComboBox = new SimpleJComboBox( prop4_v );
 
@@ -1914,10 +1915,10 @@ public JPanel assemble_tab_properties( ) {
 	JLabel props_tab_props_5_campbellsci_desc_JLabel = new JLabel(
  	__props_5_campbellsci_desc_JLabel_str );
 
-	Vector prop5_v = new Vector();
-	prop5_v.addElement( "NONE" );
+	List prop5_v = new Vector();
+	prop5_v.add( "NONE" );
 	for ( int i=0; i<=50; i++ ) {
-		prop5_v.addElement( String.valueOf(i) );
+		prop5_v.add( String.valueOf(i) );
 	}
  	__props_5_campbellsci_JComboBox = new SimpleJComboBox( prop5_v );
  	JGUIUtil.setEnabled(__props_5_campbellsci_JComboBox, false );
@@ -1931,9 +1932,9 @@ public JPanel assemble_tab_properties( ) {
 	JLabel props_tab_props_6_campbellsci_desc_JLabel = new JLabel(
  	__props_6_campbellsci_desc_JLabel_str );
 
-	Vector prop6_v = new Vector();
+	List prop6_v = new Vector();
 	for ( int i=1; i<=50; i++ ) {
-		prop6_v.addElement( String.valueOf(i) );
+		prop6_v.add( String.valueOf(i) );
 	}
  	__props_6_campbellsci_JComboBox = new SimpleJComboBox( prop6_v );
 	
@@ -2734,8 +2735,7 @@ public JPanel assemble_tab_timeSeries() {
 	TSIdent tsid = null;
 	String create_str=null;
 	for ( int i=0; i< numb_all_MeasType; i++ ) {
-		rti_mt =  (RiversideDB_MeasType)
- 		__all_MeasType_vect.elementAt(i);
+		rti_mt =  (RiversideDB_MeasType)__all_MeasType_vect.get(i);
 		if ( rti_mt == null ) {
 			continue;
 		}
@@ -2759,7 +2759,7 @@ public JPanel assemble_tab_timeSeries() {
 				rti_mt.getDescription() );
 			}
 			//add this to the __all_import_MeasTypes_vect!
- 			__leftList_MeasType_vect.addElement( rti_mt );
+ 			__leftList_MeasType_vect.add( rti_mt );
 		}
 	}
 
@@ -2800,7 +2800,7 @@ public JPanel assemble_tab_timeSeries() {
 	//data for list
 	//need vector of importconf objects and meastype objects ,
 	//labels for worksheet and importproduct type
-	Vector mt_vect = new Vector();
+	List mt_vect = new Vector();
 
 	//from the Vector of ImportConf objects, get the
 	//the MeasType_nums for those objects.
@@ -2818,7 +2818,7 @@ public JPanel assemble_tab_timeSeries() {
 	rti_mt = null;
 	for ( int i=0; i< numb_ic; i++ ) {
 		rti_ic = ( RiversideDB_ImportConf )
- 		__db_RTi_ImportConf_vect.elementAt( i );
+ 		__db_RTi_ImportConf_vect.get( i );
 
 		//now get the MeasType from the object...
 		mt_int = rti_ic.getMeasType_num();
@@ -2840,7 +2840,7 @@ public JPanel assemble_tab_timeSeries() {
 			continue;
 		}
 
-		mt_vect.addElement( rti_mt );
+		mt_vect.add( rti_mt );
 
 		rti_mt = null;
 		rti_ic = null;
@@ -2977,13 +2977,13 @@ public JPanel assemble_tab_timeSeries() {
 		//pass in Vector of ImportConf objects, 
 		//Vector of MEasType objects, Arr of labels,
 		//import type
-		Vector v = new Vector();
+		List v = new Vector();
 	
 		//NOTE:: if you pass in the actual vector: 
 		//_db_RTi_ImportConf_vect, it will get added to deleted
 		//from from within the TableModel, which we do not want!
-		v.addElement( __worksheet_RTi_ImportConf_vect );
-		v.addElement( mt_vect);
+		v.add( __worksheet_RTi_ImportConf_vect );
+		v.add( mt_vect);
 
  		__table_model = new RiversideDB_ImportConf_TableModel( 
 		v, __arrWorksheet_labels, __arrWorksheet_tooltips,
@@ -3130,8 +3130,7 @@ public void closeGUI() {
 	}
 	RiversideDB_ImportConf ic = null;
 	for ( int i=0; i<size; i++ ) {
-		ic = ( RiversideDB_ImportConf ) 
- 		__gui_RTi_ImportConf_vect.elementAt(i);
+		ic = ( RiversideDB_ImportConf )__gui_RTi_ImportConf_vect.get(i);
 		if ( ic == null ) {
 			continue;
 		}
@@ -3216,8 +3215,7 @@ protected void checkRequiredInput() throws Exception {
 		}
 		RiversideDB_ImportProduct ip = null;
 		for (int i=0; i<size; i++ ) {
-			ip = (RiversideDB_ImportProduct) 
- 			__RTi_ImportProduct_vect.elementAt(i);
+			ip = (RiversideDB_ImportProduct)__RTi_ImportProduct_vect.get(i);
 			if ( (ip.getProduct_name()).equalsIgnoreCase( prodID ) ) {
 				//we found a product with that name already
 				buffer.append( "ImportProduct named: \""
@@ -3390,8 +3388,7 @@ protected void checkRequiredInput() throws Exception {
 	}
 	else {
 		//get the ImportConf Objects out of the worksheet
-		Vector table_data = __timeseries_tab_selTS_JWorksheet.
-		getAllData();
+		List table_data = __timeseries_tab_selTS_JWorksheet.getAllData();
 		//should be the same size as above
 		table_size = table_data.size();
 	
@@ -3399,7 +3396,7 @@ protected void checkRequiredInput() throws Exception {
 		long mt_num = -999;
 		for ( int i=0; i< table_size; i++ ) {
 			ic = (RiversideDB_ImportConf) 
-			table_data.elementAt( i );
+			table_data.get( i );
 			if ( ic == null ) {
 				continue;
 			}
@@ -3515,7 +3512,7 @@ private void create_main_panel( ) {
 	"Required: set Product Group for Import Product" );
 
 	//items for Group JComboBox
-	Vector prodGrp_vect = null;
+	List prodGrp_vect = null;
 	try {
 		prodGrp_vect = 
  		__dmi.readProductGroupListForProductType( "IMPORT" );
@@ -3523,7 +3520,7 @@ private void create_main_panel( ) {
 	catch (Exception e ) {
 		Message.printWarning( 2, routine, e );
 	}
-	Vector grp_names_vect = new Vector();
+	List grp_names_vect = new Vector();
 	RiversideDB_ProductGroup pg = null;
 	//go through vector and get list of just the Groups
 	int size = 0;
@@ -3531,11 +3528,11 @@ private void create_main_panel( ) {
 		size = prodGrp_vect.size();
 	}
 	for ( int i=0; i<size; i++ ) {
-		pg= (RiversideDB_ProductGroup) prodGrp_vect.elementAt(i);
+		pg= (RiversideDB_ProductGroup) prodGrp_vect.get(i);
 		if ( pg == null ) {
 			continue;
 		}
-		grp_names_vect.addElement( pg.getProductGroup_num() + " - " +
+		grp_names_vect.add( pg.getProductGroup_num() + " - " +
 		pg.getName() );
 		//grp_names_vect.addElement( pg.getProductGroup_num() + " - " +
 		//pg.getIdentifier() );
@@ -3552,12 +3549,12 @@ private void create_main_panel( ) {
 
 	//create JComboBox
 	//get vector of type names
-	Vector type_vect = new Vector();
+	List type_vect = new Vector();
 	RiversideDB_ImportType it = null;
 	String type = null;
 	for ( int i=0; i< __RTi_ImportType_vect.size(); i++ ) {
 		it = (RiversideDB_ImportType) 
- 		__RTi_ImportType_vect.elementAt(i);
+ 		__RTi_ImportType_vect.get(i);
 		if ( it == null ) {
 			continue;
 		}
@@ -3568,7 +3565,7 @@ private void create_main_panel( ) {
 				(type.substring( 0, 80 ) + " ...").trim();
 			}
 			//add it to vector for drop-down list
-			type_vect.addElement( type );
+			type_vect.add( type );
 		}
 		type = null;
 		it = null;
@@ -3588,7 +3585,7 @@ private void create_main_panel( ) {
 	//Vector of MeasLocGroup objects that this user has access to
 
 	//__dmi.setDumpSQLOnExecution( true );
-	Vector dbmlg_vect = null;
+	List dbmlg_vect = null;
 	try {
 		dbmlg_vect = __dmi.
 		readDBUserMeasLocGroupRelationListForDBUser_num(
@@ -3620,10 +3617,9 @@ private void create_main_panel( ) {
 	int mlg_num = -999;
 	//vector to hold items that go into comboBox - will
 	//have "MeasLocGroupNum - MeasLocGroup_ID - MeasLocGroup_Name"
-	Vector measlocgroup_vect = new Vector();
+	List measlocgroup_vect = new Vector();
 	for ( int i=0; i<size_dbmlg; i++ ) {
-		dbmlg = (RiversideDB_DBUserMeasLocGroupRelation)
-		dbmlg_vect.elementAt(i);
+		dbmlg = (RiversideDB_DBUserMeasLocGroupRelation)dbmlg_vect.get(i);
 		if ( dbmlg == null ) {
 			continue;
 		}
@@ -3631,14 +3627,13 @@ private void create_main_panel( ) {
 		mlg_num = dbmlg.getMeasLocGroup_num();
 		//now use that to get MeasLocGroup object
 		for ( int j=0; j<size_mlg;j++ ) {
-			mlg = (RiversideDB_MeasLocGroup) 
-			__RTi_MeasLocGroup_vect.elementAt(j);
+			mlg = (RiversideDB_MeasLocGroup)__RTi_MeasLocGroup_vect.get(j);
 			if ( mlg == null ) {
 				continue;
 			}
 			if ( mlg.getMeasLocGroup_num() == mlg_num ) {
 				//found one
-				measlocgroup_vect.addElement(
+				measlocgroup_vect.add(
 				mlg.getMeasLocGroup_num() + " - " +
 				mlg.getIdentifier() + " - " + 
 				mlg.getName() );
@@ -3881,8 +3876,7 @@ protected RiversideDB_MeasType getMeasTypeForMeasType_num ( long mt_num ) {
 	int mt_size = __leftList_MeasType_vect.size();
 	RiversideDB_MeasType mt = null;
 	for (int k=0; k<mt_size; k++ ) {
-		mt = ( RiversideDB_MeasType) __leftList_MeasType_vect.
-		elementAt(k);
+		mt = ( RiversideDB_MeasType) __leftList_MeasType_vect.get(k);
 		if ( mt == null ) {
 			continue;
 		}
@@ -3907,8 +3901,7 @@ protected String getTSIDForMeasType_num ( long mt_num ) {
 	int mt_size = __leftList_MeasType_vect.size();
 	RiversideDB_MeasType mt = null;
 	for (int k=0; k<mt_size; k++ ) {
-		mt = ( RiversideDB_MeasType) __leftList_MeasType_vect.
-		elementAt(k);
+		mt = ( RiversideDB_MeasType) __leftList_MeasType_vect.get(k);
 		if ( mt == null ) {
 			continue;
 		}
@@ -3937,14 +3930,14 @@ protected String getTSIDForMeasType_num ( long mt_num ) {
 
 /**
 Method reads the properties for the ImportProduct object passed 
-in and returns the properties in a Vector of Vectors in the
+in and returns the properties in a list of lists in the
 format of: item at (0)="Property Name" and at (1)="Property Value".
 @param RiversideDB_ImportProduct object to get properties from.
 @return Vector of vectors containing the properties for the
 RiversideDB_ImportProduct object passed in. Format of Vector:
 item at (0)="Property Name" and at (1)="Property Value".
 */
-protected Vector getVectorOfProperties( RiversideDB_ImportProduct ip ) {
+protected List getListOfProperties( RiversideDB_ImportProduct ip ) {
 	String routine = __class + ".getVectorOfProperties";
 
 	//get the properties string for the MeasReduction object
@@ -3962,8 +3955,8 @@ protected Vector getVectorOfProperties( RiversideDB_ImportProduct ip ) {
 	//make Vector of Vectors to hold the properties for 
 	//the ImportProduct object -each item in the Vector is another
 	//vector with PropertyName as element 0 and PropertyValue as element 1
-	Vector all_props_vect = new Vector();
-	Vector tmp_props_vect = null;
+	List all_props_vect = new Vector();
+	List tmp_props_vect = null;
 	if ( tmp_props_str!= null ) {
 		//break up string based on ";"s
 		if ( tmp_props_str.indexOf( ";" ) > 0 ) {
@@ -3974,13 +3967,13 @@ protected Vector getVectorOfProperties( RiversideDB_ImportProduct ip ) {
 		else  {
 			// Have just 1 property-- add it to vector as is.
 			tmp_props_vect = new Vector();
-			tmp_props_vect.addElement( tmp_props_str);
+			tmp_props_vect.add( tmp_props_str);
 		}
 	}
 	else {
 		//there are no properties set, so add an empty vector
 	    tmp_props_vect = new Vector();
-		tmp_props_vect.addElement( new Vector() );
+		tmp_props_vect.add( new Vector() );
 	}
 
 	// Have a vector containing Strings - each string in format : "Propertyname=PropertyValue"
@@ -3994,7 +3987,7 @@ protected Vector getVectorOfProperties( RiversideDB_ImportProduct ip ) {
 	String str_name= null;
 	String str_val= null;
 	for ( int i=0; i<tmp_num; i++ )  {
-		str_with_eq = ( String) tmp_props_vect.elementAt(i);
+		str_with_eq = ( String) tmp_props_vect.get(i);
 		//break this string up based on the equal sign
 		int eq_ind = -999;
 		eq_ind = str_with_eq.indexOf("=");
@@ -4003,11 +3996,11 @@ protected Vector getVectorOfProperties( RiversideDB_ImportProduct ip ) {
 			str_val = (str_with_eq.substring(eq_ind+1)).trim();
 		}
 		//now make this a new vector
-		Vector brokenup_vect = new Vector();
-		brokenup_vect.addElement( str_name );
-		brokenup_vect.addElement( str_val );
+		List brokenup_vect = new Vector();
+		brokenup_vect.add( str_name );
+		brokenup_vect.add( str_val );
 		//now add this vector to the all_props_vet
-		all_props_vect.addElement( brokenup_vect );
+		all_props_vect.add( brokenup_vect );
 	}
 	return all_props_vect;
 } //end getVectorOfProperties
@@ -4184,8 +4177,7 @@ protected void updateCreateMethodForMeasType( RiversideDB_MeasType mt ) {
 	size = __leftList_MeasType_vect.size();
 	RiversideDB_MeasType orig_mt = null;
 	for ( int i=0; i<size; i++ ) {
-		orig_mt = (RiversideDB_MeasType)
- 		__leftList_MeasType_vect.elementAt(i);
+		orig_mt = (RiversideDB_MeasType)__leftList_MeasType_vect.get(i);
 		if (orig_mt == null ) {
 			continue;
 		}
@@ -4223,10 +4215,10 @@ protected void update_database( ) throws Exception {
 	StringBuffer b = new StringBuffer();
 	for ( int i=0; i< __dirty_vect.size(); i++ ) {
 		if ( i == ( __dirty_vect.size()-1) ) {
-			b.append( (String) __dirty_vect.elementAt(i) );
+			b.append( (String) __dirty_vect.get(i) );
 		}
 		else {
-			b.append( (String) __dirty_vect.elementAt(i) + "\n" );
+			b.append( (String) __dirty_vect.get(i) + "\n" );
 		}
 	}
 
@@ -4239,7 +4231,7 @@ protected void update_database( ) throws Exception {
 	}
 	for ( int i=0; i<ic_size; i++ ) {
 		ic = ( RiversideDB_ImportConf ) 
- 		__gui_RTi_ImportConf_vect.elementAt(i);
+ 		__gui_RTi_ImportConf_vect.get(i);
 		if ( ic == null ) {
 			continue;
 		}
@@ -4264,7 +4256,7 @@ protected void update_database( ) throws Exception {
 		}
 		for ( int m=0; m<mt_size;m++ ) {
 			mt = (RiversideDB_MeasType) 
- 			__leftList_MeasType_vect.elementAt(m);
+ 			__leftList_MeasType_vect.get(m);
 			if ( mt == null ) {
 				continue;
 			}
@@ -4319,9 +4311,7 @@ protected void update_database( ) throws Exception {
 		//go through and write any dirty MeasType objects
 		//back to the database.
 		for ( int m=0; m<mt_size; m++ ) {
-			mt = (RiversideDB_MeasType) 
- 			__leftList_MeasType_vect.
-			elementAt(m);
+			mt = (RiversideDB_MeasType)__leftList_MeasType_vect.get(m);
 			if ( mt == null ) {	
 				continue;
 			}
@@ -4444,7 +4434,7 @@ protected void update_database( ) throws Exception {
 		ic = null;
 		for ( int i=0; i<ic_size; i++ ) {
 			ic = ( RiversideDB_ImportConf ) 
- 			__gui_RTi_ImportConf_vect.elementAt(i);
+ 			__gui_RTi_ImportConf_vect.get(i);
 			if ( ic == null ) {
 				continue;
 			}
@@ -4515,8 +4505,7 @@ protected void update_RiversideDB_objects( ) throws Exception {
 	//clear out the GUI version of the Vector and refill it.
  	__gui_RTi_ImportConf_vect.clear();
 	for ( int i=0; i<s; i++ ) {
- 		__gui_RTi_ImportConf_vect.addElement(
- 		__db_RTi_ImportConf_vect.elementAt(i) );
+ 		__gui_RTi_ImportConf_vect.add( __db_RTi_ImportConf_vect.get(i) );
 	}
 
 	boolean blnContinue = true;
@@ -5402,8 +5391,8 @@ protected void update_GUI_fields_propertiesTab( ) {
 	//Use getVectorOfProperties to get a Vector of Vectors where
 	//each Vector within the main Vector contains the property
 	//key at position 0 and value at position 1.
-	Vector props_vect = null;
-	props_vect = getVectorOfProperties( __db_RTi_ImportProduct );
+	List props_vect = null;
+	props_vect = getListOfProperties( __db_RTi_ImportProduct );
 
 	//set properties in GU0
 	if ( __db_ImportProduct_type.equalsIgnoreCase( __type_campbellsci_str)) {
@@ -5421,7 +5410,7 @@ of type campbellscientific.
 @param all_props_vect Vector containing all the properties for 
 this ImportProduct.
 */
-protected void update_GUI_fields_propertiesTab_campbellsci_props( Vector all_props_vect ) {
+protected void update_GUI_fields_propertiesTab_campbellsci_props( List all_props_vect ) {
 
 	int size = 0;
 	if ( all_props_vect != null ) {
@@ -5430,10 +5419,10 @@ protected void update_GUI_fields_propertiesTab_campbellsci_props( Vector all_pro
 	//go through each and set the appropriate components
 	String prop_str= null;
 	String prop_value_str= null;
-	Vector v = null;
+	List v = null;
 	for ( int i=0; i<size; i++ ) {
-		v = (Vector) all_props_vect.elementAt(i);	
-		prop_str= (String) v.elementAt(0);
+		v = (List) all_props_vect.get(i);	
+		prop_str= (String) v.get(0);
 		if ( prop_str== null ) {
 			continue;
 		}
@@ -5441,7 +5430,7 @@ protected void update_GUI_fields_propertiesTab_campbellsci_props( Vector all_pro
 		else if ( prop_str.equalsIgnoreCase( 
  		__props_1_campbellsci_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str= (String)v.elementAt(1);
+			prop_value_str= (String)v.get(1);
  			__props_1_campbellsci_JComboBox.
 			setSelectedItem( prop_value_str);
 		}
@@ -5449,7 +5438,7 @@ protected void update_GUI_fields_propertiesTab_campbellsci_props( Vector all_pro
 		else if ( prop_str.equalsIgnoreCase( 
  		__props_2_campbellsci_JLabel_str ) ) {
 			//then get its value to set in the TextField
-			prop_value_str= (String)v.elementAt(1);
+			prop_value_str= (String)v.get(1);
 			if( ( prop_value_str== null ) || 
 			( prop_value_str.length() <= 0 ) ) {
  				__props_2_campbellsci_JTextField.setText( "-6999" );
@@ -5463,7 +5452,7 @@ protected void update_GUI_fields_propertiesTab_campbellsci_props( Vector all_pro
 		else if ( prop_str.equalsIgnoreCase( 
  		__props_3_campbellsci_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str= (String)v.elementAt(1);
+			prop_value_str= (String)v.get(1);
  			__props_3_campbellsci_JComboBox.
 			setSelectedItem( prop_value_str);
 		}
@@ -5471,7 +5460,7 @@ protected void update_GUI_fields_propertiesTab_campbellsci_props( Vector all_pro
 		else if ( prop_str.equalsIgnoreCase( 
  		__props_4_campbellsci_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str= (String)v.elementAt(1);
+			prop_value_str= (String)v.get(1);
  			__props_4_campbellsci_JComboBox.
 			setSelectedItem( prop_value_str);
 		}
@@ -5479,7 +5468,7 @@ protected void update_GUI_fields_propertiesTab_campbellsci_props( Vector all_pro
 		else if ( prop_str.equalsIgnoreCase( 
  		__props_5_campbellsci_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str= (String)v.elementAt(1);
+			prop_value_str= (String)v.get(1);
  			__props_5_campbellsci_JComboBox.
 			setSelectedItem( prop_value_str);
 		}
@@ -5487,7 +5476,7 @@ protected void update_GUI_fields_propertiesTab_campbellsci_props( Vector all_pro
 		else if ( prop_str.equalsIgnoreCase( 
  		__props_6_campbellsci_JLabel_str ) ) {
 			//then get its value to set in the combobox/
-			prop_value_str= (String)v.elementAt(1);
+			prop_value_str= (String)v.get(1);
  			__props_6_campbellsci_JComboBox.
 			setSelectedItem( prop_value_str);
 		}
@@ -5503,7 +5492,7 @@ of any type but campbellscientific.
 @param all_props_vect Vector containing all the properties for 
 this ImportProduct.
 */
-protected void update_GUI_fields_propertiesTab_generic_props( Vector all_props_vect ) {
+protected void update_GUI_fields_propertiesTab_generic_props( List all_props_vect ) {
 
 	//For now, the generic ImportPRoduct type just has
 	//one JTextField with props seperated by ";" just like in db
@@ -5615,7 +5604,7 @@ public void verify_archive_tab () throws Exception {
 		if ( ! db_arch_perm_str.equalsIgnoreCase( 
 		gui_arch_perm_str) ) {
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change DoArchive from \"" + db_arch_perm_str+ 
 			"\" to \"" + gui_arch_perm_str+ "\"");
 
@@ -5634,7 +5623,7 @@ public void verify_archive_tab () throws Exception {
 
 		if ( !db_arch_dir_str.equalsIgnoreCase( gui_arch_dir_str) ) {
  		__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Archive Directory from \"" + db_arch_dir_str+ 
 			"\" to \"" + gui_arch_dir_str+ "\"");
 
@@ -5651,7 +5640,7 @@ public void verify_archive_tab () throws Exception {
 		}
 		if ( !db_arch_file_str.equalsIgnoreCase( gui_arch_file_str) ) {
  		__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Archive File(s) from \"" + db_arch_file_str+ 
 			"\" to \"" + gui_arch_file_str+ "\"");
 
@@ -5667,7 +5656,7 @@ public void verify_archive_tab () throws Exception {
 		if ( ! db_arch_perm_str.equalsIgnoreCase( 
 		gui_arch_perm_str) ) {
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change DoArchve from \"" + db_arch_perm_str+ 
 			"\" to \"" + gui_arch_perm_str+ "\"");
 
@@ -5679,7 +5668,7 @@ public void verify_archive_tab () throws Exception {
 		if ( ! db_arch_dir_str.equalsIgnoreCase( 
 		gui_arch_dir_str) ) {
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Archive Directory from \"" + db_arch_dir_str+ 
 			"\" to \"" + gui_arch_dir_str+ "\"");
 
@@ -5689,7 +5678,7 @@ public void verify_archive_tab () throws Exception {
 		if ( ! db_arch_file_str.equalsIgnoreCase( 
 		gui_arch_file_str) ) {
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Archive File(s) from \"" + db_arch_file_str+ 
 			"\" to \"" + gui_arch_file_str+ "\"");
 
@@ -5757,7 +5746,7 @@ public void verify_automation_tab() throws Exception {
 		if ( ! db_isAuto_str.equalsIgnoreCase( gui_isAuto_str) ) {
 			//mark as dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change IsAutomated from \"" + db_isAuto_str+ 
 			"\" to \"" + gui_isAuto_str+ "\"");
 
@@ -5786,7 +5775,7 @@ public void verify_automation_tab() throws Exception {
 		if ( ! db_everyInt_str.equalsIgnoreCase( gui_everyInt_str) ) {
 			//mark as dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Every Interval from \"" + db_everyInt_str+ 
 			"\" to \"" + gui_everyInt_str+ "\"");
 
@@ -5806,7 +5795,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_year_str.equalsIgnoreCase( gui_year_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Year from \"" + db_year_str+ 
 				"\" to \"" + gui_year_str+ "\"");
 
@@ -5827,7 +5816,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_month_str.equalsIgnoreCase( gui_month_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Month from \"" + db_month_str+ 
 				"\" to \"" + gui_month_str+ "\"");
 
@@ -5847,7 +5836,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_day_str.equalsIgnoreCase( gui_day_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Day from \"" + db_day_str+ 
 				"\" to \"" + gui_day_str+ "\"");
 
@@ -5867,7 +5856,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_hour_str.equalsIgnoreCase( gui_hour_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Hour from \"" + db_hour_str+ 
 				"\" to \"" + gui_hour_str+ "\"");
 
@@ -5887,7 +5876,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_minute_str.equalsIgnoreCase( gui_minute_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Minute from \"" + db_minute_str+ 
 				"\" to \"" + gui_minute_str+ "\"");
 
@@ -5907,7 +5896,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_second_str.equalsIgnoreCase( gui_second_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Second from \"" + db_second_str+ 
 				"\" to \"" + gui_second_str+ "\"");
 
@@ -5928,7 +5917,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_weekday_str.equalsIgnoreCase( gui_weekday_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Weekday from \"" + db_weekday_str+ 
 				"\" to \"" + gui_weekday_str+ "\"");
 
@@ -5954,7 +5943,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_delay_str.equalsIgnoreCase( gui_delay_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Delay from \"" + db_delay_str+ 
 				"\" to \"" + gui_delay_str+ "\"");
 
@@ -5970,7 +5959,7 @@ public void verify_automation_tab() throws Exception {
 		//compare value to what was originally in db
 		if ( !db_isAuto_str.equalsIgnoreCase( gui_isAuto_str)){
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change IsAutomated from \"" + db_isAuto_str+ 
 				"\" to \"" + gui_isAuto_str+ "\"");
 
@@ -5981,7 +5970,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_year_str.equalsIgnoreCase( gui_year_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Year from \"" + db_year_str+ 
 				"\" to \"" + gui_year_str+ "\"");
 
@@ -5991,7 +5980,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_month_str.equalsIgnoreCase( gui_month_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Month from \"" + db_month_str+ 
 				"\" to \"" + gui_month_str+ "\"");
 
@@ -6001,7 +5990,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_day_str.equalsIgnoreCase( gui_day_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Day from \"" + db_day_str+ 
 				"\" to \"" + gui_day_str+ "\"");
 
@@ -6011,7 +6000,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_hour_str.equalsIgnoreCase( gui_hour_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Hour from \"" + db_hour_str+ 
 				"\" to \"" + gui_hour_str+ "\"");
 
@@ -6021,7 +6010,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_minute_str.equalsIgnoreCase( gui_minute_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Minute from \"" + db_minute_str+ 
 				"\" to \"" + gui_minute_str+ "\"");
 
@@ -6031,7 +6020,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_second_str.equalsIgnoreCase( gui_second_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Second from \"" + db_second_str+ 
 				"\" to \"" + gui_second_str+ "\"");
 
@@ -6041,7 +6030,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_weekday_str.equalsIgnoreCase( gui_weekday_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Weekday from \"" + db_weekday_str+ 
 				"\" to \"" + gui_weekday_str+ "\"");
 
@@ -6051,7 +6040,7 @@ public void verify_automation_tab() throws Exception {
 		if ( !db_delay_str.equalsIgnoreCase( gui_delay_str)){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Delay from \"" + db_delay_str+ 
 				"\" to \"" + gui_delay_str+ "\"");
 
@@ -6105,7 +6094,7 @@ public void verify_files_tab() throws Exception {
 	if ( !db_source_dir.equalsIgnoreCase( gui_source_dir )){
 			//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change Source Directory from \"" + db_source_dir + 
 			"\" to \"" + gui_source_dir + "\"");
 
@@ -6124,7 +6113,7 @@ public void verify_files_tab() throws Exception {
 	if ( !db_source_file.equalsIgnoreCase( gui_source_file )){
 			//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change Source File(s) from \"" + db_source_file + 
 			"\" to \"" + gui_source_file + "\"");
 
@@ -6144,7 +6133,7 @@ public void verify_files_tab() throws Exception {
 	if ( !db_dest_dir.equalsIgnoreCase( gui_dest_dir )){
 			//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change Destination Directory from \"" + db_dest_dir + 
 			"\" to \"" + gui_dest_dir + "\"");
 
@@ -6162,7 +6151,7 @@ public void verify_files_tab() throws Exception {
 	if ( !db_dest_file.equalsIgnoreCase( gui_dest_file )){
 			//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 			"Change Destination File(s) from \"" + db_dest_file + 
 			"\" to \"" + gui_dest_file + "\"");
 
@@ -6225,7 +6214,7 @@ public void verify_properties_tab() throws Exception {
 	if ( db_imp_order != gui_imp_order ) {
 		//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Import Order from \"" + db_imp_order  + 
 		"\" to \"" + gui_imp_order  + "\"");
 
@@ -6256,7 +6245,7 @@ public void verify_properties_tab() throws Exception {
 	if ( !db_imp_window_str.equalsIgnoreCase( gui_imp_window_str)){
 		//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Import Window from \"" + db_imp_window_str + 
 		"\" to \"" + gui_imp_window_str + "\"");
 
@@ -6285,7 +6274,7 @@ public void verify_properties_tab() throws Exception {
 		//using the DateTime.equals method
 		if ( ! db_next_DateTime.equals( gui_next_DateTime ) ) {
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change Next Date from \"" + 
 			db_next_DateTime.toString() +
 			"\" to \"" + gui_next_DateTime.toString()  + "\"");
@@ -6325,7 +6314,7 @@ public void verify_properties_tab() throws Exception {
 		if ( !db_add_source_dir.equalsIgnoreCase( gui_add_source_dir )){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Additional Source Directory from \"" + db_add_source_dir + 
 				"\" to \"" + gui_add_source_dir + "\"");
         	
@@ -6344,7 +6333,7 @@ public void verify_properties_tab() throws Exception {
 		if ( !db_add_source_file.equalsIgnoreCase( gui_add_source_file )){
 				//set Dirty
  			__gui_RTi_ImportProduct.setDirty( true );
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 				"Change Additional Source File(s) from \"" + db_add_source_file + 
 				"\" to \"" + gui_add_source_file + "\"");
         	
@@ -6460,7 +6449,7 @@ public void verify_properties_tab_campbellsci_props() throws Exception {
 	if ( !db_props_str.equalsIgnoreCase( gui_props_str) ){
 		//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from \"" + db_props_str + 
 		"\"\nto \"" + gui_props_str + "\"");
 
@@ -6494,7 +6483,7 @@ public void verify_properties_tab_generic_props() throws Exception {
 	if ( !db_props.equalsIgnoreCase( gui_props ) ) {
 		//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from \"" + db_props + 
 		"\" to \"" + gui_props + "\"");
 
@@ -6536,7 +6525,7 @@ public void verify_security_tab() throws Exception {
 	if ( !db_user_login_str.equalsIgnoreCase( gui_user_login_str)){
 		//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change User Login from \"" + db_user_login_str + 
 		"\" to \"" + gui_user_login_str + "\"");
 
@@ -6552,7 +6541,7 @@ public void verify_security_tab() throws Exception {
 	if ( !db_user_passwd_str.equalsIgnoreCase( gui_user_passwd_str)){
 		//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change User Password from \"" + db_user_passwd_str + 
 		"\" to \"" + gui_user_passwd_str + "\"");
 
@@ -6568,7 +6557,7 @@ public void verify_security_tab() throws Exception {
 	if ( !db_firewall_login_str.equalsIgnoreCase( gui_firewall_login_str)){
 		//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Firewall Login from \"" + db_firewall_login_str + 
 		"\" to \"" + gui_firewall_login_str + "\"");
 
@@ -6584,7 +6573,7 @@ public void verify_security_tab() throws Exception {
 	if ( !db_firewall_passwd_str.equalsIgnoreCase(gui_firewall_passwd_str)){
 		//set Dirty
  		__gui_RTi_ImportProduct.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Firewall Password from \"" + db_firewall_passwd_str+ 
 		"\" to \"" + gui_firewall_passwd_str + "\"");
 
@@ -6648,8 +6637,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 		"associated with this ImportProduct: \n" );
 	}
 	for ( int i=0; i<orig_num; i++ ) {
-		ic = (RiversideDB_ImportConf) __gui_RTi_ImportConf_vect.
-		elementAt(i);
+		ic = (RiversideDB_ImportConf) __gui_RTi_ImportConf_vect.get(i);
 		if ( ic == null ) {
 			continue;
 		}
@@ -6663,7 +6651,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 	}
 
 	//read in all data currently in worksheet.
-	Vector table_vect = null;
+	List table_vect = null;
 	table_vect = __timeseries_tab_selTS_JWorksheet.getAllData();
 
 	//compare original number of ImportConf objects
@@ -6704,7 +6692,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 		ic = null;
 		for ( int i=0; i<rows; i++ ) {
 			ic = (RiversideDB_ImportConf) 
-			table_vect.elementAt(i);
+			table_vect.get(i);
 			if ( ic == null ) {
 				continue;
 			}
@@ -6712,7 +6700,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
  			__gui_RTi_ImportProduct.setDirty( true );
 			//add to Vector
 	
- 			__gui_RTi_ImportConf_vect.addElement( ic );
+ 			__gui_RTi_ImportConf_vect.add( ic );
 			
 			long mt_num = -999;
 			mt_num = ic.getMeasType_num();
@@ -6733,7 +6721,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 					mt.setDirty( true );
 					updateCreateMethodForMeasType(
 					mt );
- 					__dirty_vect.addElement( "Updated " +
+ 					__dirty_vect.add( "Updated " +
 					"MeasType " + tsid_str+ " to " +
 					" be an Import Time Series." );
 				}
@@ -6742,7 +6730,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 			gui_buffer.append( tsid_str+ "\n" );
 		}
 
- 		__dirty_vect.addElement( "Update ImportConf objects " +
+ 		__dirty_vect.add( "Update ImportConf objects " +
 		"associated with ImportProduct? \n" + db_buffer.toString() +
 		"\n" + gui_buffer.toString() );
 
@@ -6771,7 +6759,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 		boolean blnNewIC = false;
 		for ( int i=0; i<rows; i++ ) {
 			table_ic = (RiversideDB_ImportConf) 
-			table_vect.elementAt(i);
+			table_vect.get(i);
 			if ( table_ic == null ) {
 				continue;
 			}
@@ -6782,8 +6770,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 			
 			//now go through original vector of RTi_ImportConf
 			for ( int j=0; j<orig_num;j++ ) {
-				orig_ic = (RiversideDB_ImportConf) 
- 				__db_RTi_ImportConf_vect.elementAt(j);
+				orig_ic = (RiversideDB_ImportConf)__db_RTi_ImportConf_vect.get(j);
 				if ( orig_ic == null ) {
 					continue;
 				}
@@ -6819,7 +6806,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						table_ic.setDirty( true );
  						__gui_RTi_ImportProduct.setDirty( 
 						true );
- 						__dirty_vect.addElement( 
+ 						__dirty_vect.add( 
 						"Update " +
 						"Data Column field from:\n \"" +
 						db_ext_field + "\" to: \"" +
@@ -6843,7 +6830,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						table_ic.setDirty( true );
  						__gui_RTi_ImportProduct.setDirty( 
 						true );
- 						__dirty_vect.addElement( 
+ 						__dirty_vect.add( 
 						"Update " +
 						"Data File from:\n \"" +
 						db_ext_id + "\" to: \"" +
@@ -6867,7 +6854,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						table_ic.setDirty( true );
  						__gui_RTi_ImportProduct.setDirty( 
 						true );
- 						__dirty_vect.addElement( 
+ 						__dirty_vect.add( 
 						"Update " +
 						"Data Table from:\n \"" +
 						db_ext_table + "\" to: \"" +
@@ -6896,7 +6883,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						table_ic.setDirty( true );
  						__gui_RTi_ImportProduct.setDirty( 
 						true );
- 						__dirty_vect.addElement( 
+ 						__dirty_vect.add( 
 						"Update " +
 						"Data Units from:\n \"" +
 						db_ext_units + "\" to: \"" +
@@ -6919,7 +6906,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						table_ic.setDirty( true );
  						__gui_RTi_ImportProduct.setDirty( 
 						true );
- 						__dirty_vect.addElement( 
+ 						__dirty_vect.add( 
 						"Update " +
 						"Data IsActive field from:\n \"" +
 						db_isActive + "\" to: \"" +
@@ -6932,8 +6919,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 					//ImportConf object back to
 					//Vector of ImportConfs
 
- 					__gui_RTi_ImportConf_vect.addElement(
-					table_ic );
+ 					__gui_RTi_ImportConf_vect.add(table_ic );
 
 					break;
 				}
@@ -6960,7 +6946,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 				//so this one must be a new addition
 				table_ic.setDirty( true );
  				__gui_RTi_ImportProduct.setDirty( true );
- 				__dirty_vect.addElement(
+ 				__dirty_vect.add(
 				"Add ImportConf object \"" +
 				tsid_str+ "\" to selected ImportProduct?" );
 
@@ -6976,7 +6962,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 						mt.setDirty( true );
 						updateCreateMethodForMeasType(
 						mt );
- 						__dirty_vect.addElement( 
+ 						__dirty_vect.add( 
 						"Updated " +
 						"MeasType " + tsid_str+ 
 						" to be an Import Time " +
@@ -6985,7 +6971,7 @@ public void verify_timeseries_tab( boolean blnWarningOn ) throws Exception {
 				}
 	
 				//update vector of GUI importConf objects
- 				__gui_RTi_ImportConf_vect.addElement( table_ic );
+ 				__gui_RTi_ImportConf_vect.add( table_ic );
 				table_ic = null;
 				orig_ic = null;
 			}
@@ -7088,7 +7074,7 @@ public void verify_top_fields() throws Exception {
 	db_id = __db_RTi_ImportProduct.getProduct_name();
 	if ( ! db_id.equalsIgnoreCase( gui_id) ) {
  		__gui_RTi_ImportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Product Identifier from \"" + 
 		db_id +"\" to \"" +gui_id+"\"");
  		__gui_RTi_ImportProduct.setProduct_name( gui_id );
@@ -7117,7 +7103,7 @@ public void verify_top_fields() throws Exception {
 	//Get Identifier
 	String db_grp= "";
 	int num_prodgrps = 0;
-	Vector prodGrp_vect = null;
+	List prodGrp_vect = null;
 	try {
 		prodGrp_vect = 
  		__dmi.readProductGroupListForProductType( "IMPORT" );
@@ -7130,7 +7116,7 @@ public void verify_top_fields() throws Exception {
 	}
 	RiversideDB_ProductGroup pg = null;
 	for ( int i=0; i< num_prodgrps; i++ ) { 
-		pg = (RiversideDB_ProductGroup) prodGrp_vect.elementAt(i);
+		pg = (RiversideDB_ProductGroup) prodGrp_vect.get(i);
 		if ( pg == null ) {
 			continue;
 		}
@@ -7146,7 +7132,7 @@ public void verify_top_fields() throws Exception {
 	if ( db_grp_num !=  gui_grp_num ) {
  		__gui_RTi_ImportProduct.setDirty ( true );
 
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Product Group num from " + db_grp_num +"(\""+
 		db_grp +"\") to " + gui_grp_num + " (\"" +gui_grp + "\")");
 
@@ -7168,7 +7154,7 @@ public void verify_top_fields() throws Exception {
 	if ( ! db_type.equalsIgnoreCase( gui_type ) ) {
 		//mark dirty
  		__gui_RTi_ImportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Product Type from \"" + 
 		db_type +"\" to \"" +gui_type+"\"");
  		__gui_RTi_ImportProduct.setProduct_type( gui_type );
@@ -7193,7 +7179,7 @@ public void verify_top_fields() throws Exception {
 	if ( db_mlg_num != gui_mlg_num ) {
 		//mark object as dirty
  		__gui_RTi_ImportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change MeasLocGroup_num from \"" + 
 		db_mlg_num +"\" to \"" +gui_mlg_num+"\"");
 		//set in memory
@@ -7214,7 +7200,7 @@ public void verify_top_fields() throws Exception {
 	//compare
 	if ( !db_isAct_str.equalsIgnoreCase( gui_isAct_str)) {
  		__gui_RTi_ImportProduct.setDirty ( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change isActive (Y/N) from \"" + 
 		db_isAct_str+"\" to \"" +gui_isAct_str+"\"");
 		//set in memory
@@ -7285,8 +7271,7 @@ public void actionPerformed (ActionEvent event) {
 
  				__gui_RTi_ImportConf_vect.clear();
 				for ( int i=0; i<s; i++ ) {
- 					__gui_RTi_ImportConf_vect.addElement(
- 					__db_RTi_ImportConf_vect.elementAt(i) );
+ 					__gui_RTi_ImportConf_vect.add( __db_RTi_ImportConf_vect.get(i) );
 				}
 
  				__dirty_vect.clear();
@@ -7311,9 +7296,9 @@ public void actionPerformed (ActionEvent event) {
 			RiversideDB_ImportConf ic = null;
 			for ( int i=0; i<s; i++ ) {
 				ic = (RiversideDB_ImportConf)
- 				__gui_RTi_ImportConf_vect.elementAt(i);
+ 				__gui_RTi_ImportConf_vect.get(i);
 				ic.setDirty( false );
- 				__db_RTi_ImportConf_vect.addElement(ic );
+ 				__db_RTi_ImportConf_vect.add(ic );
 			}
 		}
 
@@ -7534,7 +7519,7 @@ public void actionPerformed (ActionEvent event) {
 				b = new StringBuffer();
 				for (int i=0;i< __dirty_vect.size();i++) {
 					b.append( (String) 
- 					__dirty_vect.elementAt(i)+"\n" );
+ 					__dirty_vect.get(i)+"\n" );
 				}
 
 				//write out a confirmation message.
@@ -7720,7 +7705,7 @@ public void actionPerformed (ActionEvent event) {
 		//Vector mt_vect = new Vector();
 		//Vector ic_vect = new Vector();
 		//read in all ImportConf objects
-		Vector all_ImportConf_vect = null;
+		List all_ImportConf_vect = null;
 		try {
 			all_ImportConf_vect = 
  			__dmi.readImportConfList();
@@ -7808,7 +7793,7 @@ public void actionPerformed (ActionEvent event) {
 				for ( int j=0;j<num_ic;j++ ) {
 					ic =(RiversideDB_ImportConf) 
 					all_ImportConf_vect.
-					elementAt(j);
+					get(j);
 					if ( ic == null ) {
 						continue;
 					}

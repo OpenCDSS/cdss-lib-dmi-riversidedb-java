@@ -13,7 +13,7 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.GUI.JWorksheet_TableModelListener;
@@ -65,7 +65,7 @@ Constructor.
 @param editable whether the data can be edited
 @throws Exception if invalid data were passed in.
 */
-public RiversideDB_State_TableModel(Vector values, boolean editable)
+public RiversideDB_State_TableModel(List values, boolean editable)
 throws Exception {
 	if (values == null) {
 		throw new Exception ("Invalid data passed to " 
@@ -83,8 +83,7 @@ Constructor.
 @param editable whether the data can be edited
 @throws Exception if invalid data were passed in.
 */
-public RiversideDB_State_TableModel(RiversideDB_DMI dmi, Vector values, 
-boolean editable)
+public RiversideDB_State_TableModel(RiversideDB_DMI dmi, List values, boolean editable)
 throws Exception {
 	if (values == null) {
 		throw new Exception ("Invalid data passed to " 
@@ -203,8 +202,7 @@ public int getRowCount() {
 }
 
 /**
-From AbstractTableModel; returns the data that should be placed in the JTable
-at the given row and column.
+From AbstractTableModel; returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
 @return the data that should be placed in the JTable at the given row and col.
@@ -214,7 +212,7 @@ public Object getValueAt(int row, int col) {
 		row = _sortOrder[row];
 	}
 
-	RiversideDB_State s = (RiversideDB_State)_data.elementAt(row);
+	RiversideDB_State s = (RiversideDB_State)_data.get(row);
 
 	if (__isVersion02) {
 		switch (col) {
@@ -288,7 +286,7 @@ Sets the value at the specified position to the specified value.
 @param col the col of the cell for which to set the value.
 */
 public void setValueAt(Object value, int row, int col) {
-	RiversideDB_State s = (RiversideDB_State)_data.elementAt(row);
+	RiversideDB_State s = (RiversideDB_State)_data.get(row);
 	String val;
 	int i;
 	if (__isVersion02) {

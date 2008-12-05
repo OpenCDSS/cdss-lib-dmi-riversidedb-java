@@ -31,6 +31,7 @@
 //------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
+import java.util.List;
 import java.util.Vector;
 import RTi.DMI.DMIDataObject;
 import RTi.Util.Message.Message;
@@ -168,8 +169,7 @@ Adds a new record to the worksheet with values read in from an import file.
 @param classes the classes for the fields.
 @return true if successful, false if not.
 */
-protected boolean importNewRecord(
-	Vector values, int[] fieldNums, Class[] classes )
+protected boolean importNewRecord( List values, int[] fieldNums, Class[] classes )
 {
 	_worksheet.addRow(new RiversideDB_DataUnits());
 
@@ -244,12 +244,12 @@ protected void setupComboBoxes()
 	String routine = CLASS + ".setupComboBoxes";
 
 	try {
-		Vector v = _dmi.readDataDimensionList();
+		List v = _dmi.readDataDimensionList();
 		int size = v.size();
-		Vector values = new Vector();
+		List values = new Vector();
 		RiversideDB_DataDimension dd = null;
 		for ( int i = 0; i < size; i++ ) {
-			dd = (RiversideDB_DataDimension)v.elementAt(i);
+			dd = (RiversideDB_DataDimension)v.get(i);
 			values.add( dd.getDimension  ().trim() + " - "
 				  + dd.getDescription().trim());
 		}
@@ -268,7 +268,7 @@ Writes a record to the database.
 @param pairs Vector that ties the record to be written to a row in the
 worksheet.
 */
-protected void writeRecord( int recordNum, DMIDataObject ddo, Vector pairs )
+protected void writeRecord( int recordNum, DMIDataObject ddo, List pairs )
 throws Exception
 {
 	RiversideDB_DataUnits du  = (RiversideDB_DataUnits)

@@ -115,6 +115,7 @@ import  java.awt.event.ActionEvent;
 import  java.awt.event.ActionListener;
 import  java.awt.event.WindowEvent;
 import  java.awt.event.WindowListener;
+import  java.util.List;
 import  java.util.Vector;
 
 import 	javax.swing.BorderFactory;
@@ -520,11 +521,11 @@ long __proc_stagedischargerating_order= 3; //or 103
 RiversideDB_MeasType __db_RTi_MeasType = null;
 RiversideDB_MeasReduction __db_RTi_MeasReduction = null;
 //private Vector __RTi_MeasReduction_vect = null;
-private Vector __RTi_MeasReductionType_vect = null;
-private Vector __db_RTi_MeasReducRelation_vect = new Vector();
+private List __RTi_MeasReductionType_vect = null;
+private List __db_RTi_MeasReducRelation_vect = new Vector();
 
 //holds name and description of MeasReductionTypes
-private Vector __process_vect = null;
+private List __process_vect = null;
 
 //this is the MeastType.MeasTypeNum and the MeasReduction.OutputMeasTypeNum
 long __db_MeasType_num = -999;
@@ -532,12 +533,12 @@ long __db_MeasLoc_num = -999;
 
 //Holds a Vector of status information-- each
 //field that has been changed is recored in this vector.
-private Vector __dirty_vect = new Vector();
+private List __dirty_vect = new Vector();
 
 //Holds objects with current, but uncommitted changes 
 RiversideDB_MeasType __gui_RTi_MeasType = null;
 RiversideDB_MeasReduction __gui_RTi_MeasReduction = null;
-private Vector __gui_RTi_MeasReducRelation_vect = new Vector();
+private List __gui_RTi_MeasReducRelation_vect = new Vector();
 
 //Flag to indicate if we are running in CAUTIOUS MODE---
 //aka, if we prompt the user for confirmation of changes
@@ -939,35 +940,35 @@ protected JPanel assemble_inputTS_changedatatype_panel ( ) {
 	"reduction is (automatically) performed.</html>");
 
 	//make vector for comboboxes...
-	Vector prop_1_vect = new Vector();
-	prop_1_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_1_vect.addElement( "TRUE" );
+	List prop_1_vect = new Vector();
+	prop_1_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_1_vect.add( "TRUE" );
 
-	Vector prop_2_vect = new Vector();
-	prop_2_vect.addElement(DEFAULT_STRING + " - 0");
-	prop_2_vect.addElement("30000");
-	prop_2_vect.addElement("31000");
-	prop_2_vect.addElement("32000");
-	prop_2_vect.addElement("33000");
-	prop_2_vect.addElement("34000");
-	prop_2_vect.addElement("35000");
-	prop_2_vect.addElement("36000");
+	List prop_2_vect = new Vector();
+	prop_2_vect.add(DEFAULT_STRING + " - 0");
+	prop_2_vect.add("30000");
+	prop_2_vect.add("31000");
+	prop_2_vect.add("32000");
+	prop_2_vect.add("33000");
+	prop_2_vect.add("34000");
+	prop_2_vect.add("35000");
+	prop_2_vect.add("36000");
 
-	Vector prop_3_vect = new Vector();
-	prop_3_vect.addElement(DEFAULT_STRING + " - REGULAR");
-	prop_3_vect.addElement("ROCKET");
+	List prop_3_vect = new Vector();
+	prop_3_vect.add(DEFAULT_STRING + " - REGULAR");
+	prop_3_vect.add("ROCKET");
 
-	Vector prop_4_vect = new Vector();
-	prop_4_vect.addElement(DEFAULT_STRING + " - 2DAY" );
+	List prop_4_vect = new Vector();
+	prop_4_vect.add(DEFAULT_STRING + " - 2DAY" );
 	for ( int i=1;i<32; i++ ) {
 		if ( i != 2 ) {
-			prop_4_vect.addElement(i + "DAY" );
+			prop_4_vect.add(i + "DAY" );
 		}
 	}
 
-	Vector prop_5_vect = new Vector();
-	prop_5_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_5_vect.addElement("TRUE");
+	List prop_5_vect = new Vector();
+	prop_5_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_5_vect.add("TRUE");
 
  	__props_1_changedatatype_JComboBox =
 	new SimpleJComboBox( prop_1_vect );
@@ -1265,25 +1266,25 @@ protected JPanel assemble_inputTS_changeint_panel ( ) {
 	"0 and 100 to <br>define the percentage of allowed missing <br>input " +
 	"data values per output interval.</html>" );
 
-	Vector prop_1_vect = new Vector();
-	prop_1_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_1_vect.addElement( "TRUE" );
+	List prop_1_vect = new Vector();
+	prop_1_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_1_vect.add( "TRUE" );
 
-	Vector prop_2_vect = new Vector();
-	prop_2_vect.addElement( DEFAULT_STRING + " - 2DAY" );
+	List prop_2_vect = new Vector();
+	prop_2_vect.add( DEFAULT_STRING + " - 2DAY" );
 	for ( int i=1;i<32; i++ ) {
 		if ( i != 2 ) {
-			prop_2_vect.addElement(i + "DAY" );
+			prop_2_vect.add(i + "DAY" );
 		}
 	}
 
-	Vector prop_3_vect = new Vector();
-	prop_3_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_3_vect.addElement( "TRUE" );
+	List prop_3_vect = new Vector();
+	prop_3_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_3_vect.add( "TRUE" );
 
-	Vector prop_4_vect = new Vector();
+	List prop_4_vect = new Vector();
 	for ( int i=0; i<=100; i++ ) {
-		prop_4_vect.addElement( String.valueOf( i ) );
+		prop_4_vect.add( String.valueOf( i ) );
 	}
 
 	//JComboBoxes
@@ -1553,8 +1554,8 @@ protected JPanel assemble_inputTS_fillfloodmonitor_panel ( ) {
 
 	//vector for comboboxes
 
-	Vector prop_1_vect = new Vector();
-	Vector prop_1_scen_vect = null;
+	List prop_1_vect = new Vector();
+	List prop_1_scen_vect = null;
 	try {
 		prop_1_scen_vect= __dmi.readScenarioList();
 	}
@@ -1573,7 +1574,7 @@ protected JPanel assemble_inputTS_fillfloodmonitor_panel ( ) {
 	RiversideDB_Scenario rs = null;
 		try {
 			rs = (RiversideDB_Scenario) 
-			prop_1_scen_vect.elementAt(i);
+			prop_1_scen_vect.get(i);
 
 		} catch (Exception e) {Message.printWarning( 2, routine, e); }
 		if ( rs == null ) {
@@ -1583,16 +1584,15 @@ protected JPanel assemble_inputTS_fillfloodmonitor_panel ( ) {
 		if (s.length() > 50 )  {
 			s = s.substring( 0, 50 ) + "..." ;
 		}
-		prop_1_vect.addElement( s );
+		prop_1_vect.add( s );
 	}
 
 	//one more property to vector
-	prop_1_vect.insertElementAt( DEFAULT_STRING + 
-	" - SIMULATION.ZERO_QPF_SCENARIO", 0 );
+	prop_1_vect.add( 0, DEFAULT_STRING + " - SIMULATION.ZERO_QPF_SCENARIO" );
 
-	Vector prop_2_vect = new Vector();
-	prop_2_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_2_vect.addElement("TRUE");
+	List prop_2_vect = new Vector();
+	prop_2_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_2_vect.add("TRUE");
 
 	//JComboBoxes
  	__props_1_fillfloodmonitor_JComboBox = new SimpleJComboBox( prop_1_vect );
@@ -1905,7 +1905,7 @@ protected JPanel assemble_inputTS_map_panel ( ) {
  		__worksheet_props.add("JWorksheet.SelectionMode=SingleRowSelection");
 	}
 	//make worksheet
-	Vector v = new Vector();
+	List v = new Vector();
 	String arr[] = {"",""};
 	v.add(arr);
 
@@ -1977,26 +1977,26 @@ protected JPanel assemble_inputTS_map_panel ( ) {
 
 
 	//vector for properties
-	Vector prop_1_vect = new Vector();
-	prop_1_vect.addElement( DEFAULT_STRING + " - -999" );
-	prop_1_vect.addElement( "1.0" );
-	prop_1_vect.addElement( "2.0" );
-	prop_1_vect.addElement( "3.0" );
-	prop_1_vect.addElement( "4.0" );
-	prop_1_vect.addElement( "5.0" );
-	prop_1_vect.addElement( "6.0" );
-	prop_1_vect.addElement( "7.0" );
-	prop_1_vect.addElement( "8.0" );
-	prop_1_vect.addElement( "9.0" );
-	prop_1_vect.addElement( "10.0" );
+	List prop_1_vect = new Vector();
+	prop_1_vect.add( DEFAULT_STRING + " - -999" );
+	prop_1_vect.add( "1.0" );
+	prop_1_vect.add( "2.0" );
+	prop_1_vect.add( "3.0" );
+	prop_1_vect.add( "4.0" );
+	prop_1_vect.add( "5.0" );
+	prop_1_vect.add( "6.0" );
+	prop_1_vect.add( "7.0" );
+	prop_1_vect.add( "8.0" );
+	prop_1_vect.add( "9.0" );
+	prop_1_vect.add( "10.0" );
 
-	Vector prop_2_vect = new Vector();
-	prop_2_vect.addElement( DEFAULT_STRING + " - TRUE" );
-	prop_2_vect.addElement( "FALSE" );
+	List prop_2_vect = new Vector();
+	prop_2_vect.add( DEFAULT_STRING + " - TRUE" );
+	prop_2_vect.add( "FALSE" );
 
-	Vector prop_3_vect = new Vector();
-	prop_3_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_3_vect.addElement("TRUE");
+	List prop_3_vect = new Vector();
+	prop_3_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_3_vect.add("TRUE");
 
 	//JComboBoxes
  	__props_1_map_JComboBox = new SimpleJComboBox( prop_1_vect );
@@ -2239,19 +2239,17 @@ protected JPanel assemble_inputTS_mapx_panel ( ) {
 */
 
 	//vector for properties
-	Vector prop_1_vect = new Vector();
-	prop_1_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_1_vect.addElement( "TRUE" );
+	List prop_1_vect = new Vector();
+	prop_1_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_1_vect.add( "TRUE" );
 
-	Vector prop_2_vect = new Vector();
-	prop_2_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_2_vect.addElement("TRUE");
+	List prop_2_vect = new Vector();
+	prop_2_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_2_vect.add("TRUE");
 
 	//JComobBoxes for properties
- 	__props_1_mapx_JComboBox =
-	new SimpleJComboBox( prop_1_vect );
- 	__props_2_mapx_JComboBox =
-	new SimpleJComboBox( prop_2_vect );
+ 	__props_1_mapx_JComboBox = new SimpleJComboBox( prop_1_vect );
+ 	__props_2_mapx_JComboBox = new SimpleJComboBox( prop_2_vect );
 
 	try {
 
@@ -2431,7 +2429,7 @@ protected JPanel assemble_inputTS_mat_panel ( ) {
  		__worksheet_props.add("JWorksheet.SelectionMode=ExcelSelection");
 	}
 	//make worksheet
-	Vector v = new Vector();
+	List v = new Vector();
 	String arr[] = {"",""};
 	v.add(arr);
 
@@ -2502,41 +2500,41 @@ protected JPanel assemble_inputTS_mat_panel ( ) {
 
 
 	//vector for comoboboxes for properties
-	Vector prop_1_vect = new Vector();
+	List prop_1_vect = new Vector();
 	// ideally should have 2 comboboxes:  
 	//1 with: DAY and HOUR  and other: 1-12
-	prop_1_vect.addElement( "1DAY" );
-	prop_1_vect.addElement( "2DAY" );
-	prop_1_vect.addElement( "3DAY" );
-	prop_1_vect.addElement( "4DAY" );
-	prop_1_vect.addElement( "5DAY" );
-	prop_1_vect.addElement( "6DAY" );
-	prop_1_vect.addElement( "7DAY" );
-	prop_1_vect.addElement( "8DAY" );
-	prop_1_vect.addElement( "9DAY" );
-	prop_1_vect.addElement( "10DAY" );
-	prop_1_vect.addElement( "11DAY" );
-	prop_1_vect.addElement( "12DAY" );
-	prop_1_vect.addElement( "1HOUR" );
-	prop_1_vect.addElement( "2HOUR" );
-	prop_1_vect.addElement( "3HOUR" );
-	prop_1_vect.addElement( "4HOUR" );
-	prop_1_vect.addElement( "5HOUR" );
-	prop_1_vect.addElement( "6HOUR" );
-	prop_1_vect.addElement( "7HOUR" );
-	prop_1_vect.addElement( "8HOUR" );
-	prop_1_vect.addElement( "9HOUR" );
-	prop_1_vect.addElement( "10HOUR" );
-	prop_1_vect.addElement( "11HOUR" );
-	prop_1_vect.addElement( "12HOUR" );
+	prop_1_vect.add( "1DAY" );
+	prop_1_vect.add( "2DAY" );
+	prop_1_vect.add( "3DAY" );
+	prop_1_vect.add( "4DAY" );
+	prop_1_vect.add( "5DAY" );
+	prop_1_vect.add( "6DAY" );
+	prop_1_vect.add( "7DAY" );
+	prop_1_vect.add( "8DAY" );
+	prop_1_vect.add( "9DAY" );
+	prop_1_vect.add( "10DAY" );
+	prop_1_vect.add( "11DAY" );
+	prop_1_vect.add( "12DAY" );
+	prop_1_vect.add( "1HOUR" );
+	prop_1_vect.add( "2HOUR" );
+	prop_1_vect.add( "3HOUR" );
+	prop_1_vect.add( "4HOUR" );
+	prop_1_vect.add( "5HOUR" );
+	prop_1_vect.add( "6HOUR" );
+	prop_1_vect.add( "7HOUR" );
+	prop_1_vect.add( "8HOUR" );
+	prop_1_vect.add( "9HOUR" );
+	prop_1_vect.add( "10HOUR" );
+	prop_1_vect.add( "11HOUR" );
+	prop_1_vect.add( "12HOUR" );
 
 	/*
 	Vector prop_2_vect = new Vector();
-	prop_2_vect.addElement( ".5 .4 .4 .3 .2 .1 0 .1 .2 .3 .4 .5 .7 .8 .9 1 1 .9 .9 .8 .8 .7 .6 .6");
+	prop_2_vect.add( ".5 .4 .4 .3 .2 .1 0 .1 .2 .3 .4 .5 .7 .8 .9 1 1 .9 .9 .8 .8 .7 .6 .6");
 	*/
-	Vector prop_3_vect = new Vector();
-	prop_3_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_3_vect.addElement("TRUE");
+	List prop_3_vect = new Vector();
+	prop_3_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_3_vect.add("TRUE");
 
 	//jcomboboxes for properties
  	__props_1_mat_JComboBox =
@@ -3047,21 +3045,21 @@ protected JPanel assemble_inputTS_stagedischargerating_panel ( ) {
 	"reduction is (automatically) performed.</html>");
 
 	//Vectors for properties
-	Vector prop_1_vect = new Vector();
-	prop_1_vect.addElement( "TO_DISCHARGE" );
-	prop_1_vect.addElement( "TO_STAGE" );
+	List prop_1_vect = new Vector();
+	prop_1_vect.add( "TO_DISCHARGE" );
+	prop_1_vect.add( "TO_STAGE" );
 
-	Vector prop_2_vect = new Vector();
-	prop_2_vect.addElement( DEFAULT_STRING + " - 2DAY" );
+	List prop_2_vect = new Vector();
+	prop_2_vect.add( DEFAULT_STRING + " - 2DAY" );
 	for ( int i=1;i<32; i++ ) {
 		if ( i != 2 ) {
-			prop_2_vect.addElement(i + "DAY" );
+			prop_2_vect.add(i + "DAY" );
 		}
 	}
 
-	Vector prop_3_vect = new Vector();
-	prop_3_vect.addElement( DEFAULT_STRING + " - FALSE" );
-	prop_3_vect.addElement( "TRUE" );
+	List prop_3_vect = new Vector();
+	prop_3_vect.add( DEFAULT_STRING + " - FALSE" );
+	prop_3_vect.add( "TRUE" );
 
 	//JComboBoxes for properties
  	__props_1_stagedischargerating_JComboBox =
@@ -3239,41 +3237,41 @@ protected JPanel assemble_top_panel ( ) {
 	JLabel order_JLabel = new JLabel( "Processing Order:");
 	order_JLabel.setToolTipText("Select processing order" );
 	//Order JComboBox
-	Vector order_vect = new Vector();
-	order_vect.addElement("1");
-	order_vect.addElement("2");
-	order_vect.addElement("3");
-	order_vect.addElement("4");
-	order_vect.addElement("5");
-	order_vect.addElement("5");
-	order_vect.addElement("6");
-	order_vect.addElement("7");
-	order_vect.addElement("8");
-	order_vect.addElement("9");
-	order_vect.addElement("10");
-	order_vect.addElement("11");
-	order_vect.addElement("12");
-	order_vect.addElement("13");
-	order_vect.addElement("14");
-	order_vect.addElement("15");
-	order_vect.addElement("16");
-	order_vect.addElement("17");
-	order_vect.addElement("18");
-	order_vect.addElement("19");
-	order_vect.addElement("20");
-	order_vect.addElement("101");
-	order_vect.addElement("103");
-	order_vect.addElement("105");
-	order_vect.addElement("201");
+	List order_vect = new Vector();
+	order_vect.add("1");
+	order_vect.add("2");
+	order_vect.add("3");
+	order_vect.add("4");
+	order_vect.add("5");
+	order_vect.add("5");
+	order_vect.add("6");
+	order_vect.add("7");
+	order_vect.add("8");
+	order_vect.add("9");
+	order_vect.add("10");
+	order_vect.add("11");
+	order_vect.add("12");
+	order_vect.add("13");
+	order_vect.add("14");
+	order_vect.add("15");
+	order_vect.add("16");
+	order_vect.add("17");
+	order_vect.add("18");
+	order_vect.add("19");
+	order_vect.add("20");
+	order_vect.add("101");
+	order_vect.add("103");
+	order_vect.add("105");
+	order_vect.add("201");
  	__order_JComboBox = new SimpleJComboBox( order_vect );
 
 	//active Label
 	JLabel active_JLabel = new JLabel( "Active:" );
 	active_JLabel.setToolTipText("Select Y to perform processing" );
 	//active JComboBox
-	Vector active_vect = new Vector();
-	active_vect.addElement( "Y - Perform Processing" );
-	active_vect.addElement( "N - Do Not Perform Processing" );
+	List active_vect = new Vector();
+	active_vect.add( "Y - Perform Processing" );
+	active_vect.add( "N - Do Not Perform Processing" );
  	__active_JComboBox = new SimpleJComboBox( active_vect );
 
 	try {
@@ -3421,7 +3419,7 @@ protected void checkRequiredInput() throws Exception {
 	else if( __weights_JWorksheet != null ) {
 		
 		// map and mat have weights so are in tables.
-		Vector data_vect = __weights_JWorksheet.getAllData();
+		List data_vect = __weights_JWorksheet.getAllData();
 		if ( data_vect != null ) {
 			arr_gui_inputTS = data_vect.toArray();
 		}
@@ -3549,10 +3547,10 @@ Returns a vector containing the Reduction processes possible for
 the time series (type) selected in the JTree.
 @return Vector of processes
 */
-protected Vector getProcessChoices() {
+protected List getProcessChoices() {
 	String routine = __class + ".getProcessChoices";
 
-	Vector proc_vect = new Vector();
+	List proc_vect = new Vector();
 
 	//get Time series type
 	String sel_ts_type = null;
@@ -3583,7 +3581,7 @@ protected Vector getProcessChoices() {
 	String mrtype= null;
 	for ( int i=0; i<size; i++ ) {
 		mrt = (RiversideDB_MeasReductionType) 
- 		__RTi_MeasReductionType_vect.elementAt(i);
+ 		__RTi_MeasReductionType_vect.get(i);
 		if ( mrt == null ) {
 			continue;
 		}
@@ -3595,13 +3593,13 @@ protected Vector getProcessChoices() {
 
 		if (( mrtype.equalsIgnoreCase( "FILLREPEAT" ) ) ||
 		( mrtype.equalsIgnoreCase("CHANGEINT" )) ) {
-			proc_vect.addElement( 
+			proc_vect.add( 
 			mrtype + " - " +desc );
 		}
 		else if ( mrtype.equalsIgnoreCase("ChangeDataType" )) {
 			//add PTPX only
 			if( sel_ts_type.equals( "PTPX") ) {
-				proc_vect.addElement( 
+				proc_vect.add( 
 				mrtype + " - " +desc );
 			}
 		}
@@ -3611,7 +3609,7 @@ protected Vector getProcessChoices() {
 			( sel_ts_type.equalsIgnoreCase( "SQIN") ) ||
 			( sel_ts_type.equalsIgnoreCase( "QIN") ) ||
 			( sel_ts_type.equalsIgnoreCase( "SSTG") ) ) {
-				proc_vect.addElement( 
+				proc_vect.add( 
 				mrtype + " - " +desc );
 			}
 		}
@@ -3619,7 +3617,7 @@ protected Vector getProcessChoices() {
 		else if ( mrtype.equalsIgnoreCase( "MAP" ) ) {
 			//MAP- types PTPX and MAP
 			if(  sel_ts_type.equalsIgnoreCase( "PTPX") ) {
-				proc_vect.addElement( 
+				proc_vect.add( 
 				mrtype + " - " +desc );
 			}
 		}
@@ -3627,7 +3625,7 @@ protected Vector getProcessChoices() {
 			//MAT - types TAIN TAVG MAT
 			if( ( sel_ts_type.equalsIgnoreCase( "TAIN") ) ||
 			( sel_ts_type.equalsIgnoreCase( "TAVG") ) ){
-				proc_vect.addElement( 
+				proc_vect.add( 
 				mrtype + " - " +desc );
 			}
 		}
@@ -3635,7 +3633,7 @@ protected Vector getProcessChoices() {
 			// MAPX - types MAPX and QPF
 			if( ( sel_ts_type.equalsIgnoreCase( "MAPX") ) ||
 			( sel_ts_type.equalsIgnoreCase( "QPF") ) ){
-				proc_vect.addElement( 
+				proc_vect.add( 
 				mrtype + " - " +desc );
 			}
 		}
@@ -3644,7 +3642,7 @@ protected Vector getProcessChoices() {
 		// SHAPEFILE - types MAPX and QPF
 			if( ( sel_ts_type.equalsIgnoreCase( "MAPX") ) ||
 			( sel_ts_type.equalsIgnoreCase( "QPF") ) ){
-				proc_vect.addElement( 
+				proc_vect.add( 
 				mrtype + " - " +desc );
 			}
 		}
@@ -3657,7 +3655,7 @@ protected Vector getProcessChoices() {
 			//( sel_ts_type.equalsIgnoreCase( "PELE") ) ||
 			//( sel_ts_type.equalsIgnoreCase( "RQME") ) ) {}
 			if ( sel_ts_type.equalsIgnoreCase( "FLOODMONITOR") ) {
-				proc_vect.addElement( 
+				proc_vect.add( 
 				mrtype + " - " +desc );
 			}
 		}
@@ -3683,7 +3681,7 @@ protected String getProcessorDescription( String proc_type ) {
 	String type= null;
 	for ( int i=0; i<size; i++ ) {
 		mrt = (RiversideDB_MeasReductionType) 
- 		__RTi_MeasReductionType_vect.elementAt(i);
+ 		__RTi_MeasReductionType_vect.get(i);
 		if ( mrt == null ) {
 			continue;
 		}
@@ -3712,7 +3710,7 @@ format of: item at (0)="Property Name" and at (1)="Property Value".
 RiversideDB_MeasReduction object passed in. Format of Vector:
 item at (0)="Property Name" and at (1)="Property Value".
 */
-protected Vector getVectorOfProperties( RiversideDB_MeasReduction mr ) {
+protected List getVectorOfProperties( RiversideDB_MeasReduction mr ) {
 	String routine = __class + ".getVectorOfProperties";
 
 	//get the properties string for the MeasReduction object
@@ -3730,8 +3728,8 @@ protected Vector getVectorOfProperties( RiversideDB_MeasReduction mr ) {
 	//make Vector of Vectors to hold the properties for 
 	//the MeasReduction object -each item in the Vector is another
 	//vector with PropertyName as element 0 and PropertyValue as element 1
-	Vector all_props_vect = new Vector();
-	Vector tmp_props_vect = null;
+	List all_props_vect = new Vector();
+	List tmp_props_vect = null;
 	if ( tmp_props_str != null ) {
 		//break up string based on ";"s
 		if ( tmp_props_str.indexOf( ";" ) > 0 ) {
@@ -3742,13 +3740,13 @@ protected Vector getVectorOfProperties( RiversideDB_MeasReduction mr ) {
 		else {
 			// Have just 1 property-- add it to vector as is.
 			tmp_props_vect = new Vector();
-			tmp_props_vect.addElement( tmp_props_str );
+			tmp_props_vect.add( tmp_props_str );
 		}
 	}
 	else {
 		// There are no properties set, so add an empty vector
 	    tmp_props_vect = new Vector();
-		tmp_props_vect.addElement( new Vector() );
+		tmp_props_vect.add( new Vector() );
 	}
 
 	// Have a vector containing Strings - each string in format : "Propertyname=PropertyValue"
@@ -3762,7 +3760,7 @@ protected Vector getVectorOfProperties( RiversideDB_MeasReduction mr ) {
 	String str_name= null;
 	String str_val= null;
 	for ( int i=0; i<tmp_num; i++ )  {
-		str_with_eq = ( String) tmp_props_vect.elementAt(i);
+		str_with_eq = ( String) tmp_props_vect.get(i);
 		//break this string up based on the equal sign
 		int eq_ind = -999;
 		eq_ind = str_with_eq.indexOf("=");
@@ -3771,11 +3769,11 @@ protected Vector getVectorOfProperties( RiversideDB_MeasReduction mr ) {
 			str_val = (str_with_eq.substring(eq_ind+1)).trim();
 		}
 		//now make this a new vector
-		Vector brokenup_vect = new Vector();
-		brokenup_vect.addElement( str_name );
-		brokenup_vect.addElement( str_val );
+		List brokenup_vect = new Vector();
+		brokenup_vect.add( str_name );
+		brokenup_vect.add( str_val );
 		//now add this vector to the all_props_vet
-		all_props_vect.addElement( brokenup_vect );
+		all_props_vect.add( brokenup_vect );
 	}
 	return all_props_vect;
 } //end getVectorOfProperties
@@ -4173,10 +4171,10 @@ protected void update_database( ) throws Exception {
 	StringBuffer b = new StringBuffer();
 	for ( int i=0; i< __dirty_vect.size(); i++ ) {
 		if ( i == ( __dirty_vect.size()-1) ) {
-			b.append( (String) __dirty_vect.elementAt(i) );
+			b.append( (String) __dirty_vect.get(i) );
 		}
 		else{
-			b.append( (String) __dirty_vect.elementAt(i) + "\n" );
+			b.append( (String) __dirty_vect.get(i) + "\n" );
 		}
 	}
 
@@ -4282,7 +4280,7 @@ protected void update_database( ) throws Exception {
 	RiversideDB_MeasReducRelation mrr = null;
 	for ( int i=0; i<size; i++ ) {
 		mrr = (RiversideDB_MeasReducRelation )
- 		__gui_RTi_MeasReducRelation_vect.elementAt(i);
+ 		__gui_RTi_MeasReducRelation_vect.get(i);
 		if ( mrr == null ) {
 			continue;
 		}
@@ -4393,8 +4391,8 @@ protected void update_RiversideDB_objects() throws Exception {
 	}
 
 	for ( int i=0; i<s; i++ ) {
- 		__gui_RTi_MeasReducRelation_vect.addElement(
- 		__db_RTi_MeasReducRelation_vect.elementAt(i) );
+ 		__gui_RTi_MeasReducRelation_vect.add(
+ 		__db_RTi_MeasReducRelation_vect.get(i) );
 	}
 
 	//get all fields from the TimeSeries GUI
@@ -4500,7 +4498,7 @@ protected void update_inputTS_panel( ) {
 	//( __db_MeasType_num)
 
 	//vector holds the list of MeasType objects in the Selected list
-	Vector inputTS_MeasType_vect = new Vector();
+	List inputTS_MeasType_vect = new Vector();
 	int s = 0;
 	if ( __db_RTi_MeasReducRelation_vect != null ) {
 		s = __db_RTi_MeasReducRelation_vect.size();
@@ -4517,14 +4515,14 @@ protected void update_inputTS_panel( ) {
 	long in_mt_num = -999;
 	RiversideDB_MeasType rti_mt = null;
 	double weight = -999;
-	Vector worksheet_data_vect = new Vector();
+	List worksheet_data_vect = new Vector();
 
 	//go through vector of MeasReducRelation objects to pull out the
 	//candidates for the inputTS_MeasType_vect Vector
 	
 	for ( int i=0; i<s; i++ ) {
 		mrr = (RiversideDB_MeasReducRelation)
- 		__db_RTi_MeasReducRelation_vect.elementAt(i);
+ 		__db_RTi_MeasReducRelation_vect.get(i);
 
 		if ( mrr == null ) {
 			continue;
@@ -4602,11 +4600,11 @@ protected void update_inputTS_panel( ) {
 					String.valueOf(wt) };
 			tsid = null;
 
-			worksheet_data_vect.addElement( arr );
+			worksheet_data_vect.add( arr );
 		}
 
 		//add MeasType object to vector
-		inputTS_MeasType_vect.addElement( rti_mt );
+		inputTS_MeasType_vect.add( rti_mt );
 		mrr = null;
 		rti_mt = null;
 	}
@@ -4618,7 +4616,7 @@ protected void update_inputTS_panel( ) {
 	}
 
 	//get the Properties for the selected MeasReduction Object
-	Vector all_props_vect = null;
+	List all_props_vect = null;
 	all_props_vect = getVectorOfProperties( __db_RTi_MeasReduction );
 
 	int props_size =0;
@@ -4635,11 +4633,11 @@ protected void update_inputTS_panel( ) {
 	}
 
 	//make Vector of possible input TS, based on the process type
-	Vector unsorted_v = new Vector();
-	Vector sorted_v = null;
+	List unsorted_v = new Vector();
+	List sorted_v = null;
 	if ( __processor_type.equalsIgnoreCase ( __proc_changedatatype_str ) ) {
-		Vector all_RTi_MeasType_vect = new Vector();
-		Vector v = null;
+		List all_RTi_MeasType_vect = new Vector();
+		List v = null;
 		//input TS: PTPA and PTPX with no IRREG
 		try {
 			v = __dmi.readMeasTypeListForData_type("PTPA");
@@ -4648,7 +4646,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add vectors
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("PTPX");
@@ -4657,7 +4655,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add vectors
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		int allTS_size = 0;
@@ -4669,7 +4667,7 @@ protected void update_inputTS_panel( ) {
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.
-			elementAt(i);
+			get(i);
 			try {
 				tsid = mt.toTSIdent();
 			}
@@ -4684,7 +4682,7 @@ protected void update_inputTS_panel( ) {
 			tsid_str = tsid.toString();
 			tsid = null;
 			if ( ! tsid_str.equalsIgnoreCase( __preselected_TSID_string ) ) {
-				unsorted_v.addElement( tsid_str );
+				unsorted_v.add( tsid_str );
 			}
 			mt = null;
 		}
@@ -4734,8 +4732,8 @@ protected void update_inputTS_panel( ) {
 		String prop_value_str = null;
 		v = null;
 		for ( int i=0; i<props_size; i++ ) {
-			v = (Vector) all_props_vect.elementAt(i);	
-			prop_str = (String) v.elementAt(0);
+			v = (List) all_props_vect.get(i);	
+			prop_str = (String) v.get(0);
 			if ( prop_str == null ) {
 				continue;
 			}
@@ -4743,7 +4741,7 @@ protected void update_inputTS_panel( ) {
  				__props_1_changedatatype_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_1_changedatatype_JComboBox.
 				setSelectedItem( prop_value_str );
 			}
@@ -4751,7 +4749,7 @@ protected void update_inputTS_panel( ) {
  			__props_2_changedatatype_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_2_changedatatype_JComboBox.
 				setSelectedItem( prop_value_str );
 
@@ -4760,14 +4758,14 @@ protected void update_inputTS_panel( ) {
  			__props_3_changedatatype_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_3_changedatatype_JComboBox.
 				setSelectedItem( prop_value_str );
 
 			}
 			else if ( prop_str.equalsIgnoreCase( 
  			__props_4_changedatatype_JLabel_string ) ) {
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_4_changedatatype_JComboBox.
 				setSelectedItem( prop_value_str );
 			}
@@ -4775,7 +4773,7 @@ protected void update_inputTS_panel( ) {
  			__props_5_changedatatype_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_5_changedatatype_JComboBox.
 				setSelectedItem( prop_value_str );
 
@@ -4805,7 +4803,7 @@ protected void update_inputTS_panel( ) {
 		}
 
 		//get LIst of ALL time series 
-		Vector all_RTi_MeasType_vect = null;
+		List all_RTi_MeasType_vect = null;
 		try {
 			all_RTi_MeasType_vect =
  			__dmi.readMeasTypeList();
@@ -4821,7 +4819,7 @@ protected void update_inputTS_panel( ) {
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType)
-			all_RTi_MeasType_vect.elementAt(i);
+			all_RTi_MeasType_vect.get(i);
 			if ( mt== null ) {
 				continue;
 			}
@@ -4840,7 +4838,7 @@ protected void update_inputTS_panel( ) {
 			( tsid.getLocation().equalsIgnoreCase( sel_loc ) ) &&
 			( ! (tsid.toString()).equalsIgnoreCase( 
  			__preselected_TSID_string ) ) ) {
-				unsorted_v.addElement( tsid.toString() );
+				unsorted_v.add( tsid.toString() );
 			}
 			mt = null;
 		}
@@ -4879,10 +4877,10 @@ protected void update_inputTS_panel( ) {
 		//any of the properties associated with changedatatype process
 		String prop_str = null;
 		String prop_value_str = null;
-		Vector v = null;
+		List v = null;
 		for ( int i=0; i<props_size; i++ ) {
-			v = (Vector) all_props_vect.elementAt(i);	
-			prop_str = (String) v.elementAt(0);
+			v = (List) all_props_vect.get(i);	
+			prop_str = (String) v.get(0);
 			if ( prop_str == null ) {
 				continue;
 			}
@@ -4890,7 +4888,7 @@ protected void update_inputTS_panel( ) {
  			__props_1_changeint_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
 
  				__props_1_changeint_JComboBox.
 				setSelectedItem( prop_value_str );
@@ -4898,7 +4896,7 @@ protected void update_inputTS_panel( ) {
 			}
 			else if ( prop_str.equalsIgnoreCase( 
  			__props_2_changeint_JLabel_string ) ) {
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_2_changeint_JComboBox.
 				setSelectedItem( prop_value_str );
 			}
@@ -4911,7 +4909,7 @@ protected void update_inputTS_panel( ) {
 */
 			else if ( prop_str.equalsIgnoreCase( 
  			__props_4_changeint_JLabel_string ) ) {
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_4_changeint_JComboBox.
 				setSelectedItem( prop_value_str );
 			}
@@ -4922,8 +4920,8 @@ protected void update_inputTS_panel( ) {
 		//input TS: SSTG,SQIN,SQME,RQME,PELE with no irreg
 
 		//get LIst of ALL time series with the correct data types
-		Vector all_RTi_MeasType_vect = new Vector();
-		Vector v = null;
+		List all_RTi_MeasType_vect = new Vector();
+		List v = null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("SSTG");
 		}
@@ -4931,7 +4929,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		addVectors( v, all_RTi_MeasType_vect );
+		addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		try {
@@ -4941,7 +4939,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		addVectors( v, all_RTi_MeasType_vect );
+		addLists( v, all_RTi_MeasType_vect );
 
 		try {
 			v = __dmi.readMeasTypeListForData_type("SQME");
@@ -4950,7 +4948,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		addVectors( v, all_RTi_MeasType_vect );
+		addLists( v, all_RTi_MeasType_vect );
 
 		v= null;
 		try {
@@ -4960,7 +4958,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		addVectors( v, all_RTi_MeasType_vect );
+		addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		try {
@@ -4970,7 +4968,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		addVectors( v, all_RTi_MeasType_vect );
+		addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		try {
@@ -4981,7 +4979,7 @@ protected void update_inputTS_panel( ) {
 		}
 		//add to all_RTi_MeasType_vect
 		all_RTi_MeasType_vect = 
-		addVectors( v, all_RTi_MeasType_vect );
+		addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		int allTS_size = 0;
@@ -4993,7 +4991,7 @@ protected void update_inputTS_panel( ) {
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.
-			elementAt(i);
+			get(i);
 
 			try {
 				tsid = mt.toTSIdent();
@@ -5010,7 +5008,7 @@ protected void update_inputTS_panel( ) {
 			if ( ! tsid.getInterval().equalsIgnoreCase("IRREG")) {
 				if ( ! tsid_str.equalsIgnoreCase( 
  				__preselected_TSID_string ) )  {
-					unsorted_v.addElement( tsid_str );
+					unsorted_v.add( tsid_str );
 				}
 			}
 			tsid = null;
@@ -5028,8 +5026,8 @@ protected void update_inputTS_panel( ) {
 		String prop_value_str = null;
 		v = null;
 		for ( int i=0; i<props_size; i++ ) {
-			v = (Vector) all_props_vect.elementAt(i);	
-			prop_str = (String) v.elementAt(0);
+			v = (List) all_props_vect.get(i);	
+			prop_str = (String) v.get(0);
 			if ( prop_str == null ) {
 				continue;
 			}
@@ -5048,7 +5046,7 @@ protected void update_inputTS_panel( ) {
  			__props_2_fillfloodmonitor_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
 				try{
 					JGUIUtil.selectTokenMatches(
  					__props_2_fillfloodmonitor_JComboBox,
@@ -5063,7 +5061,7 @@ protected void update_inputTS_panel( ) {
 	}
 	else if ( __processor_type.equalsIgnoreCase ( __proc_fillrepeat_str ) ) {
 		//list all time series.
-		Vector all_RTi_MeasType_vect = null;
+		List all_RTi_MeasType_vect = null;
 		try {
 			all_RTi_MeasType_vect =
  			__dmi.readMeasTypeList();
@@ -5080,7 +5078,7 @@ protected void update_inputTS_panel( ) {
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType)
-			 all_RTi_MeasType_vect.elementAt(i);
+			 all_RTi_MeasType_vect.get(i);
 			if ( mt== null ) {
 				continue;
 			}
@@ -5098,7 +5096,7 @@ protected void update_inputTS_panel( ) {
 			tsid_str = tsid.toString();
 			tsid = null;
 			if ( ! tsid_str.equalsIgnoreCase( __preselected_TSID_string ) ) {
-				unsorted_v.addElement( tsid_str );
+				unsorted_v.add( tsid_str );
 			}
 			mt = null;
 		}
@@ -5106,15 +5104,15 @@ protected void update_inputTS_panel( ) {
 	}
 	else if ( __processor_type.equalsIgnoreCase ( __proc_map_str ) ) {
 		//input TS:PTPX
-		Vector all_RTi_MeasType_vect = new Vector();
-		Vector v = null;
+		List all_RTi_MeasType_vect = new Vector();
+		List v = null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("PTPX");
 		}
 		catch ( Exception e ) {
 			Message.printWarning( 2, routine, e);
 		}
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		int allTS_size = 0;
@@ -5128,7 +5126,7 @@ protected void update_inputTS_panel( ) {
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.
-			elementAt(i);
+			get(i);
 			try {
 				tsid = mt.toTSIdent();
 			}
@@ -5145,7 +5143,7 @@ protected void update_inputTS_panel( ) {
 			if( (!tsid.getInterval().equalsIgnoreCase("IRREG") ) &&
 			( ! tsid_str.equalsIgnoreCase( 
  			__preselected_TSID_string ) ) ) {
-				unsorted_v.addElement( tsid_str );
+				unsorted_v.add( tsid_str );
 			}
 		}
 
@@ -5164,8 +5162,8 @@ protected void update_inputTS_panel( ) {
 		String prop_value_str = null;
 		v = null;
 		for ( int i=0; i<props_size; i++ ) {
-			v = (Vector) all_props_vect.elementAt(i);	
-			prop_str = (String) v.elementAt(0);
+			v = (List) all_props_vect.get(i);	
+			prop_str = (String) v.get(0);
 			if ( prop_str == null ) {
 				continue;
 			}
@@ -5173,7 +5171,7 @@ protected void update_inputTS_panel( ) {
  			__props_1_map_JLabel_string ) ) {
 
 				//then get its value to set in the combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
 
  				__props_1_map_JComboBox.
 				setSelectedItem( prop_value_str );
@@ -5182,7 +5180,7 @@ protected void update_inputTS_panel( ) {
 			else if ( prop_str.equalsIgnoreCase( 
  			__props_2_map_JLabel_string ) ) {
 				//then get its value to set in the combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
 
  				__props_2_map_JComboBox.
 				setSelectedItem( prop_value_str );
@@ -5190,7 +5188,7 @@ protected void update_inputTS_panel( ) {
 			else if ( prop_str.equalsIgnoreCase( 
  			__props_3_map_JLabel_string ) ) {
 				//then get its value to set in the combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
 				try{
 					JGUIUtil.selectTokenMatches(
  					__props_3_map_JComboBox,
@@ -5207,16 +5205,16 @@ protected void update_inputTS_panel( ) {
 	else if ( __processor_type.equalsIgnoreCase ( __proc_mapx_str ) ) {
 
 		//input TS: XMRG and MAPX
-		Vector all_RTi_MeasType_vect = new Vector();
+		List all_RTi_MeasType_vect = new Vector();
 		
-		Vector v = null;
+		List v = null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("QPF");
 		}
 		catch ( Exception e ) {
 			Message.printWarning( 2, routine, e);
 		}
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		
 		v = null;
 		try {
@@ -5225,7 +5223,7 @@ protected void update_inputTS_panel( ) {
 		catch ( Exception e ) {
 			Message.printWarning( 2, routine, e);
 		}
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		
 		v = null;
 		int allTS_size = 0;
@@ -5254,7 +5252,7 @@ protected void update_inputTS_panel( ) {
 		RiversideDB_MeasType mt = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
-			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.elementAt(i);
+			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.get(i);
 			try {
 				tsid = mt.toTSIdent();
 			}
@@ -5276,7 +5274,7 @@ protected void update_inputTS_panel( ) {
 			if ( !tsid_str.equalsIgnoreCase(__preselected_TSID_string)
  			    && tsid.getInterval().equalsIgnoreCase(inputInterval)
  			    && tableNum == tn ) {
-				unsorted_v.addElement( tsid_str );
+				unsorted_v.add( tsid_str );
 			}
 			
 			tsid = null;
@@ -5294,8 +5292,8 @@ protected void update_inputTS_panel( ) {
 		String prop_value_str = null;
 		v = null;
 		for ( int i=0; i<props_size; i++ ) {
-			v = (Vector) all_props_vect.elementAt(i);	
-			prop_str = (String) v.elementAt(0);
+			v = (List) all_props_vect.get(i);	
+			prop_str = (String) v.get(0);
 			if ( prop_str == null ) {
 				continue;
 			}
@@ -5303,7 +5301,7 @@ protected void update_inputTS_panel( ) {
  			__props_1_mapx_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_1_mapx_JComboBox.
 				setSelectedItem( prop_value_str );
 			}
@@ -5336,8 +5334,8 @@ protected void update_inputTS_panel( ) {
 
 		//input TS:TAIN, TAVG, MAT
 		//get LIst of ALL time series with the correct data types
-		Vector all_RTi_MeasType_vect = new Vector();
-		Vector v = null;
+		List all_RTi_MeasType_vect = new Vector();
+		List v = null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("TAIN");
 		}
@@ -5345,7 +5343,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("TAVG");
@@ -5353,7 +5351,7 @@ protected void update_inputTS_panel( ) {
 		catch ( Exception e ) {
 			Message.printWarning( 2, routine, e);
 		}
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		//get size
@@ -5369,7 +5367,7 @@ protected void update_inputTS_panel( ) {
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.
-			elementAt(i);
+			get(i);
 			try {
 				tsid = mt.toTSIdent();
 			}
@@ -5386,7 +5384,7 @@ protected void update_inputTS_panel( ) {
 			if( (!tsid.getInterval().equalsIgnoreCase("IRREG") ) &&
 			( ! tsid_str.equalsIgnoreCase( 
  			__preselected_TSID_string ) ) ) {
-				unsorted_v.addElement( tsid_str );
+				unsorted_v.add( tsid_str );
 			}
 		}
 
@@ -5403,8 +5401,8 @@ protected void update_inputTS_panel( ) {
 		String prop_value_str = null;
 		v = null;
 		for ( int i=0; i<props_size; i++ ) {
-			v = (Vector) all_props_vect.elementAt(i);	
-			prop_str = (String) v.elementAt(0);
+			v = (List) all_props_vect.get(i);	
+			prop_str = (String) v.get(0);
 			if ( prop_str == null ) {
 				continue;
 			}
@@ -5412,7 +5410,7 @@ protected void update_inputTS_panel( ) {
  			__props_1_mat_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_1_mat_JComboBox.
 				setSelectedItem( prop_value_str );
 			}
@@ -5420,14 +5418,14 @@ protected void update_inputTS_panel( ) {
  			__props_2_mat_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_2_mat_JTextField.
 				setText( prop_value_str );
 				//setSelectedItem( prop_value_str );
 			}
 			if ( prop_str.equalsIgnoreCase( 
  			__props_3_mat_JLabel_string ) ) {
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
 				try{
 					JGUIUtil.selectTokenMatches(
  					__props_3_mat_JComboBox,
@@ -5444,16 +5442,16 @@ protected void update_inputTS_panel( ) {
 	else if ( __processor_type.equalsIgnoreCase ( __proc_shapefile_str ) ) {
 		
 		//input TS: XMRG and MAPX
-		Vector all_RTi_MeasType_vect = new Vector();
+		List all_RTi_MeasType_vect = new Vector();
 		
-		Vector v = null;
+		List v = null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("QPF");
 		}
 		catch ( Exception e ) {
 			Message.printWarning( 2, routine, e);
 		}
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		
 		v = null;
 		try {
@@ -5462,7 +5460,7 @@ protected void update_inputTS_panel( ) {
 		catch ( Exception e ) {
 			Message.printWarning( 2, routine, e);
 		}
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		
 		v = null;
 		int allTS_size = 0;
@@ -5491,7 +5489,7 @@ protected void update_inputTS_panel( ) {
 		RiversideDB_MeasType mt = null;
 		TSIdent tsid = null;
 		for (int i=0; i<allTS_size; i++ ) {
-			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.elementAt(i);
+			mt = (RiversideDB_MeasType) all_RTi_MeasType_vect.get(i);
 			try {
 				tsid = mt.toTSIdent();
 			}
@@ -5513,7 +5511,7 @@ protected void update_inputTS_panel( ) {
 			if ( !tsid_str.equalsIgnoreCase(__preselected_TSID_string)
  			    && tsid.getInterval().equalsIgnoreCase(inputInterval)
  			    && tableNum == tn ) {
-				unsorted_v.addElement( tsid_str );
+				unsorted_v.add( tsid_str );
 			}
 			
 			Message.printWarning( 2, routine, "Input interval "
@@ -5532,8 +5530,8 @@ protected void update_inputTS_panel( ) {
  	__proc_stagedischargerating_str ) ) {
 
 		//input TS: STG,SQIN, SSTG, QIN
-		Vector all_RTi_MeasType_vect = new Vector();
-		Vector v = null;
+		List all_RTi_MeasType_vect = new Vector();
+		List v = null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("STG");
 		}
@@ -5541,7 +5539,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 		try {
 			v = __dmi.readMeasTypeListForData_type("SSTG");
@@ -5550,7 +5548,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		try {
@@ -5560,7 +5558,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		try {
@@ -5570,7 +5568,7 @@ protected void update_inputTS_panel( ) {
 			Message.printWarning( 2, routine, e);
 		}
 		//add to all_RTi_MeasType_vect
-		all_RTi_MeasType_vect = addVectors( v, all_RTi_MeasType_vect );
+		all_RTi_MeasType_vect = addLists( v, all_RTi_MeasType_vect );
 		v= null;
 
 		//get size
@@ -5586,7 +5584,7 @@ protected void update_inputTS_panel( ) {
 		//now update list
 		for (int i=0; i<allTS_size; i++ ) {
 			mt = (RiversideDB_MeasType) 
-			all_RTi_MeasType_vect.elementAt(i);
+			all_RTi_MeasType_vect.get(i);
 
 			try {
 				tsid = mt.toTSIdent();
@@ -5604,7 +5602,7 @@ protected void update_inputTS_panel( ) {
 			//add to vector
 			if ( ! tsid_str.equalsIgnoreCase( 
  			__preselected_TSID_string ) ) {
-				unsorted_v.addElement( tsid_str);
+				unsorted_v.add( tsid_str);
 			}
 		}
 
@@ -5639,8 +5637,8 @@ protected void update_inputTS_panel( ) {
 		String prop_value_str = null;
 		v = null;
 		for ( int i=0; i<props_size; i++ ) {
-			v = (Vector) all_props_vect.elementAt(i);	
-			prop_str = (String) v.elementAt(0);
+			v = (List) all_props_vect.get(i);	
+			prop_str = (String) v.get(0);
 			if ( prop_str == null ) {
 				continue;
 			}
@@ -5655,7 +5653,7 @@ protected void update_inputTS_panel( ) {
 */			
 			else if ( prop_str.equalsIgnoreCase( 
  			__props_2_stagedischargerating_JLabel_string ) ) {
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_2_stagedischargerating_JComboBox.
 				setSelectedItem( prop_value_str );
 			}
@@ -5664,7 +5662,7 @@ protected void update_inputTS_panel( ) {
  			__props_3_stagedischargerating_JLabel_string ) ) {
 				//then get its value to set in the
 				//combobox/
-				prop_value_str = (String)v.elementAt(1);
+				prop_value_str = (String)v.get(1);
  				__props_3_stagedischargerating_JComboBox.
 				setSelectedItem( prop_value_str );
 				//set the selection in the JComboBox
@@ -5698,7 +5696,7 @@ protected void update_inputTS_panel( ) {
 	//update "ALL TS" JList
 	for ( int i=0; i<allTS_size; i++ ) {
  		__all_inputTS_ListModel.
-		addElement( sorted_v.elementAt(i) );
+		addElement( sorted_v.get(i) );
 	}
 
 	//if the right-hand "selected" list is a JList
@@ -5712,7 +5710,7 @@ protected void update_inputTS_panel( ) {
 		String tsid_str = null;
 		for ( int i=0; i<input_size; i++ ) {
 			mt = (	RiversideDB_MeasType )
-			inputTS_MeasType_vect.elementAt(i);
+			inputTS_MeasType_vect.get(i);
 			//now get TSIdent from this and add to list
 			try {
 				tsid = mt.toTSIdent();
@@ -5754,7 +5752,7 @@ protected void update_inputTS_panel( ) {
 
 			//update worksheet
  			__weights_JWorksheet.addRow( (String[])
-			worksheet_data_vect.elementAt(i) );
+			worksheet_data_vect.get(i) );
 
 		}
 
@@ -5830,7 +5828,7 @@ public void verify_top_fields() throws Exception {
 	if ( ! db_process.equalsIgnoreCase( __processor_type ) ) {
 		//then update object and set dirty
 		 __gui_RTi_MeasReduction.setDirty(true);
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Process from \"" + db_process + "\" to \"" +
  		__processor_type + "\"");
 
@@ -5853,7 +5851,7 @@ public void verify_top_fields() throws Exception {
 	if ( db_order != gui_order ) {
 		//then update object and set dirty
  		__gui_RTi_MeasReduction.setDirty(true);
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Processing Order from \"" + db_order + "\" to \"" +
 		gui_order + "\"");
 
@@ -5882,7 +5880,7 @@ public void verify_top_fields() throws Exception {
 	if ( ! db_act.equalsIgnoreCase( gui_act ) ){
 		//then update object and set dirty
  		__gui_RTi_MeasReduction.setDirty(true);
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Active (Y/N) from \"" + db_act + 
 		"\" to \"" + gui_act + "\"");
 		if ( __dmi.isDatabaseVersionAtLeast(RiversideDB_DMI._VERSION_030000_20041001) ) {
@@ -5940,8 +5938,8 @@ time series objects.
 public void verify_inputTS_fields() throws Exception {
 	String routine = __class + ".verify_inputTS_fields";
  
-	Vector gui_inputTS_vect = new Vector();
-	Vector gui_weight_vect = new Vector();
+	List gui_inputTS_vect = new Vector();
+	List gui_weight_vect = new Vector();
 
 	//what we need to check for changes between the
 	//object state in the database vs. the current 
@@ -5957,10 +5955,10 @@ public void verify_inputTS_fields() throws Exception {
 
 	//holds the current list of the inputTS associated with
 	//the MeasReduction object 
-	Vector db_inputTS_tsid_vect = new Vector();
-	Vector db_inputTS_weight_vect = new Vector();
+	List db_inputTS_tsid_vect = new Vector();
+	List db_inputTS_weight_vect = new Vector();
 
-	Vector db_inputTS_MeasType_vect = new Vector();
+	List db_inputTS_MeasType_vect = new Vector();
 	int s = 0;
 	if ( __db_RTi_MeasReducRelation_vect != null ) {
 		s = __db_RTi_MeasReducRelation_vect.size();
@@ -5975,7 +5973,7 @@ public void verify_inputTS_fields() throws Exception {
 	RiversideDB_MeasType mt = null;
 	for ( int i=0; i<s; i++ ) {
 		mrr = (RiversideDB_MeasReducRelation)
- 		__db_RTi_MeasReducRelation_vect.elementAt(i);
+ 		__db_RTi_MeasReducRelation_vect.get(i);
 		if ( mrr == null ) {
 			continue;
 		}
@@ -5992,14 +5990,14 @@ public void verify_inputTS_fields() throws Exception {
 			continue;
 		}
 		//add TSID from MeasType object to vector
-		db_inputTS_MeasType_vect.addElement( mt );
+		db_inputTS_MeasType_vect.add( mt );
 		//if using MAP or MAT, then WEIGHT field is used
 
 		if ( ( __processor_type.equalsIgnoreCase(
  		__proc_map_str ) )  || ( __processor_type.equalsIgnoreCase(
  		__proc_mat_str ) ) ) {
 			//add weight (in same order)
-			db_inputTS_weight_vect.addElement( String.valueOf(
+			db_inputTS_weight_vect.add( String.valueOf(
 			mrr.getWeight()) );
 		}
 		TSIdent tsid = null;
@@ -6015,7 +6013,7 @@ public void verify_inputTS_fields() throws Exception {
 			tsid_str = tsid.toString();
 		}
 		tsid = null;
-		db_inputTS_tsid_vect.addElement( tsid_str );
+		db_inputTS_tsid_vect.add( tsid_str );
 
 		mrr = null;
 		mt = null;
@@ -6069,7 +6067,7 @@ public void verify_inputTS_fields() throws Exception {
 		}
 
 		for ( int i=0; i<arr_gui_inputTS.length; i++ ) {
-			gui_inputTS_vect.addElement(
+			gui_inputTS_vect.add(
 			arr_gui_inputTS[i] );
 
 		}
@@ -6237,7 +6235,7 @@ public void verify_inputTS_fields() throws Exception {
 			"since there are no input time series." );
 		}
 		for ( int i=0; i<arr_gui_inputTS.length; i++ ) {
-			 gui_inputTS_vect.addElement(
+			 gui_inputTS_vect.add(
 			arr_gui_inputTS[i] );
 		}
 
@@ -6363,7 +6361,7 @@ public void verify_inputTS_fields() throws Exception {
 			"since there are no input time series." );
 		}
 		for ( int i=0; i<arr_gui_inputTS.length; i++ ) {
-			gui_inputTS_vect.addElement(
+			gui_inputTS_vect.add(
 			arr_gui_inputTS[i] );
 		}
 		if ( Message.isDebugOn ) {
@@ -6445,7 +6443,7 @@ public void verify_inputTS_fields() throws Exception {
 			"since there are no input time series." );
 		}
 		for ( int i=0; i<arr_gui_inputTS.length; i++ ) {
-			gui_inputTS_vect.addElement(
+			gui_inputTS_vect.add(
 			arr_gui_inputTS[i]);
 		}
 		if ( Message.isDebugOn ) {
@@ -6468,24 +6466,22 @@ public void verify_inputTS_fields() throws Exception {
 
 		//inputTS_type = __proc_map_str;
 		//arr_gui_inputTS=_sel_inputTS_ListModel.toArray();
-		Vector data_vect = __weights_JWorksheet.getAllData();
+		List data_vect = __weights_JWorksheet.getAllData();
 		gui_weight_vect.clear();
 		gui_inputTS_vect.clear();
 		for (int i=0; i<data_vect.size();i++ ) {
 			String [] arr_worksheet = (String []) 
-			data_vect.elementAt(i);
+			data_vect.get(i);
 			//put TSID in Vector
-			gui_inputTS_vect.addElement( arr_worksheet[0] );
+			gui_inputTS_vect.add( arr_worksheet[0] );
 			//put weight in Vector
-			gui_weight_vect.addElement( String.valueOf(
+			gui_weight_vect.add( String.valueOf(
 			arr_worksheet[1]) );
 		}
 		if ( gui_inputTS_vect.size() <= 0 ) {
 			Message.printWarning( 1, routine, 
-			"Unable to update database " +
-			"since there are no input time series.", this );
-			throw new Exception ("Unable to update database " +
-			"since there are no input time series." );
+			"Unable to update database since there are no input time series.", this );
+			throw new Exception ("Unable to update database since there are no input time series." );
 		}
 
 		if ( Message.isDebugOn ) {
@@ -6597,7 +6593,7 @@ public void verify_inputTS_fields() throws Exception {
 			"since there are no input time series." );
 		}
 		for ( int i=0; i<arr_gui_inputTS.length; i++ ) {
-			gui_inputTS_vect.addElement(
+			gui_inputTS_vect.add(
 			arr_gui_inputTS[i] );
 		}
 		if ( Message.isDebugOn ) {
@@ -6674,23 +6670,22 @@ public void verify_inputTS_fields() throws Exception {
 		//inputTS_type = __proc_mat_str;
 		//arr_gui_inputTS=
 		//_sel_inputTS_ListModel.toArray();
-		Vector data_vect = __weights_JWorksheet.getAllData();
+		List data_vect = __weights_JWorksheet.getAllData();
 		
 		gui_weight_vect.clear();
 		gui_inputTS_vect.clear();
 		for (int i=0; i<data_vect.size();i++ ) {
 			String [] arr_worksheet = (String []) 
-			data_vect.elementAt(i);
+			data_vect.get(i);
 			//put TSID in Vector
-			gui_inputTS_vect.addElement( arr_worksheet[0] );
+			gui_inputTS_vect.add( arr_worksheet[0] );
 			//put weight in Vector
-			gui_weight_vect.addElement( arr_worksheet[1] );
+			gui_weight_vect.add( arr_worksheet[1] );
 		}
 
 		if ( gui_inputTS_vect.size() <= 0 ) {
 			Message.printWarning( 1, routine, 
-			"Unable to update database " +
-			"since there are no input time series.", this );
+			"Unable to update database since there are no input time series.", this );
 			throw new Exception ("Unable to update database " +
 			"since there are no input time series." );
 		}
@@ -6814,7 +6809,7 @@ public void verify_inputTS_fields() throws Exception {
 			"since there are no input time series." );
 		}
 		for ( int i=0; i<arr_gui_inputTS.length; i++ ) {
-			gui_inputTS_vect.addElement(
+			gui_inputTS_vect.add(
 			arr_gui_inputTS[i] );
 		}
 		if ( Message.isDebugOn ) {
@@ -6911,8 +6906,8 @@ public void verify_inputTS_fields() throws Exception {
 	//need to go through and check each
 	//item against each other to see if the
 	//list of inputTS has changed or not.
-	Vector v_add_tsid = null;
-	Vector v_rem_tsid = null;
+	List v_add_tsid = null;
+	List v_rem_tsid = null;
 	v_add_tsid = findAdditions( gui_inputTS_vect, db_inputTS_tsid_vect);
 	v_rem_tsid = findRemovals( gui_inputTS_vect, db_inputTS_tsid_vect);
 	if ( Message.isDebugOn ) {
@@ -6920,8 +6915,8 @@ public void verify_inputTS_fields() throws Exception {
 		v_add_tsid.toString() +"; v_rem_tsid = " + v_rem_tsid.toString());
 	}
 
-	Vector v_add_wt = null;
-	Vector v_rem_wt = null;
+	List v_add_wt = null;
+	List v_rem_wt = null;
 	v_add_wt = findAdditions( gui_weight_vect, db_inputTS_weight_vect);
 
 	v_rem_wt = findRemovals( gui_weight_vect, db_inputTS_weight_vect);
@@ -6958,7 +6953,7 @@ public void verify_inputTS_fields() throws Exception {
 			//and MeasType num
 			RiversideDB_MeasType input_MeasType = null;
 			String inputTS_str = ( String) gui_inputTS_vect.
-			elementAt(k);
+			get(k);
 			try {
 				input_MeasType = 
  				__dmi.readMeasTypeForTSIdent( inputTS_str );
@@ -6975,7 +6970,7 @@ public void verify_inputTS_fields() throws Exception {
 			input_MeasType.getMeasType_num() );
 
 			double wt_dbl = -999;
-			String wt_str= (String) gui_weight_vect.elementAt(k);
+			String wt_str= (String) gui_weight_vect.get(k);
 			if (( wt_str != null ) && (StringUtil.isDouble( wt_str ) ) ) {
 				wt_dbl = StringUtil.atod( wt_str );
 			}
@@ -6987,13 +6982,13 @@ public void verify_inputTS_fields() throws Exception {
 			//MeasReducRelation is dirty so make MeasReduction dirty
  			__gui_RTi_MeasReduction.setDirty( true );
 
- 			__dirty_vect.addElement(
+ 			__dirty_vect.add(
 			"Change in Input Time Series for Reduction,\n " + 
 			"add: \"" + inputTS_str + "\" with weight: " 
 			+ rti_mrr.getWeight() );
 
 			//add to vector of MeasReducRelations
- 			__gui_RTi_MeasReducRelation_vect.addElement(
+ 			__gui_RTi_MeasReducRelation_vect.add(
 			rti_mrr);
 
 			input_MeasType = null;
@@ -7013,7 +7008,7 @@ public void verify_inputTS_fields() throws Exception {
 		//update 
  		__gui_RTi_MeasReduction.setDirty( true );
 
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from \"" + db_props_str + 
 		"\" to\n\"" + DMIUtil.MISSING_STRING + "\"");
 
@@ -7022,7 +7017,7 @@ public void verify_inputTS_fields() throws Exception {
 	}
 	else if ( ! gui_props_str.equalsIgnoreCase( db_props_str ) ) {
  		__gui_RTi_MeasReduction.setDirty( true );
- 		__dirty_vect.addElement(
+ 		__dirty_vect.add(
 		"Change Properties from \"" + db_props_str + "\" to \n\"" +
 		gui_props_str + "\"");
  		__gui_RTi_MeasReduction.setProperties( gui_props_str );
@@ -7097,15 +7092,11 @@ public void actionPerformed (ActionEvent event) {
 				//_db_MeasReducRelation_vect to __gui_ version
 				int s = 0;
 				if ( __db_RTi_MeasReducRelation_vect != null ){
-					s = __db_RTi_MeasReducRelation_vect.
-					size();
+					s = __db_RTi_MeasReducRelation_vect.size();
 				}
 
 				for ( int i=0; i<s; i++ ) {
- 					__gui_RTi_MeasReducRelation_vect.
-					addElement(
- 					__db_RTi_MeasReducRelation_vect.
-					elementAt(i) );
+ 					__gui_RTi_MeasReducRelation_vect.add(__db_RTi_MeasReducRelation_vect.get(i) );
 				}
 			}
 		}
@@ -7135,9 +7126,9 @@ public void actionPerformed (ActionEvent event) {
  			__db_RTi_MeasReducRelation_vect.clear();
 			for ( int i=0; i<s; i++ ) {
  				__db_RTi_MeasReducRelation_vect.
-				addElement(
+				add(
  				__gui_RTi_MeasReducRelation_vect.
-				elementAt(i) );
+				get(i) );
 			}
  			__gui_RTi_MeasReducRelation_vect.clear();
 		}
@@ -7164,7 +7155,7 @@ public void actionPerformed (ActionEvent event) {
 				StringBuffer b = new StringBuffer();
 				for (int i=0;i< __dirty_vect.size(); i++ ) {
 					b.append( (String) 
- 					__dirty_vect.elementAt(i) + 
+ 					__dirty_vect.get(i) + 
 					"\n" );
 				}
 				//write out a confirmation message.
