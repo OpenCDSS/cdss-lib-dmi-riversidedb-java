@@ -34,7 +34,7 @@ Base class for all RiversideDB_???_JFrame derived object. These extended
 RiversideDB_???_JFrame editor objects allow changes in the database that
 would require updates of the RiversideDB_???_JTree objects. These
 RiversideDB_???_JFrame editors communicate back to the RiversideDB_???_JTree
-objectse via RiversideDB_System_Listener. This class implements the
+objects via RiversideDB_System_Listener. This class implements the
 RiversideDB_System_Listener methods. It also keep the reference to the
 RiversideDB_WindowManager.
 */

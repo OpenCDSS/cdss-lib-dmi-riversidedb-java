@@ -17,7 +17,7 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
-import java.util.Vector;
+import java.util.List;
 
 import RTi.DMI.DMIDataObject;
 import RTi.DMI.DMIUtil;
@@ -339,21 +339,18 @@ public String getSHEF_pe() {
 }
 
 /**
-Determine the position in a Vector of RiversideDB_DataType, using the
-DataType for the search.
+Determine the position in a Vector of RiversideDB_DataType, using the DataType for the search.
 @param datatypes Vector or RiversideDB_DataType to search.
 @param DataType value to compare in objects.
 @return the vector position or -1 if not found.
 */
-public static int indexOf ( Vector datatypes, String DataType )
+public static int indexOf ( List datatypes, String DataType )
 {	int size = 0;
 	if ( datatypes != null ) {
 		size = datatypes.size();
 	}
 	for ( int i = 0; i < size; i++ ) {
-		if (	((RiversideDB_DataType)
-			datatypes.elementAt(i))._DataType.equalsIgnoreCase(
-			DataType) ) {
+		if ( ((RiversideDB_DataType)datatypes.get(i))._DataType.equalsIgnoreCase( DataType) ) {
 			return i;
 		}
 	}
