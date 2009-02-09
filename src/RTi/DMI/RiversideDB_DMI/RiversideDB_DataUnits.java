@@ -348,7 +348,7 @@ public DataUnits toDataUnits() throws Exception {
     units.setDimension(_Dimension);
     units.setLongName(_Units_description);
     units.setMultFactor(_Mult_factor);
-    units.setAddFactor(_Add_factor);
+    units.setOutputPrecision(_Output_precision);
     units.setSystem(_Units_system);
     return units;
 }
