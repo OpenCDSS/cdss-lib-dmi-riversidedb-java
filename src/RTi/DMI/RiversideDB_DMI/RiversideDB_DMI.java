@@ -839,8 +839,7 @@ connection.  If null, the default system login is used.
 @param system_password If not null, this is used as the system password to make
 the connection.  If null, the default system password is used.
 */
-public RiversideDB_DMI (String database_engine, String odbc_name,
-String system_login, String system_password)
+public RiversideDB_DMI (String database_engine, String odbc_name, String system_login, String system_password)
 throws Exception {
 	// Use the default system login and password
 	super ( database_engine, odbc_name, system_login, system_password );
@@ -873,8 +872,7 @@ public RiversideDB_DMI (String database_engine, String database_server,
 String database_name, int port, String system_login, String system_password)
 throws Exception {
 	// Use the default system login and password
-	super ( database_engine, database_server, database_name, port,
-		system_login, system_password );
+	super ( database_engine, database_server, database_name, port, system_login, system_password );
 	if ( system_login == null ) {
 		// Use the default...
 		setSystemLogin("admin");
