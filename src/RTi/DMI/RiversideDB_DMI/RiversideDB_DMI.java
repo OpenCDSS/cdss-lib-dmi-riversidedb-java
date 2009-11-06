@@ -4014,6 +4014,21 @@ public void determineDatabaseVersion() {
 		// Ignore ...
 		Message.printWarning(2, routine, e);
 	}
+    try {
+        // The above check works for full RiversideDB
+        // the minimized version (based off of the 03 series)
+        // does not have this table, but does have the IsEditable
+        // column in MeasType. -IWS
+        if (!version_found && DMIUtil.databaseTableHasColumn(this,
+			"MeasType", "IsEditable")) {
+			setDatabaseVersion(_VERSION_030000_20041001);
+			version_found = true;
+		}
+    }
+    catch (Exception e) {
+		// Ignore ...
+		Message.printWarning(2, routine, e);
+	}
 
 	if (!version_found) {
 		try {	
