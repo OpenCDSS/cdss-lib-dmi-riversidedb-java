@@ -414,8 +414,7 @@ then add the field to the Vector-filling code in this method</li>
 which this field was added.  Add the data member for the field, 
 get/set statements, and then add the field (with brief information on the
 version in which it was added) to the toString()</li>
-<li>add the field, and the appropriate version-checking code, to the 
-writeXXXX() method</li>
+<li>add the field, and the appropriate version-checking code, to the writeXXXX() method</li>
 <li>update determineDatabaseVersion()</li>
 </ul>
 <p>
@@ -437,8 +436,7 @@ At that point, calls can be made to theDMI methods:<ul>
 <li>canUpdate</li>
 <li>canWrite</li>
 </ul>
-to see if the user has the permissions to perform an action on a table or
-record.
+to see if the user has the permissions to perform an action on a table or record.
 <p>
 If the user group needs to be changed, a call can be made to 
 <tt>changeCurrentGroup()</tt>
@@ -479,7 +477,7 @@ protected final static long _VERSION_020800_20030422 = 2080020030422L;
 RiversideDB version for RiverTrak 02.06.00 as of 2002-06-25, including the
 following design elements:
 <ol>
-<li>	REVISIT - Need to document important items here</li>
+<li>	TODO - Need to document important items here</li>
 </ol>
 */
 protected final static long _VERSION_020601_20020625 = 2060120020625L;
@@ -601,6 +599,8 @@ protected final int _W_EXPORTTYPE = 850;
 
 // Geoloc
 protected final int _S_GEOLOC = 900;
+protected final int _S_GEOLOC_COUNTY_DISTINCT = 901;
+protected final int _S_GEOLOC_STATE_DISTINCT = 902;
 protected final int _W_GEOLOC = 950;
 
 // ImportConf
@@ -681,8 +681,15 @@ protected final int _D_MEASTRANSPROTOCOL = 2475;
 
 // MeasType
 protected final int _S_MEASTYPE = 2500;
+protected final int _S_MEASTYPE_DATASOURCEABBREV_DISTINCT = 2501;
+protected final int _S_MEASTYPE_DATATYPE_DISTINCT = 2502;
+protected final int _S_MEASTYPE_SUBTYPE_DISTINCT = 2503;
+protected final int _S_MEASTYPE_UNITS_DISTINCT = 2504;
 protected final int _W_MEASTYPE = 2550;
 protected final int _D_MEASTYPE = 2575;
+
+// MeasType - MeasLoc - Geoloc join
+protected final int _S_MEASTYPE_MEASLOC_GEOLOC_LIST = 2780;
 
 // MeasTypeStats
 protected final int _S_MEASTYPESTATS = 2600;
@@ -810,14 +817,44 @@ protected final int _W_DATATESTRESULT = 5101;
 protected final int _S_SEVERITYTYPES = 5200;
 
 /**
-Vector of RiversideDB_TableLayout, which are referenced when reading and writing time series.
+List of RiversideDB_TableLayout, which are referenced when reading and writing time series.
 */
-//private Vector _RiversideDB_TableLayout_Vector = new Vector();
+//private List _RiversideDB_TableLayout_Vector = new Vector();
 
 /**
 List of RiversideDB_Tables, which are referenced when reading and writing time series.
 */
 private List _RiversideDB_Tables_Vector = new Vector();
+
+/**
+List of counties in the Geoloc table, useful for choices.
+*/
+private List<String> __RiversideDB_GeolocCountyList = new Vector();
+
+/**
+List of states in the Geoloc table, useful for choices.
+*/
+private List<String> __RiversideDB_GeolocStateList = new Vector();
+
+/**
+List of data source abbreviations in the MeasType table, useful for choices.
+*/
+private List<String> __RiversideDB_MeasTypeDataSourceAbbrevList = new Vector();
+
+/**
+List of data types in the MeasType table, useful for choices.
+*/
+private List<String> __RiversideDB_MeasTypeDataTypeList = new Vector();
+
+/**
+List of data subtypes in the MeasType table, useful for choices.
+*/
+private List<String> __RiversideDB_MeasTypeSubTypeList = new Vector();
+
+/**
+List of data units in the MeasType table, useful for choices.
+*/
+private List<String> __RiversideDB_MeasTypeUnitsList = new Vector();
 
 /**
 The current user working in the database.  Initialized in the constructors
@@ -938,8 +975,7 @@ throws Exception {
 //////////////////////////////////////////////////////			
 		case _S_AUTOUPDATEPRODUCT:
 			select = (DMISelectStatement)statement;
-	/* AutoNum */	select.addField(
-				"AutoUpdateProduct.AutoUpdateProduct_num");
+	/* AutoNum */	select.addField("AutoUpdateProduct.AutoUpdateProduct_num");
 			select.addField("AutoUpdateProduct.TSProduct_num");
 			select.addField("AutoUpdateProduct.ProductGroup_num");
 			select.addField("AutoUpdateProduct.Identifier");
@@ -1103,10 +1139,8 @@ throws Exception {
 //////////////////////////////////////////////////////			
 		case _S_DBUSERMEASLOCGROUPRELATION:
 			select = (DMISelectStatement)statement;
-			select.addField(
-				"DBUserMeasLocGroupRelation.DBUser_num");
-			select.addField(
-				"DBUserMeasLocGroupRelation.MeasLocGroup_num");
+			select.addField("DBUserMeasLocGroupRelation.DBUser_num");
+			select.addField("DBUserMeasLocGroupRelation.MeasLocGroup_num");
 			select.addTable("DBUserMeasLocGroupRelation");
 			break;			
 		case _W_DBUSERMEASLOCGROUPRELATION:
@@ -1145,8 +1179,7 @@ throws Exception {
 			select.addField ( "ExportProduct.Product_name" );
 			select.addField ( "ExportProduct.Product_type" );
 			select.addField ( "ExportProduct.IsActive" );
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later			
+// TODO (JTS - 2003-06-02) This will be phased out later			
 //			if (getDatabaseVersion() < _VERSION_020800_20030422) {
 				select.addField("ExportProduct.Product_group");
 //			}
@@ -1174,13 +1207,11 @@ throws Exception {
 			select.addField ( "ExportProduct.Export_weekday" );
 			if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)){
 				select.addField("ExportProduct.TSProduct_num");
-				select.addField(
-					"ExportProduct.ProductGroup_num");
+				select.addField("ExportProduct.ProductGroup_num");
 				select.addField("ExportProduct.DBUser_num");
 				select.addField("ExportProduct.DBGroup_num");
 				select.addField("ExportProduct.DBPermissions");
-				select.addField(
-					"ExportProduct.MeasLocGroup_num");
+				select.addField("ExportProduct.MeasLocGroup_num");
 			}
 			select.addTable ( "ExportProduct" );
 			break;
@@ -1189,8 +1220,7 @@ throws Exception {
 			write.addField ( "Product_name" );
 			write.addField ( "Product_type" );
 			write.addField ( "IsActive" );
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later			
+// TODO (JTS - 2003-06-02) This will be phased out later			
 //			if (getDatabaseVersion() < _VERSION_020800_20030422) {
 				write.addField ( "Product_group" );
 //			}
@@ -1218,13 +1248,11 @@ throws Exception {
 			write.addField ( "Export_weekday" );
 			if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)){
 				write.addField("ExportProduct.TSProduct_num");
-				write.addField(
-					"ExportProduct.ProductGroup_num");
+				write.addField("ExportProduct.ProductGroup_num");
 				write.addField("ExportProduct.DBUser_num");
 				write.addField("ExportProduct.DBGroup_num");
 				write.addField("ExportProduct.DBPermissions");
-				write.addField(
-					"ExportProduct.MeasLocGroup_num");
+				write.addField("ExportProduct.MeasLocGroup_num");
 			}			
 			write.addTable ( "ExportProduct" );
 			break;			
@@ -1264,6 +1292,18 @@ throws Exception {
 			select.addField ( "Geoloc.Elevation_units" );
 			select.addTable ( "Geoloc" );
 			break;
+		case _S_GEOLOC_COUNTY_DISTINCT:
+		    select = (DMISelectStatement)statement;
+		    select.addField ( "Geoloc.County" );
+		    select.selectDistinct(true);
+		    select.addTable ( "Geoloc" );
+		    break;
+       case _S_GEOLOC_STATE_DISTINCT:
+            select = (DMISelectStatement)statement;
+            select.addField ( "Geoloc.State" );
+            select.selectDistinct(true);
+            select.addTable ( "Geoloc" );
+            break;
 		case _W_GEOLOC:
 			write = (DMIWriteStatement)statement;
 			write.addField ( "Latitude" );
@@ -1315,8 +1355,7 @@ throws Exception {
 			select.addField ( "ImportProduct.Product_name" );
 			select.addField ( "ImportProduct.Product_type" );
 			select.addField ( "ImportProduct.IsActive" );
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later
+// TODO (JTS - 2003-06-02) This will be phased out later
 //			if (getDatabaseVersion() < _VERSION_020800_20030422) {
 				select.addField("ImportProduct.Product_group");
 //			}
@@ -1350,13 +1389,11 @@ throws Exception {
 			select.addField ( "ImportProduct.Archive_dir" );
 			select.addField ( "ImportProduct.Archive_file" );
 			if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)){
-				select.addField(
-					"ImportProduct.ProductGroup_num");
+				select.addField("ImportProduct.ProductGroup_num");
 				select.addField("ImportProduct.DBUser_num");
 				select.addField("ImportProduct.DBGroup_num");
 				select.addField("ImportProduct.DBPermissions");
-				select.addField(
-					"ImportProduct.MeasLocGroup_num");
+				select.addField("ImportProduct.MeasLocGroup_num");
 			}						
 			select.addTable ( "ImportProduct" );
 			break;
@@ -1365,8 +1402,7 @@ throws Exception {
 			write.addField ( "Product_name" );
 			write.addField ( "Product_type" );
 			write.addField ( "IsActive" );
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later			
+// TODO (JTS - 2003-06-02) This will be phased out later			
 //			if (getDatabaseVersion() < _VERSION_020800_20030422) {
 				write.addField("ImportProduct.Product_group");
 //			}			
@@ -1400,13 +1436,11 @@ throws Exception {
 			write.addField ( "Archive_dir" );
 			write.addField ( "Archive_file" );
 			if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)){
-				write.addField(
-					"ImportProduct.ProductGroup_num");
+				write.addField("ImportProduct.ProductGroup_num");
 				write.addField("ImportProduct.DBUser_num");
 				write.addField("ImportProduct.DBGroup_num");
 				write.addField("ImportProduct.DBPermissions");
-				write.addField(
-					"ImportProduct.MeasLocGroup_num");
+				write.addField("ImportProduct.MeasLocGroup_num");
 			}
 			write.addTable ( "ImportProduct" );
 			break;			
@@ -1557,10 +1591,8 @@ throws Exception {
 //////////////////////////////////////////////////////			
 		case _S_MEASREDUCGRIDWEIGHT:
 			select = (DMISelectStatement)statement;
-			select.addField(
-				"MeasReducGridWeight.OutputMeasType_num");
-			select.addField(
-				"MeasReducGridWeight.InputMeasType_num");
+			select.addField("MeasReducGridWeight.OutputMeasType_num");
+			select.addField("MeasReducGridWeight.InputMeasType_num");
 			select.addField("MeasReducGridWeight.Input_Row");
 			select.addField("MeasReducGridWeight.Input_Column");
 			select.addField("MeasReducGridWeight.Area");
@@ -1721,8 +1753,7 @@ throws Exception {
 			select.addField("MeasScenarioRelation.ObsMeasType_num");
 			select.addField("MeasScenarioRelation.QFMeasType_num");
 			select.addField("MeasScenarioRelation.Weight" );
-			select.addField (
-				"MeasScenarioRelation.ScenarioMeasType_num" );
+			select.addField ("MeasScenarioRelation.ScenarioMeasType_num" );
 			select.addTable ( "MeasScenarioRelation" );
 			break;
 		case _W_MEASSCENARIORELATION:
@@ -1815,9 +1846,104 @@ throws Exception {
 			select.addField ( "MeasLoc.Measloc_name" );
 			select.addTable ( "MeasType" );
 			select.addTable ( "MeasLoc" );
-			select.addWhereClause (
-				"MeasType.MeasLoc_num=MeasLoc.MeasLoc_num" );
+			select.addWhereClause ( "MeasType.MeasLoc_num=MeasLoc.MeasLoc_num" );
 			break;
+	    case _S_MEASTYPE_MEASLOC_GEOLOC_LIST: 
+            select = (DMISelectStatement)statement;
+            // Select from a join of MeasType, MeasLoc, and Geoloc
+            select.addField ( "MeasType.MeasType_num" );
+            select.addField ( "MeasType.MeasLoc_num" );
+            select.addField ( "MeasType.Data_type" );
+            select.addField ( "MeasType.Sub_type" );
+            select.addField ( "MeasType.Time_step_base" );
+            select.addField ( "MeasType.Time_step_mult" );
+            select.addField ( "MeasType.Source_abbrev" );
+            select.addField ( "MeasType.Scenario" );
+            select.addField ( "MeasType.Table_num1" );
+            select.addField ( "MeasType.Dbload_method1" );
+            select.addField ( "MeasType.Table_num2" );
+            select.addField ( "MeasType.Dbload_method2" );
+            select.addField ( "MeasType.Description" );
+            select.addField ( "MeasType.Units_abbrev" );
+            select.addField ( "MeasType.Create_method" );
+            select.addField ( "MeasType.TransmitProtocol" );
+            select.addField ( "MeasType.Status" );
+            select.addField ( "MeasType.Min_check" );
+            select.addField ( "MeasType.Max_check" );
+            if (isDatabaseVersionAtLeast(_VERSION_030000_20041001)){
+                select.addField("MeasType.IsEditable");
+            } 
+            else {
+                select.addField("MeasType.Editable");
+            }
+            if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)){
+                select.addField("MeasType.IsVisible");
+                select.addField("MeasType.DBUser_num");
+                select.addField("MeasType.DBGroup_num");
+                select.addField("MeasType.DBPermissions");
+                select.addField("MeasType.TS_DBUser_num");
+                select.addField("MeasType.TS_DBGroup_num");
+                select.addField("MeasType.TS_DBPermissions");
+            }
+            // Measloc fields...
+            //select.addField ( "MeasLoc.MeasLoc_num" ); // Already selected from MeasType above
+            select.addField ( "MeasLoc.Identifier" );
+            select.addField ( "MeasLoc.Measloc_name" );
+            // select.addField ( "MeasLoc.source_abbrev" ); // Already selected from MeasType above
+            select.addField ( "MeasLoc.meas_loc_type" );
+            select.addField ( "MeasLoc.comment" );
+            if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)) {
+                select.addField ( "MeasLoc.MeasLocGroup_num" );
+                /* Use MeasType data
+                select.addField ( "MeasLoc.DBUser_num" );
+                select.addField ( "MeasLoc.DBGroup_num" );
+                select.addField ( "MeasLoc.DBPermissions" );
+                */
+            }
+            // Geoloc fields...
+            select.addField ( "Geoloc.Geoloc_num" );
+            select.addField ( "Geoloc.latitude" );
+            select.addField ( "Geoloc.longitude" );
+            select.addField ( "Geoloc.x" );
+            select.addField ( "Geoloc.y" );
+            select.addField ( "Geoloc.country" );
+            select.addField ( "Geoloc.state" );
+            select.addField ( "Geoloc.county" );
+            select.addField ( "Geoloc.elevation" );
+            select.addField ( "Geoloc.elevation_units" );
+            // Join the tables - make sure that Geoloc can be null
+            select.addTable ( "MeasType" );
+            select.addTable ( "MeasLoc" );
+            select.addTable ( "Geoloc" );
+            select.addWhereClause ( "MeasType.MeasLoc_num=MeasLoc.MeasLoc_num" );
+            select.addWhereClause ( "MeasLoc.Geoloc_num=Geoloc.Geoloc_num" );
+            // FIXME SAM 2010-03-11 Need to evaluate left join so missing Geoloc records still return
+            // full record
+            break;
+	    case _S_MEASTYPE_DATASOURCEABBREV_DISTINCT: 
+            select = (DMISelectStatement)statement;
+            select.addField ( "MeasType.source_abbrev" );
+            select.selectDistinct(true);
+            select.addTable ( "MeasType" );
+            break;
+        case _S_MEASTYPE_DATATYPE_DISTINCT: 
+            select = (DMISelectStatement)statement;
+            select.addField ( "MeasType.data_type" );
+            select.selectDistinct(true);
+            select.addTable ( "MeasType" );
+            break;
+        case _S_MEASTYPE_SUBTYPE_DISTINCT: 
+            select = (DMISelectStatement)statement;
+            select.addField ( "MeasType.sub_type" );
+            select.selectDistinct(true);
+            select.addTable ( "MeasType" );
+            break;
+        case _S_MEASTYPE_UNITS_DISTINCT: 
+            select = (DMISelectStatement)statement;
+            select.addField ( "MeasType.units_abbrev" );
+            select.selectDistinct(true);
+            select.addTable ( "MeasType" );
+            break;
 		case _W_MEASTYPE:
 			write = (DMIWriteStatement)statement;
 			write.addField ("MeasLoc_num");
@@ -1867,8 +1993,7 @@ throws Exception {
 			select.addField ( "MeasTypeStats.MeasType_num" );
 			select.addField ( "MeasTypeStats.Start_date" );
 			select.addField ( "MeasTypeStats.End_date" );
-			select.addField (
-				"MeasTypeStats.First_date_of_last_edit" );
+			select.addField ( "MeasTypeStats.First_date_of_last_edit" );
 			select.addField ( "MeasTypeStats.Meas_count" );
 			select.addField ( "MeasTypeStats.Min_val" );
 			select.addField ( "MeasTypeStats.Max_val" );
@@ -1956,8 +2081,7 @@ throws Exception {
 //////////////////////////////////////////////////////			
 		case _S_OPERATIONSTATERELATION:
 			select = (DMISelectStatement)statement;
-			select.addField("OperationStateRelation"
-				+ ".OperationStateRelation_num");
+			select.addField("OperationStateRelation.OperationStateRelation_num");
 			select.addField("OperationStateRelation.Operation_num");
 			select.addField("OperationStateRelation.State_name");
 			select.addField("OperationStateRelation.Default_value");
@@ -2131,14 +2255,12 @@ throws Exception {
 			select.addField ( "StageDischargeRating.End_Date" );
 			select.addField("StageDischargeRating.RatingTable_num");
 			select.addField("StageDischargeRating.Gage_Zero_Datum");
-			select.addField (
-				"StageDischargeRating.Gage_Datum_Units" );
+			select.addField ( "StageDischargeRating.Gage_Datum_Units" );
 			select.addField ( "StageDischargeRating.Warning_Level");
 			select.addField ( "StageDischargeRating.Flood_Level" );
 			select.addField ( "StageDischargeRating.Stage_Units" );
 			select.addField("StageDischargeRating.Discharge_Units");
-			select.addField(
-				"StageDischargeRating.Interpolation_Method");
+			select.addField("StageDischargeRating.Interpolation_Method");
 			select.addTable ( "StageDischargeRating" );
 			break;
 		case _W_STAGEDISCHARGERATING:
@@ -2167,8 +2289,7 @@ throws Exception {
 			select = (DMISelectStatement)statement;
 			if (isDatabaseVersionAtLeast(_VERSION_030000_20041001)){
 				select.addField("State.StateGroup_num");
-				select.addField("State"
-					+ ".OperationStateRelation_num");
+				select.addField("State.OperationStateRelation_num");
 				select.addField("State.Sequence");
 				select.addField("State.ValueStr");
 				select.addTable("State");
@@ -2466,16 +2587,14 @@ throws Exception {
 
 		case _S_DATATESTACTION:
 			select = (DMISelectStatement)statement;
-			select.addField("DataTestActionRelationship"
-				+ ".DataTestNum");
+			select.addField("DataTestActionRelationship.DataTestNum");
 			select.addField("DataTestActionRelationship.ActionNum");
 			select.addTable("DataTestActionRelationship");
 			break;
 
 		case _S_DATATESTEXPRESSION:
 			select = (DMISelectStatement)statement;
-			select.addField("DataTestExpression"
-				+ ".DataTestExpressionNum");
+			select.addField("DataTestExpression.DataTestExpressionNum");
 			select.addField("DataTestExpression.Operator");
 			select.addField("DataTestExpression.LeftSideType");
 			select.addField("DataTestExpression.LeftSideNum");
@@ -2513,8 +2632,7 @@ throws Exception {
 
 		case _S_DATATESTFUNCTIONINPUTID:
 			select = (DMISelectStatement)statement;
-			select.addField("DataTestFunctionInputIDs"
-				+ ".DataTestFunctionNum");
+			select.addField("DataTestFunctionInputIDs.DataTestFunctionNum");
 			select.addField("DataTestFunctionInputIDs.Position");
 			select.addField("DataTestFunctionInputIDs.[ID]");
 			select.addTable("DataTestFunctionInputIDs");
@@ -2582,8 +2700,7 @@ throws Exception {
 			select.addField("DataTestResults.TestTime");
 			select.addField("DataTestResults.LeftSideValue");
 			select.addField("DataTestResults.RightSideValue");
-			select.addField(
-				"DataTestResults.DataTestExpressionNum");
+			select.addField("DataTestResults.DataTestExpressionNum");
 			select.addField("DataTestResults.[Level]");
 			select.addField("DataTestResults.Message");
 			select.addTable("DataTestResults");
@@ -2621,8 +2738,7 @@ throws Exception {
 // C FUNCTIONS
 
 /**
-Determine whether the user can create the database table/record, given a set of
-permissions.
+Determine whether the user can create the database table/record, given a set of permissions.
 @param DBUser_num the DBUser_num that owns the table/record in the database
 @param DBGroup_num the GBGroup that owns the table/record in the database
 @param permissions the permissions string (see permissions documentation above)
@@ -2639,8 +2755,7 @@ throws Exception {
 		+ DBGroup_num + ", " + permissions + ")");
 
 	if (_dbuser.getLogin().trim().equalsIgnoreCase("root")) {
-		Message.printDebug(dl, routine, "Current user is root, can "
-			+ "always create.");
+		Message.printDebug(dl, routine, "Current user is root, can always create.");
 		// root can do ANYTHING
 		return true;
 	}
@@ -2658,8 +2773,7 @@ throws Exception {
 		canCreate = false;
 		Message.printDebug(dl, routine, "Group num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "GC+", 0) > -1) {
-			Message.printDebug(dl, routine, "GC+ set, canCreate = "
-				+ "true");
+			Message.printDebug(dl, routine, "GC+ set, canCreate = true");
 			canCreate = true;
 		}
 		else {
@@ -2672,8 +2786,7 @@ throws Exception {
 		canCreate = false;
 		Message.printDebug(dl, routine, "User num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "UC+", 0) > -1) {
-			Message.printDebug(dl, routine, "UC+ set, canCreate = "
-				+ "true");
+			Message.printDebug(dl, routine, "UC+ set, canCreate = true");
 			canCreate = true;
 		}
 		else {
@@ -2685,8 +2798,7 @@ throws Exception {
 }
 
 /**
-Determine whether the user can delete the database table/record, given a set of
-permissions.
+Determine whether the user can delete the database table/record, given a set of permissions.
 @param DBUser_num the DBUser_num that owns the table/record in the database
 @param DBGroup_num the GBGroup that owns the table/record in the database
 @param permissions the permissions string (see permissions documentation above)
@@ -2703,8 +2815,7 @@ throws Exception {
 		+ DBGroup_num + ", " + permissions + ")");
 
 	if (_dbuser.getLogin().trim().equalsIgnoreCase("root")) {
-		Message.printDebug(dl, routine, "Current user is root, can "
-			+ "always delete.");
+		Message.printDebug(dl, routine, "Current user is root, can always delete.");
 		// root can do ANYTHING
 		return true;
 	}
@@ -2722,8 +2833,7 @@ throws Exception {
 		canDelete = false;
 		Message.printDebug(dl, routine, "Group num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "GD+", 0) > -1) {
-			Message.printDebug(dl, routine, "GD+ set, canDelete = "
-				+ "true");
+			Message.printDebug(dl, routine, "GD+ set, canDelete = true");
 			canDelete = true;
 		}
 		else {
@@ -2736,8 +2846,7 @@ throws Exception {
 		canDelete = false;
 		Message.printDebug(dl, routine, "User num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "UD+", 0) > -1) {
-			Message.printDebug(dl, routine, "UD+ set, canDelete = "
-				+ "true");
+			Message.printDebug(dl, routine, "UD+ set, canDelete = true");
 			canDelete = true;
 		}
 		else {
@@ -2749,8 +2858,7 @@ throws Exception {
 }
 
 /**
-Determine whether the user can insert the database table/record, given a set of
-permissions.
+Determine whether the user can insert the database table/record, given a set of permissions.
 @param DBUser_num the DBUser_num that owns the table/record in the database
 @param DBGroup_num the GBGroup that owns the table/record in the database
 @param permissions the permissions string (see permissions documentation above)
@@ -2767,8 +2875,7 @@ throws Exception {
 		+ DBGroup_num + ", " + permissions + ")");
 
 	if (_dbuser.getLogin().trim().equalsIgnoreCase("root")) {
-		Message.printDebug(dl, routine, "Current user is root, can "
-			+ "always insert.");
+		Message.printDebug(dl, routine, "Current user is root, can always insert.");
 		// root can do ANYTHING
 		return true;
 	}
@@ -2786,8 +2893,7 @@ throws Exception {
 		canInsert = false;
 		Message.printDebug(dl, routine, "Group num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "GI+", 0) > -1) {
-			Message.printDebug(dl, routine, "GI+ set, canInsert = "
-				+ "true");
+			Message.printDebug(dl, routine, "GI+ set, canInsert = true");
 			canInsert = true;
 		}
 		else {
@@ -2800,8 +2906,7 @@ throws Exception {
 		canInsert = false;
 		Message.printDebug(dl, routine, "User num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "UI+", 0) > -1) {
-			Message.printDebug(dl, routine, "UI+ set, canInsert = "
-				+ "true");
+			Message.printDebug(dl, routine, "UI+ set, canInsert = true");
 			canInsert = true;
 		}
 		else {
@@ -2813,8 +2918,7 @@ throws Exception {
 }
 
 /**
-Determine whether the user can read the database table/record, given a set of
-permissions.
+Determine whether the user can read the database table/record, given a set of permissions.
 @param DBUser_num the DBUser_num that owns the table/record in the database
 @param DBGroup_num the GBGroup that owns the table/record in the database
 @param permissions the permissions string (see permissions documentation above)
@@ -2831,8 +2935,7 @@ throws Exception {
 		+ DBGroup_num + ", " + permissions + ")");
 
 	if (_dbuser.getLogin().trim().equalsIgnoreCase("root")) {
-		Message.printDebug(dl, routine, "Current user is root, can "
-			+ "always read.");
+		Message.printDebug(dl, routine, "Current user is root, can always read.");
 		// root can do ANYTHING
 		return true;
 	}
@@ -2850,8 +2953,7 @@ throws Exception {
 		canRead = false;
 		Message.printDebug(dl, routine, "Group num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "GR+", 0) > -1) {
-			Message.printDebug(dl, routine, "GR+ set, canRead = "
-				+ "true");
+			Message.printDebug(dl, routine, "GR+ set, canRead = true");
 			canRead = true;
 		}
 		else {
@@ -2864,8 +2966,7 @@ throws Exception {
 		canRead = false;
 		Message.printDebug(dl, routine, "User num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "UR+", 0) > -1) {
-			Message.printDebug(dl, routine, "UR+ set, canRead = "
-				+ "true");
+			Message.printDebug(dl, routine, "UR+ set, canRead = true");
 			canRead = true;
 		}
 		else {
@@ -2877,8 +2978,7 @@ throws Exception {
 }
 
 /**
-Determine whether the user can update the database table/record, given a set of
-permissions.
+Determine whether the user can update the database table/record, given a set of permissions.
 @param DBUser_num the DBUser_num that owns the table/record in the database
 @param DBGroup_num the GBGroup that owns the table/record in the database
 @param permissions the permissions string (see permissions documentation above)
@@ -2895,8 +2995,7 @@ throws Exception {
 		+ DBGroup_num + ", " + permissions + ")");
 
 	if (_dbuser.getLogin().trim().equalsIgnoreCase("root")) {
-		Message.printDebug(dl, routine, "Current user is root, can "
-			+ "always read.");
+		Message.printDebug(dl, routine, "Current user is root, can always update.");
 		// root can do ANYTHING
 		return true;
 	}
@@ -2914,8 +3013,7 @@ throws Exception {
 		canUpdate = false;
 		Message.printDebug(dl, routine, "Group num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "GU+", 0) > -1) {
-			Message.printDebug(dl, routine, "GU+ set, canUpdate = "
-				+ "true");
+			Message.printDebug(dl, routine, "GU+ set, canUpdate = true");
 			canUpdate = true;
 		}
 		else {
@@ -2928,8 +3026,7 @@ throws Exception {
 		canUpdate = false;
 		Message.printDebug(dl, routine, "User num matches ...");
 		if (StringUtil.indexOfIgnoreCase(permissions, "UU+", 0) > -1) {
-			Message.printDebug(dl, routine, "UU+ set, canUpdate = "
-				+ "true");
+			Message.printDebug(dl, routine, "UU+ set, canUpdate = true");
 			canUpdate = true;
 		}
 		else {
@@ -2988,16 +3085,13 @@ throws Exception {
 
 	if (found == -1) {
 		Message.printWarning(2, routine, 
-			"Requested DBGroup \"" + new_dbgroup + "\" is not "
-			+ "valid.");
-		throw new Exception ("Requested DBGroup \"" + new_dbgroup 
-			+ "\" is not valid.");
+			"Requested DBGroup \"" + new_dbgroup + "\" is not valid.");
+		throw new Exception ("Requested DBGroup \"" + new_dbgroup + "\" is not valid.");
 	}
 
 	group = (RiversideDB_DBGroup)dbgroupV.get(found);
 
-	// loop through the relationships to see if the current user is
-	// in the group
+	// loop through the relationships to see if the current user is in the group
 	List dbuserGroupV = readDBUserDBGroupRelationListForDBGroup_num( group.getDBGroup_num());
 	
 	size = 0;
@@ -3019,15 +3113,13 @@ throws Exception {
 
 	Message.printWarning(2, routine, "User does not belong to requested "
 		+ "DBGroup \"" + new_dbgroup + "\".");
-	throw new Exception ("User does not belong to requested DBGroup \"" 
-		+ new_dbgroup + "\".");
+	throw new Exception ("User does not belong to requested DBGroup \"" + new_dbgroup + "\".");
 }
 
 // D FUNCTIONS
 
 /**
-Deletes records from the DataDimension table that have the given 
-Dimension. 
+Deletes records from the DataDimension table that have the given Dimension. 
 @param Dimension the Dimension for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3041,8 +3133,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the DataSource table that have the given 
-Source_abbrev. 
+Deletes records from the DataSource table that have the given Source_abbrev. 
 @param Source_abbrev the Source_abbrev for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3055,8 +3146,7 @@ throws Exception {
 	return dmiDelete(d);
 }
 /**
-Deletes records from the DataType table that have the given 
-DataType. 
+Deletes records from the DataType table that have the given DataType. 
 @param DataType the DataType for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3070,8 +3160,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the DataUnits table that have the given 
-Units_abbrev. 
+Deletes records from the DataUnits table that have the given Units_abbrev. 
 @param Units_abbrev the Units_abbrev for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3087,8 +3176,7 @@ throws Exception {
 /**
 Deletes records from the DBUserMeasLocGroupRelation table that have the given
 MeasLocGroup_num.  Note that all matching DBUserMeasLocGRoupRelation records 
-are deleted, <i>even if they belong to users other than the one 
-currently logged in</i>.
+are deleted, <i>even if they belong to users other than the one currently logged in</i>.
 @param MeasLocGroup_num the MeasLocGroup_num for which to delete records
 @return the number of records deleted from the table
 @throws Exception if an error occurs.
@@ -3096,8 +3184,7 @@ currently logged in</i>.
 public int deleteDBUserMeasLocGroupRelationForMeasLocGroup_num(
 int MeasLocGroup_num)
 throws Exception {
-	String sql = "DELETE FROM DBUserMeasLocGroupRelation WHERE "
-		+ "MeasLocGroup_num = " + MeasLocGroup_num;
+	String sql = "DELETE FROM DBUserMeasLocGroupRelation WHERE MeasLocGroup_num = " + MeasLocGroup_num;
 	return dmiDelete(sql);
 }
 
@@ -3113,38 +3200,31 @@ public int deleteDBUserMeasLocGroupRelationForMeasLocGroup_numDBUser_num(
 int MeasLocGroup_num, int DBUser_num)
 throws Exception {
 	String sql = "DELETE FROM DBUserMeasLocGroupRelation WHERE "
-		+ "MeasLocGroup_num = " + MeasLocGroup_num + " AND " 
-		+ "DBUser_num = " + DBUser_num;
+		+ "MeasLocGroup_num = " + MeasLocGroup_num + " AND DBUser_num = " + DBUser_num;
 	return dmiDelete(sql);
 }
 
 /**
-Deletes records from the ExportConf table that have the given 
-ExportProduct_num.
-@param ExportProduct_num the ExportProduct_num that determines the records
-to be deleted
+Deletes records from the ExportConf table that have the given ExportProduct_num.
+@param ExportProduct_num the ExportProduct_num that determines the records to be deleted
 @return the number of records deleted
 @throws Exception if an error occurs
 */
 public int deleteExportConfForExportProduct_num(long ExportProduct_num) 
 throws Exception {
-	String sql = "DELETE FROM ExportConf WHERE ExportProduct_num = " 
-		+ ExportProduct_num;
+	String sql = "DELETE FROM ExportConf WHERE ExportProduct_num = " + ExportProduct_num;
 	return dmiDelete(sql);
 }
 
 /**
-Deletes records from the ExportConf table that have the given 
-MeasType_num.
-@param MeasType_num the MeasType_num that determines the records
-to be deleted
+Deletes records from the ExportConf table that have the given MeasType_num.
+@param MeasType_num the MeasType_num that determines the records to be deleted
 @return an integer which tells how many records were deleted 
 @throws Exception if an error occurs
 */
 public int deleteExportConfForMeasType_num(int MeasType_num) 
 throws Exception {
-	String sql = "DELETE FROM ExportConf WHERE MeasType_num = " 
-		+ MeasType_num;
+	String sql = "DELETE FROM ExportConf WHERE MeasType_num = " + MeasType_num;
 	return dmiDelete(sql);
 }
 
@@ -3161,22 +3241,18 @@ deleted in each table.<br>
 */
 public int[] deleteExportProductForProductGroup_num(int ProductGroup_num)
 throws Exception {
-	// First get a list of all the export products with that 
-	// ProductGroup_num
+	// First get a list of all the export products with that ProductGroup_num
 	List v = readExportProductListForProductGroup_num(ProductGroup_num);
 
 	int confCount = 0;
 	for (int i = 0; i < v.size(); i++) {
-		RiversideDB_ExportProduct e = (RiversideDB_ExportProduct)
-			v.get(i);
-		confCount += deleteExportConfForExportProduct_num(
-			e.getExportProduct_num());
+		RiversideDB_ExportProduct e = (RiversideDB_ExportProduct)v.get(i);
+		confCount += deleteExportConfForExportProduct_num( e.getExportProduct_num());
 	}
 
 	DMIDeleteStatement d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_EXPORTPRODUCT);
-	d.addWhereClause ( "ExportProduct.ProductGroup_num = " 
-		+ ProductGroup_num);
+	d.addWhereClause ( "ExportProduct.ProductGroup_num = " + ProductGroup_num);
 	int productCount = dmiDelete(d);
 
 	int[] deleted = new int[3];
@@ -3190,8 +3266,7 @@ throws Exception {
 /**
 Deletes records from ExportProduct that have the given ExportProduct_num,
 first deleting the associated child records from ExportConf.
-@param ExportProduct_num the ExportProduct_num of which to delete the 
-records
+@param ExportProduct_num the ExportProduct_num of which to delete the records
 @return a 3-element int array.  The array contains the number of records 
 deleted in each table.<br>
 [0] - the number of records deleted from ExportProduct<br>
@@ -3205,8 +3280,7 @@ throws Exception {
 	
 	DMIDeleteStatement d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_EXPORTPRODUCT);
-	d.addWhereClause ( "ExportProduct.ExportProduct_num = " 
-		+ ExportProduct_num);
+	d.addWhereClause ( "ExportProduct.ExportProduct_num = " + ExportProduct_num);
 	int productCount = dmiDelete(d);
 
 	int[] deleted = new int[3];
@@ -3219,12 +3293,9 @@ throws Exception {
 
 /**
 Deletes all records from ProductGroup and ExportProduct that match the given
-ProductGroup_num, as well as all the child records in ExportConf of all the 
-ExportProduct records.
-@param ProductGroup_num the Product group against which to match records that
-should be deleted.
-@return a 4-element int array.  The array contains the number of records 
-deleted in each table.<br>
+ProductGroup_num, as well as all the child records in ExportConf of all the ExportProduct records.
+@param ProductGroup_num the Product group against which to match records that should be deleted.
+@return a 4-element int array.  The array contains the number of records deleted in each table.<br>
 [0] - the number of records deleted from ProductGroup<br>
 [1] - the number of records deleted from ExportProduct<br>
 [2] - the number of records deleted from ExportConf<br>
@@ -3233,8 +3304,7 @@ deleted in each table.<br>
 */
 public int[] deleteExportProductGroupForProductGroup_num(int ProductGroup_num)
 throws Exception {
-	int[] subDeleteds = 
-		deleteExportProductForProductGroup_num(ProductGroup_num);
+	int[] subDeleteds = deleteExportProductForProductGroup_num(ProductGroup_num);
 	
 	int size = subDeleteds.length;
 	size++;
@@ -3244,8 +3314,7 @@ throws Exception {
 		deleted[(i + 1)] = subDeleteds[i];
 	}
 
-	String sql = "DELETE FROM ProductGroup WHERE ProductGroup_num = " 
-		+ ProductGroup_num;
+	String sql = "DELETE FROM ProductGroup WHERE ProductGroup_num = " + ProductGroup_num;
 	int prodDel = dmiDelete(sql);
 
 	deleted[0] = prodDel;
@@ -3255,44 +3324,34 @@ throws Exception {
 }
 
 /**
-Deletes records from the ImportConf table that have the given 
-ImportProduct_num.
-@param ImportProduct_num the ImportProduct_num that determines the records
-to be deleted
+Deletes records from the ImportConf table that have the given ImportProduct_num.
+@param ImportProduct_num the ImportProduct_num that determines the records to be deleted
 @return the number of records deleted
 @throws Exception if an error occurs.
 */
 public int deleteImportConfForImportProduct_num(long ImportProduct_num) 
 throws Exception {
-	String sql = "DELETE FROM ImportConf WHERE ImportProduct_num = " 
-		+ ImportProduct_num;
+	String sql = "DELETE FROM ImportConf WHERE ImportProduct_num = " + ImportProduct_num;
 	return dmiDelete(sql);
 }
 
 /**
-Deletes records from the ImportConf table that have the given 
-MeasType_num.
-@param MeasType_num the MeasType_num that determines the records
-to be deleted
+Deletes records from the ImportConf table that have the given MeasType_num.
+@param MeasType_num the MeasType_num that determines the records to be deleted
 @return an integer which tells how many records were deleted 
 @throws Exception if an error occurs
 */
 public int deleteImportConfForMeasType_num(int MeasType_num) 
 throws Exception {
-	String sql = "DELETE FROM ImportConf WHERE MeasType_num = " 
-		+ MeasType_num;
+	String sql = "DELETE FROM ImportConf WHERE MeasType_num = " + MeasType_num;
 	return dmiDelete(sql);
 }
 
-
 /**
 Deletes all records from ProductGroup and ImportProduct that match the given
-ProductGroup_num, as well as all the child records in ImportConf of all the 
-ImportProduct records.
-@param ProductGroup_num the Product group against which to match records that
-should be deleted.
-@return a 4-element int array.  The array contains the number of records 
-deleted in each table.<br>
+ProductGroup_num, as well as all the child records in ImportConf of all the ImportProduct records.
+@param ProductGroup_num the Product group against which to match records that should be deleted.
+@return a 4-element int array.  The array contains the number of records deleted in each table.<br>
 [0] - the number of records deleted from ProductGroup<br>
 [1] - the number of records deleted from ImportProduct<br>
 [2] - the number of records deleted from ImportConf<br>
@@ -3301,8 +3360,7 @@ deleted in each table.<br>
 */
 public int[] deleteImportProductGroupForProductGroup_num(int ProductGroup_num)
 throws Exception {
-	int[] subDeleteds = 
-		deleteImportProductForProductGroup_num(ProductGroup_num);
+	int[] subDeleteds = deleteImportProductForProductGroup_num(ProductGroup_num);
 	
 	int size = subDeleteds.length;
 	size++;
@@ -3312,8 +3370,7 @@ throws Exception {
 		deleted[(i + 1)] = subDeleteds[i];
 	}
 
-	String sql = "DELETE FROM ProductGroup WHERE ProductGroup_num = " 
-		+ ProductGroup_num;
+	String sql = "DELETE FROM ProductGroup WHERE ProductGroup_num = " + ProductGroup_num;
 	int prodDel = dmiDelete(sql);
 
 	deleted[0] = prodDel;
@@ -3335,22 +3392,18 @@ deleted in each table.<br>
 */
 public int[] deleteImportProductForProductGroup_num(int ProductGroup_num)
 throws Exception {
-	// First get a list of all the import products with that 
-	// ProductGroup_num
+	// First get a list of all the import products with that ProductGroup_num
 	List v = readImportProductListForProductGroup_num(ProductGroup_num);
 
 	int confCount = 0;
 	for (int i = 0; i < v.size(); i++) {
-		RiversideDB_ImportProduct e = (RiversideDB_ImportProduct)
-			v.get(i);
-		confCount += deleteImportConfForImportProduct_num(
-			e.getImportProduct_num());
+		RiversideDB_ImportProduct e = (RiversideDB_ImportProduct)v.get(i);
+		confCount += deleteImportConfForImportProduct_num(e.getImportProduct_num());
 	}
 	
 	DMIDeleteStatement d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_IMPORTPRODUCT);
-	d.addWhereClause ( "ImportProduct.ProductGroup_num = " 
-		+ ProductGroup_num);
+	d.addWhereClause ( "ImportProduct.ProductGroup_num = " + ProductGroup_num);
 	int productCount = dmiDelete(d);
 
 	int[] deleted = new int[3];
@@ -3364,8 +3417,7 @@ throws Exception {
 /**
 Deletes records from ImportProduct that have the given ImportProduct_num,
 first deleting the associated child records from ImportConf.
-@param ImportProduct_num the ImportProduct_num of which to delete the 
-records
+@param ImportProduct_num the ImportProduct_num of which to delete the records
 @return a 3-element int array.  The array contains the number of records 
 deleted in each table.<br>
 [0] - the number of records deleted from ImportProduct<br>
@@ -3379,8 +3431,7 @@ throws Exception {
 	
 	DMIDeleteStatement d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_IMPORTPRODUCT);
-	d.addWhereClause ( "ImportProduct.ImportProduct_num = " 
-		+ ImportProduct_num);
+	d.addWhereClause ( "ImportProduct.ImportProduct_num = " + ImportProduct_num);
 	int productCount = dmiDelete(d);
 
 	int[] deleted = new int[3];
@@ -3392,8 +3443,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the ImportType table that have the given 
-Name. 
+Deletes records from the ImportType table that have the given Name. 
 @param Name the Name for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3407,8 +3457,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the MeasCreateMethod table that have the given 
-Method. 
+Deletes records from the MeasCreateMethod table that have the given Method. 
 @param Method the Method for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3446,8 +3495,7 @@ throws Exception {
 	int total = 0;
 	if (v != null) {	
 		for (int i = 0; i < v.size(); i++) {
-			RiversideDB_MeasType m = 
-				(RiversideDB_MeasType)v.get(i);
+			RiversideDB_MeasType m = (RiversideDB_MeasType)v.get(i);
 			long MeasType_num = m.getMeasType_num();
 			total += deleteMeasTypeForMeasType_num(MeasType_num)[6];
 		}
@@ -3472,8 +3520,7 @@ throws Exception {
 		sdr = (RiversideDB_StageDischargeRating)v2.get(i);
 		d = new DMIDeleteStatement(this);
 		buildSQL(d, _D_RATINGTABLE);
-		d.addWhereClause("RatingTable_num = " 
-			+ sdr.getRatingTable_num());
+		d.addWhereClause("RatingTable_num = " + sdr.getRatingTable_num());
 		deleted[2] += dmiDelete(d);
 	}	
 	total += deleted[2];	
@@ -3515,14 +3562,11 @@ throws Exception {
 		MeasLocGroup_num, _dbuser.getDBUser_num());
 	*/
 	int relDeleted = 
-		deleteDBUserMeasLocGroupRelationForMeasLocGroup_num(
-		MeasLocGroup_num);
+		deleteDBUserMeasLocGroupRelationForMeasLocGroup_num(MeasLocGroup_num);
 
-	int[] stateGroupDeleted = deleteStateGroupForMeasLocGroup_num(
-		MeasLocGroup_num);
+	int[] stateGroupDeleted = deleteStateGroupForMeasLocGroup_num(MeasLocGroup_num);
 
-	String sql = "DELETE FROM MeasLocGroup WHERE MeasLocGroup_num = "
-		+ MeasLocGroup_num;
+	String sql = "DELETE FROM MeasLocGroup WHERE MeasLocGroup_num = " + MeasLocGroup_num;
 	int measLocDeleted = dmiDelete(sql);
 	
 	int[] deleteds = new int[5];
@@ -3536,8 +3580,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the MeasQualityFlag table that have the given 
-Quality_flag. 
+Deletes records from the MeasQualityFlag table that have the given Quality_flag. 
 @param Quality_flag the Quality_flag for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3551,8 +3594,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the MeasReducRelation table that have the given 
-Input Meas Type number.
+Deletes records from the MeasReducRelation table that have the given Input Meas Type number.
 @param InputMeasType_num the input meas type num for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs
@@ -3561,14 +3603,12 @@ public int deleteMeasReducRelationForInputMeasType_num(long InputMeasType_num)
 throws Exception {
 	DMIDeleteStatement d = new DMIDeleteStatement(this);
 	buildSQL(d, _D_MEASREDUCRELATION);
-	d.addWhereClause("MeasReducRelation.InputMeasType_num = "
-		+ InputMeasType_num);
+	d.addWhereClause("MeasReducRelation.InputMeasType_num = " + InputMeasType_num);
 	return dmiDelete(d);
 }
 
 /**
-Deletes records from the MeasReducRelation table that have the given 
-Output Meas Type number.
+Deletes records from the MeasReducRelation table that have the given Output Meas Type number.
 @param OutputMeasType_num the Output meas type num for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs
@@ -3577,14 +3617,12 @@ public int deleteMeasReducRelationForOutputMeasType_num(long OutputMeasType_num)
 throws Exception {
 	DMIDeleteStatement d = new DMIDeleteStatement(this);
 	buildSQL(d, _D_MEASREDUCRELATION);
-	d.addWhereClause("MeasReducRelation.OutputMeasType_num = "
-		+ OutputMeasType_num);
+	d.addWhereClause("MeasReducRelation.OutputMeasType_num = " + OutputMeasType_num);
 	return dmiDelete(d);
 }
 
 /**
-Deletes records from the MeasReductionType table that have the given 
-Type. 
+Deletes records from the MeasReductionType table that have the given Type. 
 @param Type the Type for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3598,8 +3636,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the MeasTimeScale table that have the given 
-Scale. 
+Deletes records from the MeasTimeScale table that have the given Scale. 
 @param Scale the Scale for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3613,8 +3650,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the MeasTransProtocol table that have the given 
-Protocol. 
+Deletes records from the MeasTransProtocol table that have the given Protocol. 
 @param Protocol the Protocol for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3670,73 +3706,61 @@ throws Exception {
 	deleted[13] = dmiDelete(sql);
 	total += deleted[13];
 	
-	sql = "DELETE FROM TSMonth WHERE TSMonth.MeasType_num = "
-		+ MeasType_num;
+	sql = "DELETE FROM TSMonth WHERE TSMonth.MeasType_num = " + MeasType_num;
 	deleted[12] = dmiDelete(sql);
 	total += deleted[12];
 	
-	sql = "DELETE FROM TSMinute WHERE TSMinute.MeasType_num = "
-		+ MeasType_num;
+	sql = "DELETE FROM TSMinute WHERE TSMinute.MeasType_num = " + MeasType_num;
 	deleted[11] = dmiDelete(sql);
 	total += deleted[11];
 	
-	sql = "DELETE FROM TSLookup WHERE TSLookup.MeasType_num = "
-		+ MeasType_num;
+	sql = "DELETE FROM TSLookup WHERE TSLookup.MeasType_num = " + MeasType_num;
 	deleted[10] = dmiDelete(sql);
 	total += deleted[10];
 	
-	sql = "DELETE FROM TSIrregMonth WHERE TSIrregMonth.MeasType_num = "
-		+ MeasType_num;
+	sql = "DELETE FROM TSIrregMonth WHERE TSIrregMonth.MeasType_num = " + MeasType_num;
 	deleted[9] = dmiDelete(sql);
 	total += deleted[9];
 	
-	sql = "DELETE FROM TSIrregMin WHERE TSIrregMin.MeasType_num = "
-		+ MeasType_num;
+	sql = "DELETE FROM TSIrregMin WHERE TSIrregMin.MeasType_num = " + MeasType_num;
 	deleted[8] = dmiDelete(sql);
 	total += deleted[8];
 	
-	sql = "DELETE FROM TSHour WHERE TSHour.MeasType_num = "
-		+ MeasType_num;
+	sql = "DELETE FROM TSHour WHERE TSHour.MeasType_num = " + MeasType_num;
 	deleted[7] = dmiDelete(sql);
 	total += deleted[7];
 	
-	sql = "DELETE FROM TSFloodMonitor WHERE "
-		+ "TSFloodMonitor.MeasType_num = " + MeasType_num;
+	sql = "DELETE FROM TSFloodMonitor WHERE " + "TSFloodMonitor.MeasType_num = " + MeasType_num;
 	deleted[6] = dmiDelete(sql);
 	total += deleted[6];
 	
 	DMIDeleteStatement d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_MEASREDUCRELATION);
-	d.addWhereClause ( "MeasReducRelation.OutputMeasType_num=" 
-		+ MeasType_num ); 
+	d.addWhereClause ( "MeasReducRelation.OutputMeasType_num=" + MeasType_num ); 
 	deleted[5] = dmiDelete(d);
 	total += deleted[5];
 
 	d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_MEASREDUCTION);
-	d.addWhereClause ( "MeasReduction.OutputMeasType_num=" 
-		+ MeasType_num ); 
+	d.addWhereClause ( "MeasReduction.OutputMeasType_num=" + MeasType_num ); 
 	deleted[4] = dmiDelete(d);
 	total += deleted[4];
 
 	d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_MEASTYPESTATS);
-	d.addWhereClause ( "MeasTypeStats.MeasType_num="
-		+ MeasType_num ); 		
+	d.addWhereClause ( "MeasTypeStats.MeasType_num=" + MeasType_num ); 		
 	deleted[3] = dmiDelete(d);
 	total += deleted[3];
 
 	d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_MEASTYPESTATUS);
-	d.addWhereClause ( "MeasTypeStatus.MeasType_num="
-		+ MeasType_num ); 				
+	d.addWhereClause ( "MeasTypeStatus.MeasType_num=" + MeasType_num ); 				
 	deleted[2] = dmiDelete(d);		
 	total += deleted[2];
 		
 	d = new DMIDeleteStatement ( this );
 	buildSQL ( d, _D_IMPORTCONF);
-	d.addWhereClause ( "ImportConf.MeasType_num="
-		+ MeasType_num ); 		
+	d.addWhereClause ( "ImportConf.MeasType_num=" + MeasType_num ); 		
 	deleted[1] = dmiDelete(d);		
 	total += deleted[1];
 		
@@ -3752,8 +3776,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the MessageLog table that have the given 
-Message_num. 
+Deletes records from the MessageLog table that have the given Message_num. 
 @param Message_num the Message_num for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3767,8 +3790,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the Props table that have the given 
-Variable. 
+Deletes records from the Props table that have the given Variable. 
 @param Variable the Variable for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3795,8 +3817,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the Scenario table that have the given 
-Scenario_num. 
+Deletes records from the Scenario table that have the given Scenario_num. 
 @param Scenario_num the Scenario_num for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3810,8 +3831,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the SHEFType table that have the given 
-SHEF_pe. 
+Deletes records from the SHEFType table that have the given SHEF_pe. 
 @param SHEF_pe the SHEF_pe for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3832,8 +3852,7 @@ Deletes all records with the given StateGroup_num from StateGroup.
 */
 public int deleteStateForStateGroup_num(long StateGroup_num)
 throws Exception {
-	String sql = "DELETE FROM State WHERE State.StateGroup_num = "
-		+ StateGroup_num;
+	String sql = "DELETE FROM State WHERE State.StateGroup_num = " + StateGroup_num;
 	return dmiDelete(sql);
 }
 
@@ -3841,8 +3860,7 @@ throws Exception {
 Deletes all records with the given StateGroup_num and 
 OperationStateRelation_num from StateGroup.
 @param StateGroup_num the StateGroup_num for which to delete records.
-@param OperationStateRelation_num the OperationStateRelation_num for which 
-to delete records.
+@param OperationStateRelation_num the OperationStateRelation_num for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
 */
@@ -3877,12 +3895,10 @@ throws Exception {
 	
 	for (int i = 0; i < v.size(); i++) {
 		sg = (RiversideDB_StateGroup)v.get(i);
-		stateTotal += deleteStateForStateGroup_num(
-			sg.getStateGroup_num());
+		stateTotal += deleteStateForStateGroup_num(sg.getStateGroup_num());
 	}
 	
-	String sql = "DELETE FROM StateGroup WHERE "
-		+ "StateGroup.MeasLocGroup_num = " + MeasLocGroup_num;
+	String sql = "DELETE FROM StateGroup WHERE StateGroup.MeasLocGroup_num = " + MeasLocGroup_num;
 	deleteds[0] = dmiDelete(sql);
 	deleteds[1] = stateTotal;
 	deleteds[2] = deleteds[0] + deleteds[1];
@@ -3890,8 +3906,7 @@ throws Exception {
 }
 
 /**
-Deletes records from the TableLayout table that have the given 
-TableLayout_num. 
+Deletes records from the TableLayout table that have the given TableLayout_num. 
 @param TableLayout_num the TableLayout_num for which to delete records.
 @return the number of records deleted.
 @throws Exception if an error occurs.
@@ -3907,10 +3922,9 @@ throws Exception {
 /**
 Deletes records from the TSProduct and TSProductProps tables for the TSProduct
 with the specified identifier.<p>  Permissions are not checked in this method 
-as to whether the user has permissiont o 
+as to whether the user has permission to delete. 
 @param identifier the identifier String of the TSProduct in the database.
-Identifier is forced to be unique in the code that writes a TSProduct to the
-database.  
+Identifier is forced to be unique in the code that writes a TSProduct to the database.  
 @return a 3-element array.  The first element contains the number of records
 deleted from the TSProduct table.  The second element contains the number of 
 records deleted from the TSProductProps table.  The third element contains the
@@ -3932,9 +3946,7 @@ throws Exception {
 			
 	int propsCount = deleteTSProductPropsForTSProduct_num(tsproduct_num);
 
-	String sql = "DELETE FROM tsproduct WHERE "
-		+ "tsproduct.identifier = '"
-		+ identifier + "'";
+	String sql = "DELETE FROM tsproduct WHERE tsproduct.identifier = '" + identifier + "'";
 	deleted[0] = dmiDelete(sql);
 	deleted[1] = propsCount;
 	deleted[2] = deleted[0] + deleted[1];
@@ -3945,7 +3957,7 @@ throws Exception {
 /**
 Deletes records from the TSProduct and TSProductProps tables for the TSProduct
 with the specified identifier.<p>  Permissions are not checked in this method 
-as to whether the user has permissiont o 
+as to whether the user has permission to delete. 
 @param tsproduct_num the tsproduct_num of the records to delete.
 @return a 3-element array.  The first element contains the number of records
 deleted from the TSProduct table.  The second element contains the number of 
@@ -3958,8 +3970,7 @@ throws Exception {
 
 	int propsCount = deleteTSProductPropsForTSProduct_num(tsproduct_num);
 
-	String sql = "DELETE FROM tsproduct WHERE "
-		+ "tsproduct.tsproduct_num = " + tsproduct_num;
+	String sql = "DELETE FROM tsproduct WHERE tsproduct.tsproduct_num = " + tsproduct_num;
 	deleted[0] = dmiDelete(sql);
 	deleted[1] = propsCount;
 	deleted[2] = deleted[0] + deleted[1];
@@ -4004,8 +4015,7 @@ public void determineDatabaseVersion() {
 	String routine = "RiversideDB_DMI.determineDatabaseVersion";
 	boolean version_found = false;
 	try {
-		if (DMIUtil.databaseTableHasColumn(this,
-			"State", "OperationStateRelation_num")) {
+		if (DMIUtil.databaseTableHasColumn(this, "State", "OperationStateRelation_num")) {
 			setDatabaseVersion(_VERSION_030000_20041001);
 			version_found = true;
 		}
@@ -4019,8 +4029,7 @@ public void determineDatabaseVersion() {
         // the minimized version (based off of the 03 series)
         // does not have this table, but does have the IsEditable
         // column in MeasType. -IWS
-        if (!version_found && DMIUtil.databaseTableHasColumn(this,
-			"MeasType", "IsEditable")) {
+        if (!version_found && DMIUtil.databaseTableHasColumn(this, "MeasType", "IsEditable")) {
 			setDatabaseVersion(_VERSION_030000_20041001);
 			version_found = true;
 		}
@@ -4032,8 +4041,7 @@ public void determineDatabaseVersion() {
 
 	if (!version_found) {
 		try {	
-			if (DMIUtil.databaseTableHasColumn(this, 
-				"Tables", "IsReference")) {
+			if (DMIUtil.databaseTableHasColumn(this,"Tables", "IsReference")) {
 				setDatabaseVersion(_VERSION_020800_20030422);
 				version_found = true;
 			}
@@ -4049,8 +4057,7 @@ public void determineDatabaseVersion() {
 		setDatabaseVersion ( _VERSION_020601_20020625 );
 	}
 	Message.printStatus ( 1, routine,
-		"RiversideDB version determined to be at least "
-		+getDatabaseVersion() );
+		"RiversideDB version determined to be at least " + getDatabaseVersion() );
 }
 
 /**
@@ -4151,83 +4158,16 @@ public List getDatabaseProperties ( int level )
 	if ( getDatabaseName() == null ) {
 		v.add ( "Connect Method:  ODBC DSN" );
 	}
-	else {	v.add (
-		"Connect Method:  JDBC using the following information  " );
+	else {
+	    v.add ( "Connect Method:  JDBC using the following information  " );
 		v.add ( "Database server:  " + getDatabaseServer() );
 		v.add ( "Database name:  " + getDatabaseName() );
 	}
-	v.add ( "Database version appears to be (VVVVVVYYYYMMDD):  " +
-			getDatabaseVersion() );
+	v.add ( "Database version appears to be (VVVVVVYYYYMMDD):  " + getDatabaseVersion() );
 	v.add ( "" );
 	v.add ( "Database history (most recent at top):" );
 	v.add ( "" );
 	return v;
-}
-
-/**
-Returns "RiversideDB"
-@return "RiversideDB"
-*/
-public String getDMIName() {
-	return "RiversideDB";
-}
-
-/**
-This function determines the extreme value of the specified field from the 
-reqested table via using max(field) or min(field) and the the specified dmi 
-connection.
-@param table table name
-@param field table field to determine the max value of
-@param flag "MAX" or "MIN" depending upon which extreme is desired.
-@return returns a int of the extreme record or DMIUtil.MISSING_INT if 
-an error occured.
-@deprecated use DMIUtil.getExtremeRecord() instead.
-*/
-public long getExtremeRecord(String table, String field, String flag) {
-	String routine = "RiversideDB_DMI.getExtremeRecord";
-	try {
-		String query = "select " + flag + "(" + field.trim() + ") from "
-			+ table.trim();
-		ResultSet rs = dmiSelect(query);
-	
-		long extreme = DMIUtil.MISSING_LONG;
-		if (rs.next()) {
-			extreme = rs.getLong(1);
-			if (rs.wasNull()) {
-				extreme = DMIUtil.MISSING_LONG;
-			}
-		}
-	        return extreme;
-	}
-	catch (Exception e) {
-		Message.printWarning(1, routine, "Error finding extreme.");
-		Message.printWarning(1, routine, e);
-		return DMIUtil.MISSING_LONG;
-	}
-}
-
-/**
-This function determines the max value of the specified field from the reqested
-table via using max(field) and the the specified dmi connection.
-@param table table name
-@param field table field to determine the max value of
-@return returns max record or DMIUtil.MISSING_INT if an error occured.
-@deprecated use DMIUtil.getExtremeRecord() instead.
-*/
-public long getMaxRecord (String table, String field) {
-	return getExtremeRecord(table, field, "MAX");
-}
-
-/**
-This function determines the min value of the specified field from the reqested
-table via using min(field) and the the specified dmi connection.
-@param table table name
-@param field table field to determine the min value of
-@return returns min record or DMIUtil.MISSING_INT if an error occured.
-@deprecated use DMIUtil.getExtremeRecord() instead.
-*/
-public long getMinRecord(String table, String field) {
-	return getExtremeRecord(table, field, "MIN");
 }
 
 /**
@@ -4240,31 +4180,30 @@ returned in the following array:<p>
 <li>[2] = "00"</li>
 </ul>
 @return the database version numbers, each stored in a separate element of a
-3-element String array.  null is returned if the database version cannot be
-determined.
+3-element String array.  null is returned if the database version cannot be determined.
 */
 public String[] getDatabaseVersionArray() {
-	String[] version = new String[3];
+    String[] version = new String[3];
 
-	if (isDatabaseVersionAtLeast(_VERSION_030000_20041001)) {
-		version[0] = "03";
-		version[1] = "00";
-		version[2] = "00";
-		return version;
-	}
-	else if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)) {
-		version[0] = "02";
-		version[1] = "08";
-		version[2] = "00";
-		return version;
-	}
-	else if (isDatabaseVersionAtLeast(_VERSION_020601_20020625)) {
-		version[0] = "02";
-		version[1] = "06";
-		version[2] = "01";
-	}
-	
-	return null;
+    if (isDatabaseVersionAtLeast(_VERSION_030000_20041001)) {
+        version[0] = "03";
+        version[1] = "00";
+        version[2] = "00";
+        return version;
+    }
+    else if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)) {
+        version[0] = "02";
+        version[1] = "08";
+        version[2] = "00";
+        return version;
+    }
+    else if (isDatabaseVersionAtLeast(_VERSION_020601_20020625)) {
+        version[0] = "02";
+        version[1] = "06";
+        version[2] = "01";
+    }
+    
+    return null;
 }
 
 /**
@@ -4272,7 +4211,130 @@ Returns the current db user.
 @return the current db user.
 */
 public RiversideDB_DBUser getDBUser() {
-	return _dbuser;
+    return _dbuser;
+}
+
+/**
+Returns "RiversideDB"
+@return "RiversideDB"
+*/
+public String getDMIName() {
+	return "RiversideDB";
+}
+
+/**
+This function determines the extreme value of the specified field from the 
+requested table via using max(field) or min(field) and the the specified dmi connection.
+@param table table name
+@param field table field to determine the max value of
+@param flag "MAX" or "MIN" depending upon which extreme is desired.
+@return returns a int of the extreme record or DMIUtil.MISSING_INT if an error occurred.
+@deprecated use DMIUtil.getExtremeRecord() instead.
+*/
+public long getExtremeRecord(String table, String field, String flag) {
+	String routine = "RiversideDB_DMI.getExtremeRecord";
+	try {
+		String query = "select " + flag + "(" + field.trim() + ") from " + table.trim();
+		ResultSet rs = dmiSelect(query);
+	
+		long extreme = DMIUtil.MISSING_LONG;
+		if (rs.next()) {
+			extreme = rs.getLong(1);
+			if (rs.wasNull()) {
+				extreme = DMIUtil.MISSING_LONG;
+			}
+		}
+	    return extreme;
+	}
+	catch (Exception e) {
+		Message.printWarning(1, routine, "Error finding extreme.");
+		Message.printWarning(1, routine, e);
+		return DMIUtil.MISSING_LONG;
+	}
+}
+
+/**
+Return the list of distinct counties determined from the Geoloc table when the database connection
+was opened.
+@return the distinct counties in the Geoloc table.
+*/
+public List<String> getGeolocCountyList()
+{
+    return __RiversideDB_GeolocCountyList;
+}
+
+/**
+Return the list of distinct states determined from the Geoloc table when the database connection
+was opened.
+@return the distinct states in the Geoloc table.
+*/
+public List<String> getGeolocStateList()
+{
+    return __RiversideDB_GeolocStateList;
+}
+
+/**
+This function determines the max value of the specified field from the requested
+table via using max(field) and the the specified dmi connection.
+@param table table name
+@param field table field to determine the max value of
+@return returns max record or DMIUtil.MISSING_INT if an error occurred.
+@deprecated use DMIUtil.getExtremeRecord() instead.
+*/
+public long getMaxRecord (String table, String field) {
+	return getExtremeRecord(table, field, "MAX");
+}
+
+/**
+This function determines the min value of the specified field from the requested
+table via using min(field) and the the specified dmi connection.
+@param table table name
+@param field table field to determine the min value of
+@return returns min record or DMIUtil.MISSING_INT if an error occurred.
+@deprecated use DMIUtil.getExtremeRecord() instead.
+*/
+public long getMinRecord(String table, String field) {
+	return getExtremeRecord(table, field, "MIN");
+}
+
+/**
+Return the list of distinct data source abbreviations determined from the MeasType table when the
+database connection was opened.
+@return the distinct data source abbreviations in the MeasType table.
+*/
+public List<String> getMeasTypeDataSourceAbbrevList()
+{
+    return __RiversideDB_MeasTypeDataSourceAbbrevList;
+}
+
+/**
+Return the list of distinct data types determined from the MeasType table when the database connection
+was opened.
+@return the distinct data types in the MeasType table.
+*/
+public List<String> getMeasTypeDataTypeList()
+{
+    return __RiversideDB_MeasTypeDataTypeList;
+}
+
+/**
+Return the list of distinct data subtypes determined from the MeasType table when the database connection
+was opened.
+@return the distinct data subtypes in the MeasType table.
+*/
+public List<String> getMeasTypeSubTypeList()
+{
+    return __RiversideDB_MeasTypeSubTypeList;
+}
+
+/**
+Return the list of distinct data units determined from the MeasType table when the database connection
+was opened.
+@return the distinct data units in the MeasType table.
+*/
+public List<String> getMeasTypeUnitsList()
+{
+    return __RiversideDB_MeasTypeUnitsList;
 }
 
 /**
@@ -4309,8 +4371,7 @@ throws Exception {
 	}
 	
 	if (size == 0) {
-		String message = "No DataDimension read from database "
-			+ "-- empty set.";
+		String message = "No DataDimension read from database -- empty set.";
 		Message.printWarning ( 2, routine, message );
 		throw new Exception ( message );
 	}
@@ -4318,18 +4379,14 @@ throws Exception {
 	// For each object, break apart and add units to the global list...
 
 	for (int i = 0; i < size; i++) {
-		RiversideDB_DataDimension d = 
-			(RiversideDB_DataDimension)dataDimension.get(i);
-		try {	// Else add the units...
-			DataDimension.addDimension ( 
-				new DataDimension ( d.getDimension(),
-						d.getDescription() ) );
+		RiversideDB_DataDimension d = (RiversideDB_DataDimension)dataDimension.get(i);
+		try {
+		    // Else add the units...
+			DataDimension.addDimension ( new DataDimension ( d.getDimension(), d.getDescription() ) );
 		}
 		catch ( Exception e ) {
-			Message.printWarning ( 2, routine,
-			"Error processing RiversideDB_DataDimension "
-			+ " object at object # [" + i +
-			"]\nObject dump follows:" + d.toString());
+			Message.printWarning ( 2, routine, "Error processing RiversideDB_DataDimension "
+			+ " object at object # [" + i + "]\nObject dump follows:" + d.toString());
 		}
 	}
 
@@ -4363,9 +4420,9 @@ throws Exception {
 	String base_string;
 
 	for (int i = 0; i < size; i++) {
-		RiversideDB_DataUnits d = 
-			(RiversideDB_DataUnits)dataUnits.get(i);
-		try {	// Else add the units...
+		RiversideDB_DataUnits d = (RiversideDB_DataUnits)dataUnits.get(i);
+		try {
+		    // Else add the units...
 			units = new DataUnits ();
 
 			units.setDimension (d.getDimension());
@@ -4390,10 +4447,8 @@ throws Exception {
 			DataUnits.addUnits ( units );
 		}
 		catch ( Exception e ) {
-			Message.printWarning ( 2, routine,
-				"Error processing RiversideDB_DataUnits "
-				+ " object at object # [" + i
-				+ "]\nObject dump follows:" + d.toString());
+			Message.printWarning ( 2, routine, "Error processing RiversideDB_DataUnits "
+				+ " object at object # [" + i + "]\nObject dump follows:" + d.toString());
 		}
 	}
 
@@ -4442,8 +4497,7 @@ throws Exception {
 Reads an ActionDataModel with the given ID number.  From AlertIOInterface.
 @param actionNum the id number of the data model to be read.
 @return the ActionDataModel with the information read from the data provider.
-REVISIT (JTS - 2006-03-23)
-even necessary anymore?  
+TODO (JTS - 2006-03-23) even necessary anymore?  
 */
 public ActionDataModel readActionDataModel(int actionNum) 
 throws Exception {
@@ -4627,16 +4681,14 @@ throws Exception {
 /**
 Reads the action nums that correspond to a data test.
 @param dataTestNum the ID of the data test for which to read action nums.
-@return an integer array of the action nums (or null if there are no associated
-actions).
+@return an integer array of the action nums (or null if there are no associated actions).
 @throws Exception if an error occurs.
 */
 public int[] readDataTestActionNums(int dataTestNum) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DATATESTACTION);
-	q.addWhereClause("DataTestActionRelationship.DataTestNum = " 
-		+ dataTestNum);
+	q.addWhereClause("DataTestActionRelationship.DataTestNum = " + dataTestNum);
 	ResultSet rs = dmiSelect(q);
 	List v = new Vector();
 	int index = 1;
@@ -4644,8 +4696,7 @@ throws Exception {
 	while (rs.next()) {
 		index = 1;
 		i = rs.getInt(index++);
-		// ... and ignore -- this is the DataTestNum.  Only interested
-		// here in the action nums.
+		// ... and ignore -- this is the DataTestNum.  Only interested here in the action nums.
 		
 		i = rs.getInt(index++);
 		if (!rs.wasNull()) {
@@ -4692,8 +4743,7 @@ throws Exception {
 }
 
 /**
-Reads data test status data, puts it in the passed-in data model, and returns
-the data model.
+Reads data test status data, puts it in the passed-in data model, and returns the data model.
 */
 public DataTestDataModel readDataTestStatusForDataTestNum(
 int dataTestNum, DataTestDataModel model)
@@ -4735,16 +4785,14 @@ throws Exception {
 Reads a DataTestExpressionDataModel with the given ID number. 
 From AlertIOInterface.
 @param expressionNum the id number of the data model to be read.
-@return a DataTestExpressionDataModel with the information read from the 
-data provider.
+@return a DataTestExpressionDataModel with the information read from the data provider.
 */
 public DataTestExpressionDataModel readDataTestExpressionDataModel(
 int expressionNum) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DATATESTEXPRESSION);
-	q.addWhereClause("DataTestExpression.DataTestExpressionNum = " 
-		+ expressionNum);
+	q.addWhereClause("DataTestExpression.DataTestExpressionNum = " + expressionNum);
 	ResultSet rs = dmiSelect(q);
 	List v = toDataTestExpressionList(rs);
 	closeResultSet(rs);
@@ -4760,15 +4808,13 @@ throws Exception {
 Reads a DataTestFunctionDataModel with the given ID number.  
 From AlertIOInterface.
 @param functionNum the id number of the data model to be read.
-@return a DataTestFunctionDataModel with the information read from the 
-data provider.
+@return a DataTestFunctionDataModel with the information read from the data provider.
 */
 public DataTestFunctionDataModel readDataTestFunctionDataModel(int functionNum)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DATATESTFUNCTION);
-	q.addWhereClause("DataTestFunction.DataTestFunctionNum = " 
-		+ functionNum);
+	q.addWhereClause("DataTestFunction.DataTestFunctionNum = " + functionNum);
 	ResultSet rs = dmiSelect(q);
 	List v = toDataTestFunctionList(rs);
 	closeResultSet(rs);
@@ -4785,18 +4831,15 @@ throws Exception {
 
 /**
 Reads the Input ID nums associated with a data test function.
-@param dataTestFunctionNum the ID of the data test function to read input IDs
-for.
-@return a String array of the input IDs or null if there are no associated 
-input IDs.
+@param dataTestFunctionNum the ID of the data test function to read input IDs for.
+@return a String array of the input IDs or null if there are no associated input IDs.
 @throws Exception if an error occurs.
 */
 public String[] readDataTestFunctionInputIDs(int dataTestFunctionNum) 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DATATESTFUNCTIONINPUTID);
-	q.addWhereClause("DataTestFunctionInputIDs.DataTestFunctionNum = "
-		+ dataTestFunctionNum);
+	q.addWhereClause("DataTestFunctionInputIDs.DataTestFunctionNum = " + dataTestFunctionNum);
 	q.addOrderByClause("DataTestFunctionInputIDs.Position");
 	ResultSet rs = dmiSelect(q);
 	List v = new Vector();
@@ -4937,8 +4980,7 @@ throws Exception {
 }
 
 /**
-Executes query on DBUser table, returning the user record that matches the 
-provided DBUser.
+Executes query on DBUser table, returning the user record that matches the provided DBUser.
 @param DBUser_num the user num for which to return a record from the table
 @return a RiversideDB_DBUser object or null if nothing matched.
 @throws Exception if an error occurs.
@@ -4960,8 +5002,7 @@ throws Exception {
 }
 
 /**
-Executes query on DBUser table, returning the record that matches the 
-provided Login.
+Executes query on DBUser table, returning the record that matches the provided Login.
 @param login the login for which to return user data.
 @return a RiversideDB_DBUser object or null if nothing is found.
 @throws Exception if an error occurs.
@@ -5028,8 +5069,7 @@ int MeasLocGroup_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DBUSERMEASLOCGROUPRELATION);
-	q.addWhereClause("DBUserMeasLocGroupRelation.MeasLocGroup_num = " 
-		+ MeasLocGroup_num);
+	q.addWhereClause("DBUserMeasLocGroupRelation.MeasLocGroup_num = " + MeasLocGroup_num);
 	ResultSet rs = dmiSelect(q);
 	List v = toDBUserMeasLocGroupRelationList(rs);
 	closeResultSet(rs);
@@ -5048,14 +5088,12 @@ int DBUser_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DBUSERMEASLOCGROUPRELATION);
-	q.addWhereClause("DBUserMeasLocGroupRelation.DBUser_num = " 
-		+ DBUser_num);
+	q.addWhereClause("DBUserMeasLocGroupRelation.DBUser_num = " + DBUser_num);
 	ResultSet rs = dmiSelect(q);
 	List v = toDBUserMeasLocGroupRelationList(rs);
 	closeResultSet(rs);
 	return v;
 }
-
 
 /**
 Executes query on ExportConf table, returning all records where 
@@ -5082,8 +5120,7 @@ ExportProduct_num is equal to the value passed to the method and ordered by Iden
 @return Vector of RiversideDB_ExportConf objects, one per record
 @throws Exception if an error occurs
 */
-public List readExportConfListForExportProduct_numByLocation
-(int ExportProduct_num)
+public List readExportConfListForExportProduct_numByLocation (int ExportProduct_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_EXPORTCONF );
@@ -5165,8 +5202,7 @@ public List readExportProductList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_EXPORTPRODUCT );
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later		
+// TODO (JTS - 2003-06-02) This will be phased out later		
 //		if (getDatabaseVersion() < _VERSION_020800_20030422) {		
 	q.addOrderByClause("ExportProduct.Product_group");
 //	}	
@@ -5188,8 +5224,7 @@ public List readExportProductListForProductGroup_num(int ProductGroup_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_EXPORTPRODUCT );
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later		
+// TODO (JTS - 2003-06-02) This will be phased out later		
 //		if (getDatabaseVersion() < _VERSION_020800_20030422) {		
 	q.addOrderByClause("ExportProduct.Product_group");
 //	}	
@@ -5218,9 +5253,40 @@ throws Exception {
 }
 
 /**
+Read the distinct list of counties from the Geoloc table.
+@return a list of county names.
+@exception Exception if there is an error reading the data.
+*/
+public List<String> readGeolocCountyList () 
+throws Exception {
+    DMISelectStatement q = new DMISelectStatement ( this );
+    buildSQL(q, _S_GEOLOC_COUNTY_DISTINCT);
+    q.addOrderByClause("Geoloc.County");
+    ResultSet rs = dmiSelect(q);
+    List<String> v = toStringList (rs);
+    closeResultSet(rs);
+    return v;
+}
+
+/**
+Read the distinct list of states from the Geoloc table.
+@return a list of state names.
+@exception Exception if there is an error reading the data.
+*/
+public List<String> readGeolocStateList () 
+throws Exception {
+    DMISelectStatement q = new DMISelectStatement ( this );
+    buildSQL(q, _S_GEOLOC_STATE_DISTINCT);
+    q.addOrderByClause("Geoloc.State");
+    ResultSet rs = dmiSelect(q);
+    List<String> v = toStringList (rs);
+    closeResultSet(rs);
+    return v;
+}
+
+/**
 Read the Geoloc data for all records via a Stored Procedure.
-REVISIT (JTS - 2003-06-03)
-Is anything ever going to be done with these?
+TODO (JTS - 2003-06-03) Is anything ever going to be done with these?
 @return a vector of objects of type RiversideDB_Geoloc.
 @throws Exception if an error occurs
 */
@@ -5235,8 +5301,7 @@ throws Exception {
 }
 
 /**
-Read the Geoloc data for a given Geoloc record with the given Geoloc_num,
-via a stored procedure.
+Read the Geoloc data for a given Geoloc record with the given Geoloc_num, via a stored procedure.
 @param Geoloc_num Geoloc_num to query for.
 @return a RiversideDB_Geoloc object, or null if no matching record could be found
 @throws Exception if an error occurs
@@ -5291,6 +5356,18 @@ throws Exception {
 	_RiversideDB_Tables_Vector = readTablesList ();
     // Read the table layout table
     //_RiversideDB_TableLayout_Vector = readTableLayoutList ();
+	// Distinct counties in the GeoLoc table
+	__RiversideDB_GeolocCountyList = readGeolocCountyList();
+	// Distinct states in the GeoLoc table
+    __RiversideDB_GeolocStateList = readGeolocStateList();
+    // Distinct data types in the MeasType table
+    __RiversideDB_MeasTypeDataSourceAbbrevList = readMeasTypeDataSourceAbbrevList();
+    // Distinct data types in the MeasType table
+    __RiversideDB_MeasTypeDataTypeList = readMeasTypeDataTypeList();
+    // Distinct data subtypes in the MeasType table
+    __RiversideDB_MeasTypeSubTypeList = readMeasTypeSubTypeList();
+    // Distinct data units in the MeasType table
+    __RiversideDB_MeasTypeUnitsList = readMeasTypeUnitsList();
 }
 
 /**
@@ -5311,8 +5388,7 @@ throws Exception {
 /**
 Executes query on ImportConf table, returning all objects where
 ImportProduct_num is equal to the given ImportProduct_num
-@param ImportProduct_num the ImportProduct_num for which to return all
-matching records
+@param ImportProduct_num the ImportProduct_num for which to return all matching records
 @return Vector of RiversideDB_ImportConf objects
 @throws Exception if an error occurs
 */
@@ -5329,8 +5405,7 @@ throws Exception {
 
 /**
 Executes query on ImportConf table, returning all objects where
-ImportProduct_num is equal to the given ImportProduct_num, and ordered by
-Identifier.
+ImportProduct_num is equal to the given ImportProduct_num, and ordered by Identifier.
 @param ImportProduct_num the value for which to return matching records
 @return Vector of RiversideDB_ImportConf objects
 @throws Exception if an error occurs
@@ -5372,8 +5447,7 @@ throws Exception {
 }
 
 /**
-Read all records from the ImportProduct table, ordered by Product_group and
-Product_name.
+Read all records from the ImportProduct table, ordered by Product_group and Product_name.
 @return vector of RiversideDB_ImportProduct objects, one per record
 @throws Exception if an error occurs
 */
@@ -5381,8 +5455,7 @@ public List readImportProductList()
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_IMPORTPRODUCT );
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later		
+// TODO (JTS - 2003-06-02) This will be phased out later		
 //	if (getDatabaseVersion() < _VERSION_020800_20030422) {		
 		q.addOrderByClause("ImportProduct.Product_group");
 //	}
@@ -5425,8 +5498,7 @@ public List readImportProductListForProductGroup_num(int ProductGroup_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_IMPORTPRODUCT );
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later		
+// TODO (JTS - 2003-06-02) This will be phased out later		
 //	if (getDatabaseVersion() < _VERSION_020800_20030422) {		
 		q.addOrderByClause("ImportProduct.Product_group");
 //	}	
@@ -5534,8 +5606,7 @@ throws Exception {
 }
 
 /**
-Read the MeasLoc data for the record that matches the given identifier
-and Meas_loc_type
+Read the MeasLoc data for the record that matches the given identifier and Meas_loc_type
 @param Identifier Identifier to match against.
 @param type Meas_loc_type ("A" or "P") to distinguish Identifier.
 @return the matching RiversideDB_MeasLoc object, or null if none could be found
@@ -5695,8 +5766,7 @@ throws Exception {
 }
 
 /**
-Returns the RiversideDB_MeasQualityFlag record that matches the given 
-Quality_flag.
+Returns the RiversideDB_MeasQualityFlag record that matches the given Quality_flag.
 @param Quality_flag the Quality_flag to match.
 @return the matching RiversideDB_MeasQualityFlag record, or null if none match.
 @throws Exception if an error occurs.
@@ -5706,8 +5776,7 @@ String Quality_flag)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASQUALITYFLAG );
-	q.addWhereClause("MeasQualityFlag.Quality_flag = '" 
-		+ Quality_flag + "'");
+	q.addWhereClause("MeasQualityFlag.Quality_flag = '" + Quality_flag + "'");
 	q.addOrderByClause("MeasQualityFlag.Quality_flag");
 	ResultSet rs = dmiSelect(q);
 	List v = toMeasQualityFlagList (rs);
@@ -5729,8 +5798,7 @@ public List readMeasReducGridWeightListForOutputMeasType_num
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASREDUCGRIDWEIGHT );
-	q.addWhereClause ( "MeasReducGridWeight.OutputMeasType_num=" + 
-		OutputMeasType_num );
+	q.addWhereClause ( "MeasReducGridWeight.OutputMeasType_num=" + OutputMeasType_num );
 	ResultSet rs = dmiSelect(q);
 	List v = toMeasReducGridWeightList (rs);
 	closeResultSet(rs);
@@ -5781,8 +5849,7 @@ public RiversideDB_MeasReduction readMeasReductionForOutputMeasType_num
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASREDUCTION );
-	q.addWhereClause ( "MeasReduction.OutputMeasType_num=" + 
-		OutputMeasType_num );
+	q.addWhereClause ( "MeasReduction.OutputMeasType_num=" + OutputMeasType_num );
 	ResultSet rs = dmiSelect(q);
 	List v = toMeasReductionList (rs);
 	closeResultSet(rs);
@@ -5811,8 +5878,7 @@ throws Exception {
 /**
 Returns the RiversideDB_MeasReductionType record that matches the given Type.
 @param Type the Type to match.
-@return the matching RiversideDB_MeasReductionType record, or null if none 
-match.
+@return the matching RiversideDB_MeasReductionType record, or null if none match.
 @throws Exception if an error occurs.
 */
 public RiversideDB_MeasReductionType readMeasReductionTypeForType(String Type)
@@ -5915,15 +5981,12 @@ throws Exception {
 }
 
 /**
-Returns the RiversideDB_MeasTransProtocol record that matches the given 
-Protocol.
+Returns the RiversideDB_MeasTransProtocol record that matches the given Protocol.
 @param Protocol the Protocol to match.
-@return the matching RiversideDB_MeasTransProtocol record, or null if none 
-match.
+@return the matching RiversideDB_MeasTransProtocol record, or null if none match.
 @throws Exception if an error occurs.
 */
-public RiversideDB_MeasTransProtocol readMeasTransProtocolForProtocol(
-String Protocol)
+public RiversideDB_MeasTransProtocol readMeasTransProtocolForProtocol(String Protocol)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTRANSPROTOCOL );
@@ -5957,6 +6020,70 @@ throws Exception {
 		return null;
 	}
 	return v;
+}
+
+/**
+Read the distinct list of data source abbreviations from the MeasType table.
+@return a list of data types.
+@exception Exception if there is an error reading the data.
+*/
+public List<String> readMeasTypeDataSourceAbbrevList () 
+throws Exception {
+    DMISelectStatement q = new DMISelectStatement ( this );
+    buildSQL(q, _S_MEASTYPE_DATASOURCEABBREV_DISTINCT);
+    q.addOrderByClause("MeasType.source_abbrev");
+    ResultSet rs = dmiSelect(q);
+    List<String> v = toStringList (rs);
+    closeResultSet(rs);
+    return v;
+}
+
+/**
+Read the distinct list of data types from the MeasType table.
+@return a list of data types.
+@exception Exception if there is an error reading the data.
+*/
+public List<String> readMeasTypeDataTypeList () 
+throws Exception {
+    DMISelectStatement q = new DMISelectStatement ( this );
+    buildSQL(q, _S_MEASTYPE_DATATYPE_DISTINCT);
+    q.addOrderByClause("MeasType.data_type");
+    ResultSet rs = dmiSelect(q);
+    List<String> v = toStringList (rs);
+    closeResultSet(rs);
+    return v;
+}
+
+/**
+Read the distinct list of data subtypes from the MeasType table.
+@return a list of data subtypes.
+@exception Exception if there is an error reading the data.
+*/
+public List<String> readMeasTypeSubTypeList () 
+throws Exception {
+    DMISelectStatement q = new DMISelectStatement ( this );
+    buildSQL(q, _S_MEASTYPE_SUBTYPE_DISTINCT);
+    q.addOrderByClause("MeasType.sub_type");
+    ResultSet rs = dmiSelect(q);
+    List<String> v = toStringList (rs);
+    closeResultSet(rs);
+    return v;
+}
+
+/**
+Read the distinct list of data units from the MeasType table.
+@return a list of data units.
+@exception Exception if there is an error reading the data.
+*/
+public List<String> readMeasTypeUnitsList () 
+throws Exception {
+    DMISelectStatement q = new DMISelectStatement ( this );
+    buildSQL(q, _S_MEASTYPE_UNITS_DISTINCT);
+    q.addOrderByClause("MeasType.units_abbrev");
+    ResultSet rs = dmiSelect(q);
+    List<String> v = toStringList (rs);
+    closeResultSet(rs);
+    return v;
 }
 
 /**
@@ -6122,14 +6249,12 @@ throws Exception {
 /**
 executes a query on table MeasType, limiting values to a series of things,
 should any of them be set in the string passed in to the method.  The 
-where clause may set Data_type, Time_step_base, Identifier, Scenario. and/or
-Source_abbrev.
+where clause may set Data_type, Time_step_base, Identifier, Scenario, and/or Source_abbrev.
 @param tsIdent a ts identifier string that will be split up and its values
 set in various where clauses
 will have its own separate time series.
 @param sortField the field to sort on
-@return a vector of RiversideDB_MeasType objects filled with rows from the
-resultSet
+@return a vector of RiversideDB_MeasType objects filled with rows from the resultSet
 @throws Exception if an error occurs
 */
 public List readMeasTypeListForTSIdent(String tsIdent, String sortField) 
@@ -6139,25 +6264,20 @@ throws Exception {
 
 	TSIdent id = new TSIdent(tsIdent.trim());
 	if (id.getMainType().length() > 0) {
-		q.addWhereClause("MeasType.Data_type = '"
-			+ escape(id.getMainType().toUpperCase()) + "'");
+		q.addWhereClause("MeasType.Data_type = '" + escape(id.getMainType().toUpperCase()) + "'");
 	}
 
 	if (id.getSubType().length() > 0) {
-		q.addWhereClause("MeasType.Sub_type = '"
-			+ escape(id.getSubType().toUpperCase()) + "'");
+		q.addWhereClause("MeasType.Sub_type = '" + escape(id.getSubType().toUpperCase()) + "'");
 	}
 	if ( !id.getInterval().equals("") ) {
 		// TODO
-		// This does not work because the case or spelling may not
-		// match in the lookup...
+		// This does not work because the case or spelling may not match in the lookup...
 		// Need to get directly from the interval part.
 		//addWhereClause("MeasType.Time_step_base = " + 
 		//	TSInterval.getName(id.getIntervalBase()).toUpperCase());
-		TimeInterval interval = TimeInterval.parseInterval (
-			id.getInterval() );
-		q.addWhereClause("MeasType.Time_step_base = '"
-			+ escape(interval.getBaseString()) + "'" );
+		TimeInterval interval = TimeInterval.parseInterval (id.getInterval() );
+		q.addWhereClause("MeasType.Time_step_base = '" + escape(interval.getBaseString()) + "'" );
 
 		// The convention when defining MeasType records is to always
 		// include the multiplier.  However, it is not required and will
@@ -6168,23 +6288,19 @@ throws Exception {
 		// rather that getting an interval string from the integer base.
 	
 		if ( !interval.getMultiplierString().equals("") ) {
-			q.addWhereClause("MeasType.Time_step_mult = " 
-				+ interval.getMultiplierString().toUpperCase());
+			q.addWhereClause("MeasType.Time_step_mult = " + interval.getMultiplierString().toUpperCase());
 		}
 	}
 	if (id.getLocation().length() > 0) {
-		q.addWhereClause("MeasLoc.Identifier = '"
-			+ escape(id.getLocation().toUpperCase()) + "'");
+		q.addWhereClause("MeasLoc.Identifier = '" + escape(id.getLocation().toUpperCase()) + "'");
 	}
 
 	if (id.getScenario().length() > 0) {
-		q.addWhereClause("MeasType.Scenario = '"
-			+ escape(id.getScenario().toUpperCase()) + "'");
+		q.addWhereClause("MeasType.Scenario = '" + escape(id.getScenario().toUpperCase()) + "'");
 	}
 	String source = id.getSource().toUpperCase();
-	// REVISIT [LT] 2005-01-10 - Is this also version dependent ?????
-	// REVISIT [LT] 2005-02-02 - In discussion with MT it was decided that
-	//                           this check should not be done.
+	// TODO [LT] 2005-01-10 - Is this also version dependent ?????
+	// TODO [LT] 2005-02-02 - In discussion with MT it was decided that this check should not be done.
 	//			     Keep around, since I do not know if other
 	//			     application using this library is still 
 	//			     passing tsIdent with HYDROBASE. 
@@ -6192,8 +6308,7 @@ throws Exception {
 		source = id.getSubSource().toUpperCase();
 	}
 	if (source.length() > 0) {
-		q.addWhereClause("MeasType.Source_abbrev = '" 
-			+ escape(source) + "'");
+		q.addWhereClause("MeasType.Source_abbrev = '" + escape(source) + "'");
 	}
 	if (sortField != null) {
 		q.addOrderByClause(sortField);
@@ -6203,6 +6318,22 @@ throws Exception {
 	List v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	return v;
+}
+
+/**
+Read MeasType records for distinct data types, ordered by Data_type.
+@return a vector of objects of type RiversideDB_MeasType, with only the
+Data_type field filled in.
+@throws Exception if an error occurs
+*/
+public List readMeasTypeMeasLocGeolocList () 
+throws Exception {
+    DMISelectStatement q = new DMISelectStatement ( this );
+    buildSQL ( q, _S_MEASTYPE_MEASLOC_GEOLOC_LIST );
+    ResultSet rs = dmiSelect(q);
+    List v = toMeasTypeMeasLocGeolocList (rs);
+    closeResultSet(rs);
+    return v;
 }
 
 /**
@@ -6278,8 +6409,7 @@ throws Exception {
 
 /**
 Reads all Operation records for the specified MeasLocGroup_num.
-@param MeasLocGroup_num the MeasLocGroup_num for which to read Operation 
-records.
+@param MeasLocGroup_num the MeasLocGroup_num for which to read Operation records.
 @return a Vector of RiversideDB_Operation objects.
 @throws Exception if an error occurs.
 */
@@ -6296,8 +6426,7 @@ throws Exception {
 
 /**
 Reads all OperationStateRelation records for the specified Operation_num.
-@param Operation_num the Operation_num for which to read 
-OperationStateRelation records.
+@param Operation_num the Operation_num for which to read OperationStateRelation records.
 @return a Vector of RiversideDB_OperationStateRelation objects.
 @throws Exception if an error occurs.
 */
@@ -6364,8 +6493,7 @@ public List readProductGroupListForProductType(String ProductType)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_PRODUCTGROUP);
-	q.addWhereClause("ProductGroup.ProductType = '" 
-		+ escape(ProductType) + "'");
+	q.addWhereClause("ProductGroup.ProductType = '" + escape(ProductType) + "'");
 	ResultSet rs = dmiSelect(q);
 	List v = toProductGroupList(rs);
 	closeResultSet(rs);
@@ -6444,8 +6572,7 @@ throws Exception {
 }
 
 /**
-Read the RatingTable records for all that match the given RatingTable_num,
-ordered by Value1.
+Read the RatingTable records for all that match the given RatingTable_num, ordered by Value1.
 @param RatingTable_num the value to match against
 @return a Vector of matching RiversideDB_RatingTable objects.
 @throws Exception if an error occurs
@@ -6455,8 +6582,7 @@ throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_RATINGTABLE );
 	q.addWhereClause ( "RatingTable.RatingTable_num=" + RatingTable_num ); 
-	// REVISIT (JTS - 2003-06-03)
-	// Might need an argument to sort by a specific field...
+	// TODO (JTS - 2003-06-03) Might need an argument to sort by a specific field...
 	q.addOrderByClause ( "RatingTable.Value1" ); 
 	ResultSet rs = dmiSelect(q);
 	List v = toRatingTableList (rs);
@@ -6594,8 +6720,7 @@ throws Exception {
 }
 
 /**
-Reads all the StateGroup records, ordered by Date_Time in decreasing order and
-Scenario.
+Reads all the StateGroup records, ordered by Date_Time in decreasing order and Scenario.
 @return a vector of objects of type RiversideDB_StateGroup.
 @throws Exception if an error occurs
 */
@@ -6631,7 +6756,7 @@ throws Exception {
 }
 
 /**
-REVISIT (JTS - 2003-11-06)
+TODO (JTS - 2003-11-06)
 Reads all the StateGroup records, for use in the RiverTrakCalibrator, that 
 match the specified MeasLocGroup_num and are less than or equal to the run 
 time.  It then returns the StateGroup_num of the closest matching stategroup.
@@ -6640,12 +6765,10 @@ If none are found, a new stategroup is added and the number of that is returned.
 @param Date_Time the datetime to search for less than or equal to, 
 it will be formatted for SQL with DMIUtil.formatDateTime().  Can be null.
 @return the stategroup_num of the found state, or DMIUtil.MISSING_INT if 
-there is an error formatting the Date_Time to a String (almost 100% guaranteed
-not to happen).
+there is an error formatting the Date_Time to a String (almost 100% guaranteed not to happen).
 @throws Exception if an error occurs
 */
-public long readStateGroupForMeasLocGroup_numRunDate(long MeasLocGroup_num,
-DateTime Date_Time)
+public long readStateGroupForMeasLocGroup_numRunDate(long MeasLocGroup_num, DateTime Date_Time)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_STATEGROUP );
@@ -6675,8 +6798,7 @@ throws Exception {
 		buildSQL(q, _S_STATEGROUP);
 		q.addWhereClause("StateGroup.Date_Time IS NULL");
 		q.addWhereClause("StateGroup.Scenario = 'DEFAULT'");
-		q.addWhereClause("StateGroup.MeasLocGroup_num = " 
-			+ MeasLocGroup_num);
+		q.addWhereClause("StateGroup.MeasLocGroup_num = " + MeasLocGroup_num);
 		rs = dmiSelect(q);
 		v = toStateGroupList(rs);
 		if (v.size() == 0) {
@@ -6704,11 +6826,9 @@ throws Exception {
 }
 
 /**
-Read all the State records that match the given StateGroup_num, ordered by
-Module, Variable and Seq.
+Read all the State records that match the given StateGroup_num, ordered by Module, Variable and Seq.
 @param StateGroup_num value to match against
-@return a vector of objects of type RiversideDB_StateGroup with the given
-StateGroup_num.
+@return a vector of objects of type RiversideDB_StateGroup with the given StateGroup_num.
 @throws Exception if an error occurs
 */
 public List readStateListForStateGroup_num(long StateGroup_num)
@@ -6734,16 +6854,14 @@ throws Exception {
 }
 
 /**
-Read all the State records that match the given StateGroup_num, ordered by
-Module, Variable and Seq.
+Read all the State records that match the given StateGroup_num, ordered by Module, Variable and Seq.
 @param StateGroup_num value to match against
 @param module the module to match against
 @return a vector of objects of type RiversideDB_StateGroup with the given
 StateGroup_num.  Returns null if the database version is 3.00.00 or greater.
 @throws Exception if an error occurs
 */
-public List readStateListForStateGroup_numModule(long StateGroup_num,
-String module)
+public List readStateListForStateGroup_numModule(long StateGroup_num, String module)
 throws Exception {
 	if (isDatabaseVersionAtLeast(_VERSION_030000_20041001)) {
 		// the module field is not in the database design
@@ -6780,8 +6898,7 @@ throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_STATE);
 	q.addWhereClause("State.StateGroup_num = " + StateGroup_num);
-	q.addWhereClause("State.OperationStateRelation_num = "
-		+ OperationStateRelation_num);
+	q.addWhereClause("State.OperationStateRelation_num = " + OperationStateRelation_num);
 	ResultSet rs = dmiSelect(q);
 	List v = toStateList(rs);
 	closeResultSet(rs);
@@ -6791,8 +6908,7 @@ throws Exception {
 /**
 Read the Station data for all records matching the given MeasLoc_num.
 @param MeasLoc_num value to match against.
-@return a vector of objects of type RiversideDB_Station that match the given
-MeasLoc_num.
+@return a vector of objects of type RiversideDB_Station that match the given MeasLoc_num.
 @throws Exception if an error occurs
 */
 public List readStationListForMeasLoc_num ( long MeasLoc_num )
@@ -6833,8 +6949,7 @@ throws Exception {
 	if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)){
 		DMISelectStatement q = new DMISelectStatement(this);
 		buildSQL (q, _S_TABLES);
-		q.addWhereClause("IsTSTemplate = '" 
-			+ escape(IsTSTemplate) + "'");
+		q.addWhereClause("IsTSTemplate = '" + escape(IsTSTemplate) + "'");
 		ResultSet rs = dmiSelect(q);
 		List v = toTablesList(rs);
 		closeResultSet(rs);
@@ -6848,8 +6963,7 @@ throws Exception {
 /**
 Read the Table record that matches the given Table_name.
 @param Table_name value to match against
-@return a RiversideDB_Tables object with the given Table_name, or null if none
-could be found.
+@return a RiversideDB_Tables object with the given Table_name, or null if none could be found.
 @throws Exception if an error occurs
 */
 public RiversideDB_Tables readTablesForTable_name(String Table_name) 
@@ -6869,8 +6983,7 @@ throws Exception {
 /**
 Read the Table record that matches the given Table_num.
 @param Table_num the value to match against
-@return a RiversideDB_Tables object with the given Table_num, or null if none
-could be found
+@return a RiversideDB_Tables object with the given Table_num, or null if none could be found
 @throws Exception if an error occurs
 */
 public RiversideDB_Tables readTablesForTable_num(long Table_num) 
@@ -6904,14 +7017,12 @@ throws Exception {
 }
 
 /**
-Returns the RiversideDB_TableLayout record that matches the given 
-TableLayout_num.
+Returns the RiversideDB_TableLayout record that matches the given TableLayout_num.
 @param TableLayout_num the TableLayout_num to match.
 @return the matching RiversideDB_TableLayout record, or null if none match.
 @throws Exception if an error occurs.
 */
-public RiversideDB_TableLayout readTableLayoutForTableLayout_num(
-int TableLayout_num)
+public RiversideDB_TableLayout readTableLayoutForTableLayout_num(int TableLayout_num)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_TABLELAYOUT );
@@ -7297,8 +7408,7 @@ Reads the TSProduct table for the record that matches the specified identifier
 and user_num.<p>Permissions are not checked here for whether the user has 
 permission to read the record -- that should be handled by the calling code.
 @param identifier the identifier for which to search.
-@return a RiversideDB_TSProduct object, or null if no matching records could be
-found.
+@return a RiversideDB_TSProduct object, or null if no matching records could be found.
 @throws Exception if an error occurs.
 */
 public RiversideDB_TSProduct readTSProductForIdentifier(String identifier)
@@ -7321,8 +7431,7 @@ throws Exception {
 }
 
 /**
-Reads the TSProductProps table for all records that matches the specified 
-tsproduct_num.<p>
+Reads the TSProductProps table for all records that matches the specified tsproduct_num.<p>
 @param tsproduct_num the tsproduct_num to use for matching records.
 @return a Vector of the matching RiversideDB_TSProductProps records.
 @throws Exception if an error occurs.
@@ -7332,8 +7441,7 @@ throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_TSPRODUCTPROPS);
 	if (tsproduct_num < 0) {
-		throw new Exception("TSProduct_num (" + tsproduct_num + ") "
-			+ "must be >= 0");
+		throw new Exception("TSProduct_num (" + tsproduct_num + ") must be >= 0");
 	}
 	q.addWhereClause("TSProductProps.tsproduct_num = " + tsproduct_num);
 	ResultSet rs = dmiSelect(q);
@@ -7358,8 +7466,7 @@ throws Exception {
 	_dbuser = user;
 	_dbgroup = readDBGroupForDBGroup_num(user.getPrimaryDBGroup_num());
 	if (_dbgroup == null) {
-		String message = "Unable to read a user group for "
-			+ "the specified user with PrimaryDBGroup_num of '"
+		String message = "Unable to read a user group for the specified user with PrimaryDBGroup_num of '"
 			+ user.getPrimaryDBGroup_num() + "'";
 
 		Message.printWarning(1, routine, message);
@@ -7865,7 +7972,7 @@ throws Exception {
 		s = rs.getString(index++);
 		if (!rs.wasNull()) {
 			data.setMessage(s.trim());
-		}				
+		}
 		
 		v.add(data);
 	}
@@ -8253,8 +8360,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setIsActive ( s.trim() );
 		}
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later		
+// TODO (JTS - 2003-06-02) This will be phased out later		
 //		if (getDatabaseVersion() < _VERSION_020800_20030422) {		
 			s = rs.getString ( index++ );
 			if ( !rs.wasNull() ) {
@@ -8408,13 +8514,13 @@ throws Exception {
 }
 
 /**
-Convert a ResultSet to a Vector of RiversideDB_Geoloc.
+Convert a ResultSet to a list of RiversideDB_Geoloc.
 @param rs ResultSet from a Geoloc table query.
 @throws Exception if an error occurs
 */
-private List toGeolocList ( ResultSet rs ) 
+private List<RiversideDB_Geoloc> toGeolocList ( ResultSet rs ) 
 throws Exception {
-	List v = new Vector();
+	List<RiversideDB_Geoloc> v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -8550,8 +8656,7 @@ throws Exception {
 		if ( !rs.wasNull() ) {
 			data.setIsActive ( s.trim() );
 		}
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later		
+// TODO (JTS - 2003-06-02) This will be phased out later		
 //		if (getDatabaseVersion() < _VERSION_020800_20030422) {		
 			s = rs.getString ( index++ );
 			if ( !rs.wasNull() ) {
@@ -9026,8 +9131,7 @@ throws Exception {
 		data = new RiversideDB_MeasReduction();
 		index = 1;
 		l = rs.getLong ( index++ );
-		// REVISIT [LT[ 2005-01-04. Checking if null after getLong?
-		//                          Same ? for the others????
+		// TODO [LT[ 2005-01-04. Checking if null after getLong? Same ? for the others????
 		if ( !rs.wasNull() ) {
 			data.setOutputMeasType_num ( l );
 		}
@@ -9376,6 +9480,222 @@ throws Exception {
 		v.add(data);
 	}
 	return v;
+}
+
+/**
+Convert a ResultSet to a list of RiversideDB_MeasTypeMeasLocGeoloc.
+@param rs ResultSet from a MeasType/MeasLoc/Geoloc table query.
+@throws Exception if an error occurs
+*/
+private List<RiversideDB_MeasTypeMeasLocGeoloc> toMeasTypeMeasLocGeolocList ( ResultSet rs ) 
+throws Exception {
+    List<RiversideDB_MeasTypeMeasLocGeoloc> v = new Vector();
+    int index = 1;
+    String s;
+    double d;
+    long l;
+    int i;
+    RiversideDB_MeasTypeMeasLocGeoloc data = null;
+    while ( rs.next() ) {
+        data = new RiversideDB_MeasTypeMeasLocGeoloc();
+        index = 1;
+        // MeasType...
+        l = rs.getLong ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setMeasType_num ( l );
+        }
+        l = rs.getLong ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setMeasLoc_num ( l);
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setData_type ( s.trim() );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setSub_type ( s.trim() );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setTime_step_base ( s.trim() );
+        }
+        l = rs.getLong ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setTime_step_mult ( l );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setSource_abbrev ( s.trim() );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setScenario ( s.trim() );
+        }
+        l = rs.getLong ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setTable_num1 ( l );
+        }
+        l = rs.getLong ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setDbload_method1 ( l );
+        }
+        l = rs.getLong ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setTable_num2 ( l );
+        }
+        l = rs.getLong ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setDbload_method2 ( l );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setDescription ( s.trim() );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setUnits_abbrev ( s.trim() );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setCreate_method ( s.trim() );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setTransmitProtocol ( s.trim() );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setStatus ( s.trim() );
+        }
+        d = rs.getDouble ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setMin_check ( d );
+        }
+        d = rs.getDouble ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setMax_check ( d );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            if ( isDatabaseVersionAtLeast(_VERSION_030000_20041001) ) {
+                data.setIsEditable ( s.trim() );
+            }
+            else {
+                data.setEditable ( s.trim() );
+            }
+        }
+        if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)){
+            s = rs.getString(index++);
+            if (!rs.wasNull()) {
+                data.setIsVisible(s.trim());
+            }
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setDBUser_num(i);
+            }
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setDBGroup_num(i);
+            }
+            s = rs.getString(index++);
+            if (!rs.wasNull()) {
+                data.setDBPermissions(s.trim());
+            }           
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setTS_DBUser_num(i);
+            }
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setTS_DBGroup_num(i);
+            }
+            s = rs.getString(index++);
+            if (!rs.wasNull()) {
+                data.setTS_DBPermissions(s.trim());
+            }                       
+        }
+        // MeasLoc...
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setIdentifier ( s.trim() );
+        }
+        s = rs.getString ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setMeasLoc_name ( s.trim() );
+        }
+        s = rs.getString(index++);
+        if ( !rs.wasNull() ) {
+            data.setMeas_loc_type(s.trim());
+        }
+        s = rs.getString(index++);
+        if ( !rs.wasNull() ) {
+            data.setComment(s.trim());
+        }
+        if (isDatabaseVersionAtLeast(_VERSION_020800_20030422)) {
+            /* Use MeasType values
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setDBUser_num(i);
+            }
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setDBGroup_num(i);
+            }
+            s = rs.getString(index++);
+            if (!rs.wasNull()) {
+                data.setDBPermissions(s.trim());
+            }*/
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setMeasLocGroup_num(i);
+            }
+        }
+        // Geoloc...
+        l = rs.getLong(index++);
+        if ( !rs.wasNull() ) {
+            data.setGeoloc_num(l);
+        }
+        d = rs.getDouble(index++);
+        if ( !rs.wasNull() ) {
+            data.setLatitude(d);
+        }
+        d = rs.getDouble(index++);
+        if ( !rs.wasNull() ) {
+            data.setLongitude(d);
+        }
+        d = rs.getDouble(index++);
+        if ( !rs.wasNull() ) {
+            data.setX(d);
+        }
+        d = rs.getDouble(index++);
+        if ( !rs.wasNull() ) {
+            data.setY(d);
+        }
+        s = rs.getString(index++);
+        if ( !rs.wasNull() ) {
+            data.setCountry(s.trim());
+        }
+        s = rs.getString(index++);
+        if ( !rs.wasNull() ) {
+            data.setState(s.trim());
+        }
+        s = rs.getString(index++);
+        if ( !rs.wasNull() ) {
+            data.setCounty(s.trim());
+        }
+        d = rs.getDouble(index++);
+        if ( !rs.wasNull() ) {
+            data.setElevation(d);
+        }
+        s = rs.getString(index++);
+        if ( !rs.wasNull() ) {
+            data.setElevation_units(s.trim());
+        }
+        // Now add...
+        v.add(data);
+    }
+    return v;
 }
 
 /**
@@ -10118,6 +10438,26 @@ throws Exception {
 }
 
 /**
+Convert a ResultSet to a list strings.  The ResultSet is expected to only contain a string data element.
+@param rs ResultSet from a table query.
+@throws Exception if an error occurs
+*/
+private List<String> toStringList ( ResultSet rs ) 
+throws Exception {
+    List<String> v = new Vector();
+    int index = 1;
+    String s;
+    while ( rs.next() ) {
+        index = 1;
+        s = rs.getString(index++);
+        if ( !rs.wasNull() ) {
+            v.add(s.trim());
+        }
+    }
+    return v;
+}
+
+/**
 Convert a ResultSet to a Vector of RiversideDB_TableLayout.
 @param rs ResultSet from a TableLayout table query.
 @throws Exception if an error occurs
@@ -10472,8 +10812,7 @@ throws Exception {
 	w.addValue(r.getArea_units());
 
 	if (!DMIUtil.isMissing(r.getArea_num())) {
-		w.addWhereClause(
-			"Area_num = " + r.getArea_num());
+		w.addWhereClause("Area_num = " + r.getArea_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else {
@@ -10514,8 +10853,7 @@ throws Exception {
 	w.addValue(r.getSource_abbrev());
 	w.addValue(r.getSource_name());
 
-	w.addWhereClause("Source_abbrev = '" 
-		+ escape(r.getSource_abbrev()) + "'");
+	w.addWhereClause("Source_abbrev = '" + escape(r.getSource_abbrev()) + "'");
 
 	dmiWrite(w, DMI.UPDATE_INSERT);	
 }
@@ -10574,8 +10912,7 @@ throws Exception {
 
 /**
 Writes expression data.  From AlertIOInterface.
-@param dataModel the DataTestExpressionDataModel containing the data to be
-written.
+@param dataModel the DataTestExpressionDataModel containing the data to be written.
 @return the ID num of the data test expression that was written.
 @throws Exception if an error occurs.
 */
@@ -10601,12 +10938,10 @@ throws Exception {
 	if (insert) {
 		dmiWrite(w, DMI.INSERT);
 //		Message.printStatus(1, "", "" + w.toInsertString() + "\n\n\n");
-		return (int)getMaxRecord("DataTestExpression", 
-			"DataTestExpressionNum");
+		return (int)getMaxRecord("DataTestExpression", "DataTestExpressionNum");
 	}
 	else {
-		w.addWhereClause("DataTestExpressionNum = " 
-			+ dataModel.getExpressionNum());
+		w.addWhereClause("DataTestExpressionNum = " + dataModel.getExpressionNum());
 		dmiWrite(w, DMI.UPDATE);
 //		Message.printStatus(1, "", "" + w.toUpdateString() + "\n\n\n");
 		return dataModel.getExpressionNum();
@@ -10615,8 +10950,7 @@ throws Exception {
 
 /**
 Writes expression data.  From AlertIOInterface.
-@param dataModel the DataTestFunctionDataModel containing the data to be
-written.
+@param dataModel the DataTestFunctionDataModel containing the data to be written.
 @return the ID num of the data test function that was written.
 @throws Exception if an error occurs.
 */
@@ -10641,23 +10975,19 @@ throws Exception {
 	if (insert) {
 //		Message.printStatus(1, "", "" + w.toInsertString() + "\n\n\n");
 		dmiWrite(w, DMI.INSERT);
-		num = (int)getMaxRecord("DataTestFunction", 
-			"DataTestFunctionNum");
+		num = (int)getMaxRecord("DataTestFunction", "DataTestFunctionNum");
 	}
 	else {
-		w.addWhereClause("DataTestFunctionNum = " 
-			+ dataModel.getFunctionNum());
+		w.addWhereClause("DataTestFunctionNum = " + dataModel.getFunctionNum());
 //		Message.printStatus(1, "", "" + w.toUpdateString() + "\n\n\n");
 		dmiWrite(w, DMI.UPDATE);
 		num = dataModel.getFunctionNum();
 	}
 
 	// Clear out all the existing InputDataIDs.  This makes it easier
-	// to write the InputDataIDs -- all are inserts, rather than figuring
-	// out which are updates.
+	// to write the InputDataIDs -- all are inserts, rather than figuring out which are updates.
 	String sql = "DELETE FROM DataTestFunctionInputIDs WHERE "
-		+ "DataTestFunctionInputIDs.DataTestFunctionNum = " 
-		+ num;
+		+ "DataTestFunctionInputIDs.DataTestFunctionNum = " + num;
 	dmiDelete(sql);
 
 	String[] ids = dataModel.getInputDataIDs();
@@ -10713,8 +11043,7 @@ throws Exception {
 
 	dmiDelete("DELETE FROM DataTestResults WHERE DataTestNum = "
 		+ result.getDataTestNum() + " AND TestTime = '"
-		+ result.getTestTimeFormat().format(result.getTestTime()) 
-		+ "'");
+		+ result.getTestTimeFormat().format(result.getTestTime()) + "'");
 
 	dmiWrite(w, DMI.INSERT);
 //	Message.printStatus(1, "", "" + w.toInsertString() + "\n\n\n");
@@ -10780,18 +11109,15 @@ throws Exception {
 	w.addValue(r.getAdd_factor());
 	w.addValue(r.getUnits_system());
 
-	w.addWhereClause("Units_abbrev = '" 
-		+ escape(r.getUnits_abbrev()) + "'");
+	w.addWhereClause("Units_abbrev = '" + escape(r.getUnits_abbrev()) + "'");
 	
 	dmiWrite(w, DMI.UPDATE_INSERT);
 }
 
 /**
-REVISIT (JTS - 2003-06-26)
-Writes a vector of RiversideDB_DBUserMeasLocGroupRelation objects to the 
-database.
-@param v a Vector of RiversideDB_DBUserMeasLocGroupRelation objects to be
-written
+TODO (JTS - 2003-06-26)
+Writes a vector of RiversideDB_DBUserMeasLocGroupRelation objects to the database.
+@param v a Vector of RiversideDB_DBUserMeasLocGroupRelation objects to be written
 @throws Exception if an error occurs.
 */
 public void writeDBUserMeasLocGroupRelation(List v) 
@@ -10825,8 +11151,7 @@ throws Exception {
 	if (abort) {
 		throw new Exception ("Not all records in the list had the "
 			+ "same MeasLocGroup_num as the first element in the "
-			+ "list.  Records " + error + "had different "
-			+ "MeasLocGroup_nums.");
+			+ "list.  Records " + error + "had different MeasLocGroup_nums.");
 	}
 
 	deleteDBUserMeasLocGroupRelationForMeasLocGroup_num(firstMLG);	
@@ -10839,8 +11164,7 @@ throws Exception {
 
 /**
 Writes a RiversideDB_DBUserMeasLocGroupRelation object to the database.
-@param r a RiversideDB_DBUserMeasLocGroupRelation object with the data to
-write.
+@param r a RiversideDB_DBUserMeasLocGroupRelation object with the data to write.
 @throws Exception if an error occurs.
 */
 public void writeDBUserMeasLocGroupRelation(
@@ -10886,8 +11210,7 @@ If the ExportProduct_num of the object is missing, a new record will be
 inserted in the table.  Otherwise, an existing record will be updated.
 @return a RiversideDB_ExportProduct object when a new record is inserted
 into the ExportProduct table.  The ExportProduct_num value in this object
-is the newest autonumber ExportProduct_num entered.  Otherwise, it returns
-null
+is the newest autonumber ExportProduct_num entered.  Otherwise, it returns null
 @throws Exception if an error occurs
 */
 public RiversideDB_ExportProduct writeExportProduct(RiversideDB_ExportProduct r)
@@ -10898,8 +11221,7 @@ throws Exception {
 	w.addValue(r.getProduct_name());
 	w.addValue(r.getProduct_type());
 	w.addValue(r.getIsActive());
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later			
+// TODO (JTS - 2003-06-02) This will be phased out later			
 //	if (getDatabaseVersion() < _VERSION_020800_20030422) {	
 		w.addValue(r.getProduct_group());
 //	}
@@ -10935,8 +11257,7 @@ throws Exception {
 	}				
 
 	if (!DMIUtil.isMissing(r.getExportProduct_num())) {
-		w.addWhereClause(
-			"ExportProduct_num = " + r.getExportProduct_num());
+		w.addWhereClause( "ExportProduct_num = " + r.getExportProduct_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else {
@@ -10945,8 +11266,7 @@ throws Exception {
 		// to be returned, so execute a max() on the ExportProduct_num
 		// field to get the highest value (the last one inserted).  
 
-		String sql = "SELECT MAX(ExportProduct_num) from " +
-			"ExportProduct";
+		String sql = "SELECT MAX(ExportProduct_num) from ExportProduct";
 		ResultSet rs = dmiSelect(sql);
 		int ExportProduct_num;
 		if (rs.next()) {
@@ -10989,8 +11309,7 @@ value of the objects Geoloc_num is missing, a new record is inserted.  Otherwise
 a record will be added.
 @return a RiversideDB_Geoloc object when a new record is inserted
 into the Geoloc table.  The Geoloc_num value in this object
-is the newest autonumber Geoloc_num entered.  Otherwise, it returns
-null 
+is the newest autonumber Geoloc_num entered.  Otherwise, it returns null 
 @throws Exception if an error occurs
 */
 public RiversideDB_Geoloc writeGeoloc(RiversideDB_Geoloc r) throws Exception {
@@ -11008,8 +11327,7 @@ public RiversideDB_Geoloc writeGeoloc(RiversideDB_Geoloc r) throws Exception {
 	w.addValue(r.getElevation_units());
 
 	if (!DMIUtil.isMissing(r.getGeoloc_num())) {
-		w.addWhereClause(
-			"Geoloc_num = " + r.getGeoloc_num());
+		w.addWhereClause( "Geoloc_num = " + r.getGeoloc_num());
 		dmiWrite(w, DMI.UPDATE);
 		return null;
 	}
@@ -11027,8 +11345,7 @@ public RiversideDB_Geoloc writeGeoloc(RiversideDB_Geoloc r) throws Exception {
 			geoloc_num = rs.getLong(1);
 		}
 		else {
-			Message.printWarning(1, "writeGeoloc", "Error getting "
-				+ "new geoloc_num from database.");
+			Message.printWarning(1, "writeGeoloc", "Error getting new geoloc_num from database.");
 			closeResultSet(rs);
 			return r;
 		}
@@ -11070,8 +11387,7 @@ If the Object's ImportProduct_num is missing, a new record will be inserted
 in the table.  Otherwise, the existing one will be updated.
 @return a RiversideDB_ImportProduct object when a new record is inserted
 into the ImportProduct table.  The ImportProduct_num value in this object
-is the newest autonumber ImportProduct_num entered.  Otherwise, it returns
-null
+is the newest autonumber ImportProduct_num entered.  Otherwise, it returns null
 @throws Exception if an error occurs
 */
 public RiversideDB_ImportProduct writeImportProduct(RiversideDB_ImportProduct r)
@@ -11082,8 +11398,7 @@ throws Exception {
 	w.addValue(r.getProduct_name());
 	w.addValue(r.getProduct_type());
 	w.addValue(r.getIsActive());
-// REVISIT (JTS - 2003-06-02)
-// This will be phased out later			
+// TODO (JTS - 2003-06-02) This will be phased out later			
 //	if (getDatabaseVersion() < _VERSION_020800_20030422) {	
 		w.addValue(r.getProduct_group());
 //	}
@@ -11124,8 +11439,7 @@ throws Exception {
 		w.addValue(r.getMeasLocGroup_num());
 	}
 	if (!DMIUtil.isMissing(r.getImportProduct_num())) {
-		w.addWhereClause(
-			"ImportProduct_num = " + r.getImportProduct_num());
+		w.addWhereClause("ImportProduct_num = " + r.getImportProduct_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else { 
@@ -11135,8 +11449,7 @@ throws Exception {
 		// to be returned, so execute a max() on the ImportProduct_num
 		// field to get the highest value (the last one inserted).  
 
-		String sql = "SELECT MAX(ImportProduct_num) from " +
-			"ImportProduct";
+		String sql = "SELECT MAX(ImportProduct_num) from ImportProduct";
 		ResultSet rs = dmiSelect(sql);
 		int ImportProduct_num;
 		if (rs.next()) {
@@ -11190,7 +11503,6 @@ throws Exception {
 	dmiWrite(w, DMI.UPDATE_INSERT);
 }
 
-
 /**
 Writes a record to the MeasLoc table.
 @param r an object of type RiversideDB_MeasLoc to write to the table
@@ -11218,15 +11530,15 @@ throws Exception {
 
 	boolean bolReadBack = false;
 	if (!DMIUtil.isMissing(r.getMeasLoc_num())) {
-		w.addWhereClause(
-			"MeasLoc_num = " + r.getMeasLoc_num());
+		w.addWhereClause("MeasLoc_num = " + r.getMeasLoc_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else { 
 		dmiWrite(w, DMI.INSERT);
 		bolReadBack = true;
 	}
-	if ( bolReadBack ) { //we need to read in newly written MeasLoc since
+	if ( bolReadBack ) {
+	    //we need to read in newly written MeasLoc since
 		// on an insert, the number of the autonumber inserted needs
 		// to be returned, so execute a max() on the MeasLoc_num 
 		// field to get the highest value (the last one inserted).  
@@ -11246,7 +11558,6 @@ throws Exception {
 	}
 	return null;
 }
-
 
 /**
 Writes a record to the MeasLoc table.
@@ -11275,8 +11586,7 @@ throws Exception {
 	}
 
 	if (!DMIUtil.isMissing(r.getMeasLoc_num())) {
-		w.addWhereClause(
-			"MeasLoc_num = " + r.getMeasLoc_num());
+		w.addWhereClause( "MeasLoc_num = " + r.getMeasLoc_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else { 
@@ -11285,18 +11595,15 @@ throws Exception {
 }//old
 */
 
-
 /**
 Writes a record to the MeasLocGroup table by first attempting to update an
 existing record, and if none exist, inserting a new one.  At the same time,
 it also adds a new record to the DBUserMeasLocGroupRelation table for the
 currently logged-in user and the MeasLocGroup record being written, but
-<b>only</b> if the other record was first successfully written to
-MeasLocGroup.
+<b>only</b> if the other record was first successfully written to MeasLocGroup.
 @param r an object of type RiversideDB_MeasLocGroup to write to the table.
 @return null if an existing record was updated.  Otherwise it returns a 
-new RiversideDB_MeasLocGroup object with the new MeasLocGroup_num (from the 
-new record) in it.
+new RiversideDB_MeasLocGroup object with the new MeasLocGroup_num (from the new record) in it.
 @throws Exception if an error occurs.
 */
 public RiversideDB_MeasLocGroup writeMeasLocGroup(RiversideDB_MeasLocGroup r) 
@@ -11314,8 +11621,7 @@ throws Exception {
 	}
 	else {
 		operation = DMI.UPDATE;
-		w.addWhereClause("MeasLocGroup.MeasLocGroup_num = " 
-			+ MeasLocGroup_num);
+		w.addWhereClause("MeasLocGroup.MeasLocGroup_num = " + MeasLocGroup_num);
 	}
 	w.addValue(r.getIdentifier());
 	w.addValue(r.getName());
@@ -11332,8 +11638,7 @@ throws Exception {
 		// to be returned, so execute a max() on the MeasLocGroup_num 
 		// field to get the highest value (the last one inserted).  
 
-		String sql = "SELECT MAX(MeasLocGroup_num) from " +
-			"MeasLocGroup";
+		String sql = "SELECT MAX(MeasLocGroup_num) from MeasLocGroup";
 		ResultSet rs = dmiSelect(sql);
 		int group_num = DMIUtil.MISSING_INT;
 		if (rs.next()) {
@@ -11384,8 +11689,7 @@ throws Exception {
 	w.addValue(r.getQuality_flag());
 	w.addValue(r.getDescription());
 
-	w.addWhereClause("Quality_flag = '" 
-		+ escape(r.getQuality_flag()) + "'");
+	w.addWhereClause("Quality_flag = '" + escape(r.getQuality_flag()) + "'");
 
 	dmiWrite(w, DMI.UPDATE_INSERT);	
 }
@@ -11393,8 +11697,7 @@ throws Exception {
 /**
 Writes a record to the MeasReducGridWeight table by first attempting to update
 an existing record, and if none exists, inserting a new one.
-@param r an object of type RiversideDB_MEasReducGridweight to write 
-to the table
+@param r an object of type RiversideDB_MEasReducGridweight to write to the table
 @throws Exception if an error occurs
 */
 public void writeMeasReducGridWeight(RiversideDB_MeasReducGridWeight r) 
@@ -11421,8 +11724,7 @@ throws Exception {
 /**
 Writes a record to the MeasReducRelation table by first attempting to update
 an existing record, and if none exists, inserting a new one.
-@param r an object of type RiversideDB_MeasReducRelation 
-to write to the table
+@param r an object of type RiversideDB_MeasReducRelation to write to the table
 @throws Exception if an error occurs
 */
 public void writeMeasReducRelation(RiversideDB_MeasReducRelation r) 
@@ -11452,11 +11754,9 @@ throws Exception {
 
 	// first check to see if any other meas reductions already have the
 	// output meas type num in the object above ...
-	RiversideDB_MeasReduction mr = readMeasReductionForOutputMeasType_num(
-		r.getOutputMeasType_num());
+	RiversideDB_MeasReduction mr = readMeasReductionForOutputMeasType_num(r.getOutputMeasType_num());
 
-	// if none have that output meas type num, then a new record needs to 
-	// be inserted
+	// if none have that output meas type num, then a new record needs to be inserted
 	if (mr == null) {
 		buildSQL(w, _W_MEASREDUCTION);
 		w.addValue(r.getOutputMeasType_num());
@@ -11477,8 +11777,7 @@ throws Exception {
 
 		dmiWrite(w, DMI.INSERT);	
 	}
-	// otherwise, update the existing record, but don't try to change 
-	// the output meas type num
+	// otherwise, update the existing record, but don't try to change the output meas type num
 	else {
 		buildSQL(w, _W_MEASREDUCTION_UPDATE);
 		w.addValue(r.getMethod());
@@ -11496,8 +11795,7 @@ throws Exception {
 			w.addValue(r.getDBPermissions());
 		}	
 
-		w.addWhereClause("OutputMeasType_num = " 
-			+ r.getOutputMeasType_num());
+		w.addWhereClause("OutputMeasType_num = " + r.getOutputMeasType_num());
 
 		dmiWrite(w, DMI.UPDATE);	
 	}
@@ -11506,8 +11804,7 @@ throws Exception {
 /**
 Writes a record to the MeasReductionType table by first attempting to update
 an existing record, and if none exists, inserting a new one.
-@param r an object of type RiversideDB_MeasReductionType 
-to write to the table
+@param r an object of type RiversideDB_MeasReductionType to write to the table
 @throws Exception if an error occurs
 */
 public void writeMeasReductionType(RiversideDB_MeasReductionType r) 
@@ -11552,8 +11849,7 @@ throws Exception {
 /**
 Writes a record to the MeasScenarioRelation table by first attempting to update
 an existing record, and if none exists, inserting a new one.
-@param r an object of type RiversideDB_MeasScenarioRelation
-to write to the table
+@param r an object of type RiversideDB_MeasScenarioRelation to write to the table
 @throws Exception if an error occurs
 */
 public void writeMeasScenarioRelation(RiversideDB_MeasScenarioRelation r)
@@ -11594,8 +11890,7 @@ throws Exception {
 /**
 Writes a record to the MeasTransProtocol table by first attempting to update
 an existing record, and if none exists, inserting a new one.
-@param r an object of type RiversideDB_MeasTransProtocol 
-to write to the table
+@param r an object of type RiversideDB_MeasTransProtocol to write to the table
 @throws Exception if an error occurs
 */
 public void writeMeasTransProtocol(RiversideDB_MeasTransProtocol r) 
@@ -11665,8 +11960,7 @@ throws Exception {
 	}
 
 	if (!DMIUtil.isMissing(r.getMeasType_num())) {
-		w.addWhereClause(
-			"MeasType.MeasType_num = " + r.getMeasType_num());
+		w.addWhereClause( "MeasType.MeasType_num = " + r.getMeasType_num());
 		dmiWrite(w, DMI.UPDATE);
 	} 
 	else {
@@ -11675,8 +11969,7 @@ throws Exception {
 		// to be returned, so execute a max() on the ProductGroup_num 
 		// field to get the highest value (the last one inserted).  
 
-		String sql = "SELECT MAX(MeasType_num) from " +
-			"MeasType";
+		String sql = "SELECT MAX(MeasType_num) from MeasType";
 		ResultSet rs = dmiSelect(sql);
 		int measType_num;
 		if (rs.next()) {
@@ -11706,8 +11999,7 @@ throws Exception {
 	w.addValue(r.getMeasType_num());
 	w.addValue(r.getStart_date(), DateTime.PRECISION_MINUTE);
 	w.addValue(r.getEnd_date(), DateTime.PRECISION_MINUTE);
-	w.addValue(r.getFirst_date_of_last_edit(), 
-		DateTime.PRECISION_SECOND);
+	w.addValue(r.getFirst_date_of_last_edit(), DateTime.PRECISION_SECOND);
 	w.addValue(r.getMeas_count());
 	w.addValue(r.getMin_val());
 	w.addValue(r.getMax_val());
@@ -11784,8 +12076,7 @@ throws Exception {
 	w.addValue(r.getDBPermissions());
 
 	if (!DMIUtil.isMissing(r.getProductGroup_num())) {
-		w.addWhereClause("ProductGroup.ProductGroup_num = " 
-			+ r.getProductGroup_num());	
+		w.addWhereClause("ProductGroup.ProductGroup_num = " + r.getProductGroup_num());	
 		dmiWrite(w, DMI.UPDATE);
 		return null;
 	}
@@ -11796,8 +12087,7 @@ throws Exception {
 		// to be returned, so execute a max() on the ProductGroup_num 
 		// field to get the highest value (the last one inserted).  
 
-		String sql = "SELECT MAX(ProductGroup_num) from " +
-			"ProductGroup";
+		String sql = "SELECT MAX(ProductGroup_num) from ProductGroup";
 		ResultSet rs = dmiSelect(sql);
 		int ProductGroup_num;
 		if (rs.next()) {
@@ -11823,12 +12113,11 @@ public void writeProps(RiversideDB_Props r)
 throws Exception {
 	DMIWriteStatement w = new DMIWriteStatement(this);
 
-	// REVISIT [LT] 2005-01-10 - Problem here and all the other similar
+	// TODO [LT] 2005-01-10 - Problem here and all the other similar
 	//         places. Problems with validation roles for the fields
 	//         If lower case is entered when upper case is expected the
 	//         the writeProps will throw an exception (ACCESS).
-	// Would be the solution to add toUpper() for the fields needing uppper
-	// case? Maybe not. 
+	// Would be the solution to add toUpper() for the fields needing uppper case? Maybe not. 
 	// Solution: ZeroLenght and lowercase restriction will be removed from
 	//		RiversideDB as per January 2005 software group meeting.
 
@@ -11841,8 +12130,7 @@ throws Exception {
 		w.addValue(r.getDBUser_num());
 	}
 	if (!DMIUtil.isMissing(r.getProp_num())) {
-		w.addWhereClause(
-			"Prop_num = " + r.getProp_num());
+		w.addWhereClause( "Prop_num = " + r.getProp_num());
 		Message.printWarning ( 2, "DMI writeProps", w.toString() );	
 		dmiWrite(w, DMI.UPDATE);
 	}
@@ -11888,8 +12176,7 @@ public void writeRevision(RiversideDB_Revision r) throws Exception {
 	w.addValue(r.getComment());
 
 	if (!DMIUtil.isMissing(r.getRevision_num())) {
-		w.addWhereClause(
-			"Revision_num = " + r.getRevision_num());
+		w.addWhereClause( "Revision_num = " + r.getRevision_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else {
@@ -11920,8 +12207,7 @@ throws Exception {
 	}
 
 	if (!DMIUtil.isMissing(r.getScenario_num())) {
-		w.addWhereClause(
-			"Scenario_num = " + r.getScenario_num());
+		w.addWhereClause("Scenario_num = " + r.getScenario_num());
 		dmiWrite(w, DMI.UPDATE);
 		return DMIUtil.MISSING_LONG;
 	}
@@ -11958,8 +12244,7 @@ throws Exception {
 /**
 Writes a record to the StageDischargeRating table by first attempting to update 
 an existing record, and if none exists, inserting a new one.
-@param r an object of type RiversideDB_StageDischargeRating 
-to write to the table
+@param r an object of type RiversideDB_StageDischargeRating to write to the table
 @throws Exception if an error occurs
 */
 /*
@@ -11984,8 +12269,7 @@ RiversideDB_StageDischargeRating r) throws Exception {
 	//w.addWhereClause("MeasLoc_num = " + r.getMeasLoc_num());
 	//w.addWhereClause("Start_Date = " + r.getStart_Date() );
 	//w.addWhereClause("End_Date = " + r.getEnd_Date() );
-	DateTime start_dt = new DateTime( r.getStart_Date(),
-	DateTime.PRECISION_MINUTE);
+	DateTime start_dt = new DateTime( r.getStart_Date(), DateTime.PRECISION_MINUTE);
 	DateTime end_dt = new DateTime( r.getEnd_Date(),
 	DateTime.PRECISION_MINUTE);
 
@@ -12003,8 +12287,7 @@ RiversideDB_StageDischargeRating r) throws Exception {
 /**
 Writes a record to the StageDischargeRating table by first attempting to update 
 an existing record, and if none exists, inserting a new one.
-@param r an object of type RiversideDB_StageDischargeRating 
-to write to the table
+@param r an object of type RiversideDB_StageDischargeRating to write to the table
 @throws Exception if an error occurs
 */
 public RiversideDB_StageDischargeRating writeStageDischargeRating(
@@ -12026,19 +12309,15 @@ RiversideDB_StageDischargeRating r) throws Exception {
 		w.addValue(r.getDischarge_Units());
 		w.addValue(r.getInterpolation_Method());
 		
-		w.addWhereClause(
-			"StageDischargeRating.RatingTable_num = " + 
-			r.getRatingTable_num());
+		w.addWhereClause("StageDischargeRating.RatingTable_num = " + r.getRatingTable_num());
 		DateTime start_dt = new DateTime( r.getStart_Date(),
 		DateTime.PRECISION_MINUTE);
 		DateTime end_dt = new DateTime( r.getEnd_Date(),
 		DateTime.PRECISION_MINUTE);
 
 		w.addWhereClause("MeasLoc_num = " + r.getMeasLoc_num());
-		w.addWhereClause("Start_Date = "
-			+ DMIUtil.formatDateTime(this, start_dt));
-		w.addWhereClause("End_Date = "
-			+ DMIUtil.formatDateTime(this, end_dt));
+		w.addWhereClause("Start_Date = " + DMIUtil.formatDateTime(this, start_dt));
+		w.addWhereClause("End_Date = " + DMIUtil.formatDateTime(this, end_dt));
 
 //Message.printStatus(1, "", w.toUpdateString());
 		dmiWrite(w, DMI.UPDATE);
@@ -12052,10 +12331,8 @@ RiversideDB_StageDischargeRating r) throws Exception {
 
 		r.setRatingTable_num(l + 1);
 		w.addValue(r.getMeasLoc_num());
-		w.addValue(r.getStart_Date(), 
-			DateTime.PRECISION_SECOND);
-		w.addValue(r.getEnd_Date(), 
-			DateTime.PRECISION_SECOND);
+		w.addValue(r.getStart_Date(), DateTime.PRECISION_SECOND);
+		w.addValue(r.getEnd_Date(), DateTime.PRECISION_SECOND);
 		w.addValue(r.getRatingTable_num());
 		w.addValue(r.getGage_Zero_Datum());
 		w.addValue(r.getGage_Datum_Units());
@@ -12095,8 +12372,7 @@ throws Exception {
 		w.addValue(r.getValueStr());
 
 		w.addWhereClause("StateGroup_num = " + r.getStateGroup_num());
-		w.addWhereClause("OperationStateRelation_num = " 
-			+ r.getOperationStateRelation_num());
+		w.addWhereClause("OperationStateRelation_num = " + r.getOperationStateRelation_num());
 		w.addWhereClause("Sequence = " + r.getSequence());
 	}
 	else {
@@ -12134,8 +12410,7 @@ throws Exception {
 	w.addValue(r.getMeasLocGroup_num());
 
 	if (!DMIUtil.isMissing(r.getStateGroup_num())) {
-		w.addWhereClause(
-			"StateGroup_num = " + r.getStateGroup_num());
+		w.addWhereClause("StateGroup_num = " + r.getStateGroup_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else {
@@ -12163,8 +12438,7 @@ throws Exception {
 	w.addValue(r.getPrimary_flag());
 
 	if (!DMIUtil.isMissing(r.getStation_num())) {
-		w.addWhereClause(
-			"Station_num = " + r.getStation_num());
+		w.addWhereClause("Station_num = " + r.getStation_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else {
@@ -12226,8 +12500,7 @@ throws Exception {
 	}				
 
 	if (!DMIUtil.isMissing(r.getTable_num())) {
-		w.addWhereClause(
-			"Table_num = " + r.getTable_num());
+		w.addWhereClause("Table_num = " + r.getTable_num());
 		dmiWrite(w, DMI.UPDATE);
 	} 
 	else {
@@ -12238,15 +12511,13 @@ throws Exception {
 /**
 Writes a TSProduct to the database, creating a new product or updating an 
 existing product as appropriate.  Writes records to both the
-TSProduct and TSProductProps tables.  This method is from the TSProductDMI 
-interface.<p>
+TSProduct and TSProductProps tables.  This method is from the TSProductDMI interface.<p>
 This method enforces the policy of no duplicate TSProduct identifiers.  This
 was done because products may be used commonly among a group of users and right
 now there's no need to allow users to override a common TSProduct with one of 
-their own.  This may be REVISIT ed later.<p>
+their own.  This may be revisited later.<p>
 Permissions for the user to update or insert a TSProduct are checked within
-this method, so in this case calling code does not have to assume anything 
-about permissions.
+this method, so in this case calling code does not have to assume anything about permissions.
 @param product the TSProduct to write to the table.
 @return true if the TSProduct was written successfully, false if not.
 */
@@ -12266,8 +12537,7 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		Message.printWarning(1, routine, "An error occured while "
 			+ "trying to determine if a TSProduct with the given "
 			+ "\nidentifier (\"" + id + "\") exists in the "
-			+ "database.\n  The TSProduct will not be written to "
-			+ "the database.");
+			+ "database.\n  The TSProduct will not be written to the database.");
 		Message.printWarning(3, routine, e);
 		return false;
 	}
@@ -12275,25 +12545,21 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 	boolean createNew = false;
 	if (tsp == null) {
 		// if the tsp object read from the database above is null, 
-		// then there are no matching records in TSProduct for the 
-		// user and the product id.
+		// then there are no matching records in TSProduct for the user and the product id.
 		createNew = true;
 		tsp = new RiversideDB_TSProduct();
 
 		List choices = null;
 		try {
-			choices = RiversideDB_Util.getProductGroupsChoices(
-				this);
+			choices = RiversideDB_Util.getProductGroupsChoices(this);
 		}
 		catch (Exception e) {
 			Message.printWarning(2, routine,	
-				"An error occurred while reading the "
-				+ "ProductGroups that the current user\n(\""
+				"An error occurred while reading the ProductGroups that the current user\n(\""
 				+ _dbuser.getLogin() + "\", "
 				+ _dbuser.getDBUser_num() + ", "
 				+ _dbuser.getPrimaryDBGroup_num() 
-				+ ") has permission "
-				+ "to access.");
+				+ ") has permission to access.");
 			Message.printWarning(3, routine, e);
 			return false;
 		}
@@ -12301,23 +12567,17 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		// note: choices will never be null.
 
 		if (choices.size() == 0) {
-			new ResponseJDialog(new JFrame(), 
-				"No Permissions to Write",
-				"You do not have permission to write a "
-				+ "time series product for any of the\n"
-				+ "Product Groups in the database. You can "
-				+ "save the time series product to a\n"
-				+ "TSProduct file, instead.",
-				ResponseJDialog.OK);
+			new ResponseJDialog(new JFrame(), "No Permissions to Write",
+				"You do not have permission to write a time series product for any of the\n"
+				+ "Product Groups in the database. You can save the time series product to a\n"
+				+ "TSProduct file, instead.", ResponseJDialog.OK);
 			return false;
 		}
 
 		String group = (new JComboBoxResponseJDialog(
 			new JFrame(), "Select Product Group",
-			"Select the Product Group for which to save the "
-			+ "time series product.",
-			choices, ResponseJDialog.OK | ResponseJDialog.CANCEL))
-			.response();
+			"Select the Product Group for which to save the time series product.",
+			choices, ResponseJDialog.OK | ResponseJDialog.CANCEL)).response();
 
 		if (group == null) {
 			return false;
@@ -12331,13 +12591,11 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		try {
 		if (!canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(),
 		    tsp.getDBPermissions())) {
-			new ResponseJDialog(new JFrame(),
-				"Invalid Permissions",
+			new ResponseJDialog(new JFrame(), "Invalid Permissions",
 				"A time series product with the identifier '" 
 				+ tsp.getIdentifier() + "' already exists in\n"
 				+ "the database, but you do not have "
-				+ "permissions to change it.\nSave the product "
-				+ "using another identifier.",
+				+ "permissions to change it.\nSave the product using another identifier.",
 				ResponseJDialog.OK);
 			return false;
 		}
@@ -12346,20 +12604,18 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 			Message.printWarning(2, routine,
 				"An error occurred while trying to read user "
 				+ "permissions from the database.  The time "
-				+ "series product will not be able to be "
-				+ "written to the database.");
+				+ "series product will not be able to be written to the database.");
 			Message.printWarning(3, routine, e);
 		}
 	}
 
 	tsp.setName(tsproduct.getPropValue("Product.ProductName"));
 
-	// REVISIT (JTS - 2005-08-19)
+	// TODO (JTS - 2005-08-19)
 	// this code is HydroBase-specific right now but I am leaving it in
 	// *for now*.  I think that in the future there might be call to use
 	// it in some RiversideDB apps, and if it's here already we probably
-	// won't spend as much time reinventing the wheel when we come to 
-	// that bridge.
+	// won't spend as much time reinventing the wheel when we come to that bridge.
 
 	// This property is the original TSProduct ID of a TSProduct when it 
 	// was opened on the SelectTSProduct screen.  If the original
@@ -12388,17 +12644,13 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		// to the database, all its properties are simply deleted.
 
 		try {
-			deleteTSProductPropsForTSProduct_num(
-				tsp.getTSProduct_num());
+			deleteTSProductPropsForTSProduct_num(tsp.getTSProduct_num());
 		}
 		catch (Exception e) {
 			Message.printWarning(2, routine, 
-				"An error occurred while trying to delete "
-				+ "records with TSProduct_num=" 
-				+ tsp.getTSProduct_num() + " from the "
-				+ "TSProductProps table.  The time series "
-				+ "product will not be written to the "
-				+ "database.");
+				"An error occurred while trying to delete records with TSProduct_num=" 
+				+ tsp.getTSProduct_num() + " from the TSProductProps table.  The time series "
+				+ "product will not be written to the database.");
 			Message.printWarning(3, routine, e);
 			return false;
 		}
@@ -12413,11 +12665,9 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		}
 		catch (Exception e) {
 			Message.printWarning(2, routine, 
-				"An error occurred when trying to delete "
-				+ "an existing record with the identifier: \""
+				"An error occurred when trying to delete an existing record with the identifier: \""
 				+ id + "\" from the TSProduct table.  The time "
-				+ "series product will not be written to the "
-				+ "database.");
+				+ "series product will not be written to the database.");
 			Message.printWarning(3, routine, e);
 			return false;
 		}
@@ -12425,8 +12675,7 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		// Writes a new TSProduct record into the database.
 		String sql = null;
 		sql = "INSERT INTO TSProduct (ProductGroup_num, Identifier, "
-			+ "Name, DBUser_num,DBGroup_num, DBPermissions) "
-			+ "VALUES ("
+			+ "Name, DBUser_num,DBGroup_num, DBPermissions) VALUES ("
 			+ tsp.getProductGroup_num() + ", '" + id + "', '" + 
 			tsproduct.getPropValue("Product.ProductName") + "',"
 			+ _dbuser.getDBUser_num() + ", " 
@@ -12437,10 +12686,8 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		}
 		catch (Exception e) {
 			Message.printWarning(2, routine, 
-				"An error occurred while inserting a record "
-				+ "into the time series product table.  "
-				+ "The time series product will not be written "
-				+ "to the database.");
+				"An error occurred while inserting a record into the time series product table.  "
+				+ "The time series product will not be written to the database.");
 			Message.printWarning(3, routine, e);
 			return false;
 		}
@@ -12456,8 +12703,7 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 	List v = tsproduct.getAllProps();
 	// v will never be null
 
-	int count = 1;		// used to keep track of the sequence number
-				// of the property in the database
+	int count = 1;		// used to keep track of the sequence number of the property in the database
 	int size = v.size();
 	Prop p = null;
 	String sql = null;
@@ -12469,11 +12715,9 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 		p = (Prop)v.get(i);
 		if (p.getHowSet() == Prop.SET_AS_RUNTIME_DEFAULT) {
 			// do not store properties that are runtime
-			// defaults.  They will be set automatically
-			// next time at runtime.
+			// defaults.  They will be set automatically next time at runtime.
 		}
-		else if (p.getValue().toUpperCase().endsWith(
-			"PRODUCTIDORIGINAL")) {
+		else if (p.getValue().toUpperCase().endsWith("PRODUCTIDORIGINAL")) {
 			// This property is never stored.  It is used to know
 			// whether a Product was read from the database and
 			// then saved under a new Product Identifier.
@@ -12496,8 +12740,7 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 
 	if (!error.equals("")) {
 		Message.printWarning(2, routine,
-			"An error occurred writing the following product "
-		 	+ "properties to the database: \n" + error);
+			"An error occurred writing the following product properties to the database: \n" + error);
 		size = exceptions.size();
 		for (int i = 0; i < size; i++) {
 			Message.printWarning(3, routine, (Exception)exceptions.get(i));
@@ -12509,8 +12752,7 @@ public boolean writeTSProduct(TSProduct tsproduct) {
 
 /**
 Writes a RiversideDB_TSProduct record to the database.<p>
-No permissions are checked as to whether the current user can write this object
-to the database.
+No permissions are checked as to whether the current user can write this object to the database.
 @param tsp the RiversideDB_TSProduct to write.
 @return -1 if the tsproduct already exists in the database, but if a new record
 is being added, returns the number of the new record's TSProduct_num.
@@ -12545,13 +12787,11 @@ throws Exception {
 	}
 	else {
 		// Update an existing record
-		w.addWhereClause("TSProduct.TSProduct_num = " 
-			+ tsp.getTSProduct_num());
+		w.addWhereClause("TSProduct.TSProduct_num = " + tsp.getTSProduct_num());
 		dmiWrite(w, DMI.UPDATE);
 		return -1;
 		// returns -1 because the tsproduct_num has already been 
-		// determined and is present in the tsp object passed into this
-		// method.
+		// determined and is present in the tsp object passed into this method.
 	}
 }
 
@@ -12572,10 +12812,8 @@ throws Exception {
 	w.addValue(tspp.getValue());
 	w.addValue(tspp.getSequence());
 
-	w.addWhereClause("TSProductProps.TSProduct_num = " 
-		+ tspp.getTSProduct_num());
-	w.addWhereClause("TSProductProps.Property = '" 
-		+ tspp.getProperty() + "'");
+	w.addWhereClause("TSProductProps.TSProduct_num = " + tspp.getTSProduct_num());
+	w.addWhereClause("TSProductProps.Property = '" + tspp.getProperty() + "'");
 
 	dmiWrite(w, DMI.UPDATE_INSERT);
 }
@@ -12599,8 +12837,7 @@ throws Exception {
 	w.addValue(r.getversion_comment());
 
 	if (!DMIUtil.isMissing(r.getVersion_num())) {
-		w.addWhereClause(
-			"Version_num = " + r.getVersion_num());
+		w.addWhereClause("Version_num = " + r.getVersion_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else {
@@ -12612,15 +12849,12 @@ throws Exception {
 // Y FUNCTIONS
 // Z FUNCTIONS
 
-
 // Above are useful for testing.
 /////////////////////////////////////////////////////////////
 
-
 /**
 Returns a list of the TSProducts in the database, filtered for those that the
-currently-logged in user can read, edit, or delete.  This method is 
-from TSProductDMI.
+currently-logged in user can read, edit, or delete.  This method is from TSProductDMI.
 @return a list of the TSProducts in the database.
 */
 public List readTSProductDMITSProductList(boolean newProduct) {
@@ -12632,12 +12866,9 @@ public List readTSProductDMITSProductList(boolean newProduct) {
 		
 		for (int i = 0; i < size; i++) {
 			tsp = (RiversideDB_TSProduct)v.get(i);
-			if (canDelete(tsp.getDBUser_num(), tsp.getDBGroup_num(),
-				tsp.getDBPermissions())
-			  ||canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(),
-				tsp.getDBPermissions())
-			  || canRead(tsp.getDBUser_num(), tsp.getDBGroup_num(),
-				tsp.getDBPermissions())) {
+			if (canDelete(tsp.getDBUser_num(), tsp.getDBGroup_num(), tsp.getDBPermissions())
+			  ||canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(), tsp.getDBPermissions())
+			  || canRead(tsp.getDBUser_num(), tsp.getDBGroup_num(), tsp.getDBPermissions())) {
 				ret.add(tsp);
 			}
 		}
@@ -12646,8 +12877,7 @@ public List readTSProductDMITSProductList(boolean newProduct) {
 	}
 	catch (Exception e) {
 		Message.printWarning(2, "getTSProductList", 
-			"An error occurred while reading the list of time "
-			+ "series products from the database.");
+			"An error occurred while reading the list of time series products from the database.");
 		Message.printWarning(3, "getTSProductList", e);
 		return new Vector();
 	}
@@ -12660,8 +12890,7 @@ Updates the Identifier of all TSProduct records having the given TSProduct_num.
 @return a count of the number of records updated
 @throws Exception if there is an error updating the database.
 */
-public int updateTSProductIdentifierForTSProduct_num(int tsproduct_num, 
-String id)
+public int updateTSProductIdentifierForTSProduct_num(int tsproduct_num, String id)
 throws Exception {
 	String dmiString = "UPDATE tsproduct SET identifier='" + id 
 		+ "' where tsproduct_num = " + tsproduct_num;
@@ -12684,23 +12913,18 @@ throws Exception {
 }
 
 /**
-Updates the ProductGroup_num of all TSProduct records having the given 
-TSProduct_num.
+Updates the ProductGroup_num of all TSProduct records having the given TSProduct_num.
 @param tsproduct_num the TSProduct_num to match
 @param id the new identifier to update the matching records with.
 @return a count of the number of records updated
 @throws Exception if there is an error updating the database.
 */
-public int updateTSProductProductGroup_numForTSProduct_num(int tsproduct_num, 
-int productgroup_num)
+public int updateTSProductProductGroup_numForTSProduct_num(int tsproduct_num, int productgroup_num)
 throws Exception {
-	String dmiString = "UPDATE tsproduct SET ProductGroup_num=" 
-		+ productgroup_num 
+	String dmiString = "UPDATE tsproduct SET ProductGroup_num=" + productgroup_num 
 		+ " where tsproduct_num = " + tsproduct_num;
 	return dmiWrite(dmiString);
 }
-
-
 
 /**
 Writes Action data.  From AlertIOInterface
@@ -12750,8 +12974,7 @@ public DataTestResult readDataTestResult(int resultNum)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement(this);
 	buildSQL(q, _S_DATATESTRESULT);
-// REVISIT (JTS - 2006-05-10)
-// How to query?
+// TODO (JTS - 2006-05-10) How to query?
 //	q.addWhereClause("DataTestResults.DataTestNum = " + resultNum);
 	ResultSet rs = dmiSelect(q);
 	List v = toDataTestResultsList(rs);
@@ -12766,35 +12989,26 @@ throws Exception {
 
 public void deleteAction(int actionNum)
 throws Exception {
-	dmiDelete("DELETE FROM DataTestActionRelationship where ActionNum = "
-		+ actionNum);
-	dmiDelete("DELETE FROM ActionContactRelationship where ActionNum = "
-		+ actionNum);
-	dmiDelete("DELETE FROM ActionGroupActionRelationship where ActionNum = "
-		+ actionNum);
+	dmiDelete("DELETE FROM DataTestActionRelationship where ActionNum = " + actionNum);
+	dmiDelete("DELETE FROM ActionContactRelationship where ActionNum = " + actionNum);
+	dmiDelete("DELETE FROM ActionGroupActionRelationship where ActionNum = " + actionNum);
 	dmiDelete("DELETE FROM Action where ActionNum = " + actionNum);
 }
 
 public void deleteContact(int contactNum)
 throws Exception {
-	dmiDelete("DELETE FROM ActionContactRelationship where ContactNum = "
-		+ contactNum);
+	dmiDelete("DELETE FROM ActionContactRelationship where ContactNum = " + contactNum);
 	dmiDelete("DELETE FROM Contact where ContactNum = " + contactNum);
-	
 }
 
 public void deleteDataTest(int dataTestNum)
 throws Exception {
-	dmiDelete("DELETE FROM DataTestStatus where DataTestNum = "
-		+ dataTestNum);
-	dmiDelete("DELETE FROM DataTestGroupsDataTestRelationship where "
-		+ "DataTestNum = " + dataTestNum);
+	dmiDelete("DELETE FROM DataTestStatus where DataTestNum = " + dataTestNum);
+	dmiDelete("DELETE FROM DataTestGroupsDataTestRelationship where " + "DataTestNum = " + dataTestNum);
 	
-	deleteDataTestExpression(readDataTestExpressionNumForDataTestNum(
-		dataTestNum));
+	deleteDataTestExpression(readDataTestExpressionNumForDataTestNum(dataTestNum));
 
-	dmiDelete("DELETE FROM DataTestActionRelationship where DataTestNum = "
-		+ dataTestNum);
+	dmiDelete("DELETE FROM DataTestActionRelationship where DataTestNum = " + dataTestNum);
 	dmiDelete("DELETE FROM DataTest where DataTestNum = " + dataTestNum);
 }
 
@@ -12852,16 +13066,13 @@ throws Exception {
 		deleteDataTestFunction(rnum);
 	}
 	
-	dmiDelete("DELETE FROM DataTestExpression WHERE "
-		+ "DataTestExpressionNum = " + expressionNum);
+	dmiDelete("DELETE FROM DataTestExpression WHERE DataTestExpressionNum = " + expressionNum);
 }
 
 public void deleteDataTestFunction(int functionNum)
 throws Exception {
-	dmiDelete("DELETE FROM DataTestFunctionInputIDs WHERE "
-		+ "DataTestFunctionNum = " + functionNum);
-	dmiDelete("DELETE FROM DataTestFunction WHERE DataTestFunctionNum = "
-		+ functionNum);
+	dmiDelete("DELETE FROM DataTestFunctionInputIDs WHERE DataTestFunctionNum = " + functionNum);
+	dmiDelete("DELETE FROM DataTestFunction WHERE DataTestFunctionNum = " + functionNum);
 }
 
 public List readActionTypes() 
@@ -12908,8 +13119,7 @@ throws Exception {
 public void writeDataTestStatusData(DataTest test)
 throws Exception {
 	// clear out any old records
-	dmiDelete("DELETE FROM DataTestStatus WHERE DataTestNum = "
-		+ test.getDataTestNum());
+	dmiDelete("DELETE FROM DataTestStatus WHERE DataTestNum = " + test.getDataTestNum());
 	
 	DMIWriteStatement w = new DMIWriteStatement(this);
 
