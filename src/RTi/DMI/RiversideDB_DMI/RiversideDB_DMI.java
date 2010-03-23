@@ -359,6 +359,7 @@ import RTi.TS.TSIdent;
 import RTi.TS.TSSupplier;
 import RTi.TS.YearTS;
 
+import RTi.Util.GUI.InputFilter_JPanel;
 import RTi.Util.GUI.JComboBoxResponseJDialog;
 import RTi.Util.GUI.ResponseJDialog;
 
@@ -1848,9 +1849,12 @@ throws Exception {
 			select.addTable ( "MeasLoc" );
 			select.addWhereClause ( "MeasType.MeasLoc_num=MeasLoc.MeasLoc_num" );
 			break;
+//////////////////////////////////////////////////////
+// MeasTypeMeasLocGeoloc
+//////////////////////////////////////////////////////  
 	    case _S_MEASTYPE_MEASLOC_GEOLOC_LIST: 
             select = (DMISelectStatement)statement;
-            // Select from a join of MeasType, MeasLoc, and Geoloc
+            // Select from a join of MeasType, MeasLoc, and Geoloc (Geoloc allowed to be missing)
             select.addField ( "MeasType.MeasType_num" );
             select.addField ( "MeasType.MeasLoc_num" );
             select.addField ( "MeasType.Data_type" );
@@ -1918,7 +1922,7 @@ throws Exception {
             select.addWhereClause ( "MeasType.MeasLoc_num=MeasLoc.MeasLoc_num" );
             select.addWhereClause ( "MeasLoc.Geoloc_num=Geoloc.Geoloc_num" );
             // FIXME SAM 2010-03-11 Need to evaluate left join so missing Geoloc records still return
-            // full record
+            // full record - database constraints typically require a geoloc record for every measloc
             break;
 	    case _S_MEASTYPE_DATASOURCEABBREV_DISTINCT: 
             select = (DMISelectStatement)statement;
@@ -6321,15 +6325,48 @@ throws Exception {
 }
 
 /**
-Read MeasType records for distinct data types, ordered by Data_type.
-@return a vector of objects of type RiversideDB_MeasType, with only the
-Data_type field filled in.
+Read MeasTypeMeasLocGeoloc records for distinct data types, ordered by MeasLoc.identifier.
+@return a list of objects of type RiversideDB_MeasTypeMeasLocGeoloc.
+@param dataType The data type for time series, for example from from the TSTool data type choice.
+@param timeStep The time step for time series, for example from the TSTool time step choice.
+@param ifp An InputFilter_JPanel instance from which to retrieve where clause information.
 @throws Exception if an error occurs
 */
-public List readMeasTypeMeasLocGeolocList () 
-throws Exception {
+public List readMeasTypeMeasLocGeolocList ( String dataType, String timeStep, InputFilter_JPanel ifp ) 
+throws Exception
+{
     DMISelectStatement q = new DMISelectStatement ( this );
     buildSQL ( q, _S_MEASTYPE_MEASLOC_GEOLOC_LIST );
+    if ( (dataType != null) && (dataType.length() > 0) ) {
+        // Data type has been specified so add a where clause
+        q.addWhereClause("MeasType.Data_type = '" + escape(dataType) + "'");
+    }
+    if ( (timeStep != null) && (timeStep.length() > 0) ) {
+        TimeInterval interval = TimeInterval.parseInterval(timeStep);
+        q.addWhereClause("MeasType.Time_step_base = '" + escape(interval.getBaseString()) + "'" );
+        // The convention when defining MeasType records is to always
+        // include the multiplier.  However, it is not required and will
+        // not be present for IRREGULAR time step (for which there is
+        // no multiplier).  Because it is expected that the multiplier
+        // string in an identifer matches what is in the database, use
+        // the string that is passed in to determine the interval,
+        // rather that getting an interval string from the integer base.
+        if ( !interval.getMultiplierString().equals("") ) {
+            q.addWhereClause("MeasType.Time_step_mult = " + interval.getMultiplierString().toUpperCase());
+        }
+    }
+    // Add where clauses for the input filter
+    if ( ifp != null ) {
+        List whereClauses = DMIUtil.getWhereClausesFromInputFilter(this, ifp);       
+        // Add additional where clauses...
+        if (whereClauses != null) {
+            q.addWhereClauses(whereClauses);
+        }
+    }
+    // Sort based on common use
+    q.addOrderByClause ( "MeasLoc.identifier" );
+    q.addOrderByClause ( "MeasType.data_type" );
+    q.addOrderByClause ( "MeasType.sub_type" );
     ResultSet rs = dmiSelect(q);
     List v = toMeasTypeMeasLocGeolocList (rs);
     closeResultSet(rs);
