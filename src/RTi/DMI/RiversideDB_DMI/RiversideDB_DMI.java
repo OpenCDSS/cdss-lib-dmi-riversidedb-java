@@ -5267,7 +5267,7 @@ throws Exception {
     buildSQL(q, _S_GEOLOC_COUNTY_DISTINCT);
     q.addOrderByClause("Geoloc.County");
     ResultSet rs = dmiSelect(q);
-    List<String> v = toStringList (rs);
+    List<String> v = DMIUtil.toStringList (rs);
     closeResultSet(rs);
     return v;
 }
@@ -5283,7 +5283,7 @@ throws Exception {
     buildSQL(q, _S_GEOLOC_STATE_DISTINCT);
     q.addOrderByClause("Geoloc.State");
     ResultSet rs = dmiSelect(q);
-    List<String> v = toStringList (rs);
+    List<String> v = DMIUtil.toStringList (rs);
     closeResultSet(rs);
     return v;
 }
@@ -6037,7 +6037,7 @@ throws Exception {
     buildSQL(q, _S_MEASTYPE_DATASOURCEABBREV_DISTINCT);
     q.addOrderByClause("MeasType.source_abbrev");
     ResultSet rs = dmiSelect(q);
-    List<String> v = toStringList (rs);
+    List<String> v = DMIUtil.toStringList (rs);
     closeResultSet(rs);
     return v;
 }
@@ -6053,7 +6053,7 @@ throws Exception {
     buildSQL(q, _S_MEASTYPE_DATATYPE_DISTINCT);
     q.addOrderByClause("MeasType.data_type");
     ResultSet rs = dmiSelect(q);
-    List<String> v = toStringList (rs);
+    List<String> v = DMIUtil.toStringList (rs);
     closeResultSet(rs);
     return v;
 }
@@ -6069,7 +6069,7 @@ throws Exception {
     buildSQL(q, _S_MEASTYPE_SUBTYPE_DISTINCT);
     q.addOrderByClause("MeasType.sub_type");
     ResultSet rs = dmiSelect(q);
-    List<String> v = toStringList (rs);
+    List<String> v = DMIUtil.toStringList (rs);
     closeResultSet(rs);
     return v;
 }
@@ -6085,7 +6085,7 @@ throws Exception {
     buildSQL(q, _S_MEASTYPE_UNITS_DISTINCT);
     q.addOrderByClause("MeasType.units_abbrev");
     ResultSet rs = dmiSelect(q);
-    List<String> v = toStringList (rs);
+    List<String> v = DMIUtil.toStringList (rs);
     closeResultSet(rs);
     return v;
 }
@@ -10475,33 +10475,13 @@ throws Exception {
 }
 
 /**
-Convert a ResultSet to a list strings.  The ResultSet is expected to only contain a string data element.
-@param rs ResultSet from a table query.
-@throws Exception if an error occurs
-*/
-private List<String> toStringList ( ResultSet rs ) 
-throws Exception {
-    List<String> v = new Vector();
-    int index = 1;
-    String s;
-    while ( rs.next() ) {
-        index = 1;
-        s = rs.getString(index++);
-        if ( !rs.wasNull() ) {
-            v.add(s.trim());
-        }
-    }
-    return v;
-}
-
-/**
-Convert a ResultSet to a Vector of RiversideDB_TableLayout.
+Convert a ResultSet to a list of RiversideDB_TableLayout.
 @param rs ResultSet from a TableLayout table query.
 @throws Exception if an error occurs
 */
-private List toTableLayoutList ( ResultSet rs ) 
+private List<RiversideDB_TableLayout> toTableLayoutList ( ResultSet rs ) 
 throws Exception {
-	List v = new Vector();
+	List<RiversideDB_TableLayout> v = new Vector();
 	int index = 1;
 	String s;
 	long l;
