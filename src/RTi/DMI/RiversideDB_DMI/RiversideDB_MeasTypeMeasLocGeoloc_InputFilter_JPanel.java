@@ -6,8 +6,6 @@ import java.util.Vector;
 import RTi.Util.GUI.InputFilter;
 import RTi.Util.GUI.InputFilter_JPanel;
 
-import RTi.Util.IO.PropList;
-
 import RTi.Util.String.StringUtil;
 
 /**
@@ -90,12 +88,8 @@ public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDB_DMI dmi)
         geolocTableName + "y" + rd, "y",
         StringUtil.TYPE_DOUBLE, null, null, false));
 		
-	PropList filterProps = new PropList("InputFilter");
-	filterProps.set("NumFilterGroups=3");
-	filterProps.set("NumWhereRowsToDisplay=15"); // Display all without scrolling
-	setToolTipText("<html>RiversideDB queries can be filtered " 
-		+ "based on station and time series metadata.</html>");
-	setInputFilters(filters, filterProps);
+	setToolTipText("<html>RiversideDB queries can be filtered based on station and time series metadata.</html>");
+	setInputFilters(filters, 3, 15);
 }
 
 }
