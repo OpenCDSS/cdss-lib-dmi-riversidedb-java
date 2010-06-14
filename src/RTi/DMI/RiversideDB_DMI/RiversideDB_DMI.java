@@ -7326,7 +7326,7 @@ throws Exception
 			ts.setDate2(req_date2);
 			ts.setDate2Original(req_date2);
             // All the minute data has flags.
-            ts.hasDataFlags(true, 4);
+            ts.hasDataFlags(true, true);
 			ts.allocateDataSpace();
 		}
 		else if ( size > 0 ) {
@@ -7356,7 +7356,7 @@ throws Exception
 			}
 			// All the minute data has flags.
 			if ( hasFlag ) {
-			    ts.hasDataFlags(true, 4);
+			    ts.hasDataFlags(true, true);
 			}
 			ts.allocateDataSpace();
 		}
