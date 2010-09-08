@@ -1,51 +1,3 @@
-
-
-//------------------------------------------------------------------------------
-// RiversideDB_Util - Utility class containing static methods related to the 
-// 		      RiversideDB_DMI library.
-//	
-//------------------------------------------------------------------------------
-// Copyright:	See the COPYRIGHT file.
-//------------------------------------------------------------------------------
-// History:
-// 2002-23-05	Morgan Sheedy, RTi	Initial Implementation
-//
-// 2002-11-06	AMS, RTi		Changed class name from:
-//					RiversideDBAdministrator_Util 
-//					to: RTiDBAdmin_Util
-// 2002-26-09	Morgan Love, RTi	Changed Application name from:
-//					RiversideDBAdmin to:
-//					RiverTrakAssistant and Class from:
-//					RTiDBAdmin_Util to:
-//					RiverTrakAssistant_Util.
-//
-// 2002-26-09	AML , RTi  		code clean up.
-// 2003-26-09	AML , RTi  		Removed code to add Icon to JFrame 
-//					since now have methods in 
-//					JGUIUtil.
-// 2004-11-25 Luiz Teixeira, RTi 	Moved RiverTrakAssistant_Util to
-//					the RiversideDB_DMI library renaming
-//					it to RiversideDB_System_Util.java.
-// 2004-12-02 Luiz Teixeira, RTi 	Moved methods canWrite() from 
-//						RTAssistant_Main_Frame.java.
-// 2004-12-02 Luiz Teixeira, RTi 	Moved methods 
-//						createHTMLDataDictionary and 
-//						createHTMLTimeseriesList
-//					   from	RTAssistant_Main_Frame.java.
-// 2004-12-03 Luiz Teixeira, RTi	Renamed this class from
-//						RiversideDB_System_Util.java 
-//						to RiversideDB_Util.java.
-// 2004-12-03 Luiz Teixeira, RTi	Cleanup and some documentation.
-// 2004-12-21 Luiz Teixeira, RTi	Upgrade both canWrite() methods.
-//					Removed the method 
-//					        showPropertiesWorksheet().
-//					This method is not used anymore. From
-//						now on, the editor for the Props
-//						table is instantiated in the
-//						same way as the ReferenceTables.
-//					Aditional cleanup and documentation.
-// 2005-08-29	J. Thomas Sapienza, RTi	Added getProductGroupsChoices().
-//------------------------------------------------------------------------------
 package RTi.DMI.RiversideDB_DMI;
 
 import java.awt.Dimension;
@@ -81,12 +33,11 @@ Check if the user can write to the given table.
 @param RiversideDB_Tables Reference to a RiversideDb table.
 @return true if user can write to table, false otherwise.
 */
-public static boolean canWrite ( RiversideDB_DMI dmi,
-				 RiversideDB_Tables dbTable )
+public static boolean canWrite ( RiversideDB_DMI dmi, RiversideDB_Tables dbTable )
 {
 	String routine = __class + ".canWrite", mssg;
 
-	String  tableName       = dbTable.getTable_name();
+	String tableName = dbTable.getTable_name();
 	boolean writePermission = false;
 	
 	// Status
@@ -95,34 +46,28 @@ public static boolean canWrite ( RiversideDB_DMI dmi,
 
 	// Checking write permission
 	try { 
-		writePermission = dmi.canWrite ( 
-					dbTable.getDBUser_num(),
-					dbTable.getDBGroup_num(),
-					dbTable.getRecord_DBPermissions() );
+		writePermission = dmi.canWrite ( dbTable.getDBUser_num(),
+					dbTable.getDBGroup_num(), dbTable.getRecord_DBPermissions() );
 		
 		// Debug
 		if ( Message.isDebugOn ) {
-			mssg = "DBUser       is "
-				+ dbTable.getDBUser_num();
+			mssg = "DBUser       is " + dbTable.getDBUser_num();
 			Message.printDebug( 1, routine, mssg );
-			mssg = "DBGroup      is "
-				+ dbTable.getDBGroup_num();
+			mssg = "DBGroup      is " + dbTable.getDBGroup_num();
 			Message.printDebug( 1, routine, mssg );
-			mssg = "DBPermission is "
-				+ dbTable.getRecord_DBPermissions();
+			mssg = "DBPermission is " + dbTable.getRecord_DBPermissions();
 			Message.printDebug( 1, routine, mssg );
 		}
 		
 		// Status
-		mssg = "Write permission for table " + tableName
-			+ " is " + writePermission;
+		mssg = "Write permission for table " + tableName + " is " + writePermission;
 		Message.printStatus ( 1, routine, mssg );	
 		
-	} catch ( Exception e ) {
-		mssg = "Error checking write permission for table '"
-		     + tableName + "!";
+	}
+	catch ( Exception e ) {
+		mssg = "Error checking write permission for table '" + tableName + "!";
 		Message.printWarning ( 1, routine, mssg );
-		Message.printWarning ( 2, routine,    e );
+		Message.printWarning ( 2, routine, e );
 	}
 
 	return writePermission;
@@ -130,10 +75,9 @@ public static boolean canWrite ( RiversideDB_DMI dmi,
 
 /**
 Check if the user can write to the given table.
-@param dmi Reference to the RiversideDB DMI conection.
-@param tablesVector Reference to the Vector containing references to
-the RiversideDb tables.
-@param table The table to check write premission.
+@param dmi Reference to the RiversideDB DMI connection.
+@param tablesVector Reference to the list containing references to the RiversideDb tables.
+@param table The table to check write permission.
 @return true if user can write to table, false otherwise.
 */
 public static boolean canWrite ( RiversideDB_DMI dmi, String table )
@@ -147,17 +91,19 @@ public static boolean canWrite ( RiversideDB_DMI dmi, String table )
 
 	// Get the vector of RiversideDB_Tables table objects.
 	// If null return false.
-	List tablesVector = dmi.getRiversideDB_Tables();
-	if ( tablesVector == null ) return writePermission;
+	List<RiversideDB_Tables> tablesVector = dmi.getRiversideDB_Tables();
+	if ( tablesVector == null ) {
+	    return writePermission;
+	}
 
 	// Or loop through the vector looking for a match for 'table'
 	RiversideDB_Tables dbTable = null;
-	String tableName           = null;
+	String tableName = null;
 	
 	for ( int i = 0; i < tablesVector.size(); i++ ) {
 		
 		// RiversideDB_Tables table object at 'i'
-		dbTable = ( RiversideDB_Tables ) tablesVector.get(i);
+		dbTable = tablesVector.get(i);
 		
 		if ( dbTable != null ) {
 			
@@ -176,7 +122,8 @@ public static boolean canWrite ( RiversideDB_DMI dmi, String table )
 				writePermission = canWrite ( dmi, dbTable );
 				break;	
 			}
-		} else {
+		}
+		else {
 			mssg = "Error checking for permission. Null table!";
 			Message.printWarning ( 1, routine, mssg ); 
 		}
@@ -197,8 +144,7 @@ Creates a HTML file containing the Data Dictionary.
 @param dmi Reference to the DIM connection.
 @return true if user can write to table, false otherwise.
 */
-public static void createHTMLDataDictionary (
-	JFrame jFrame, RiversideDB_DMI dmi )
+public static void createHTMLDataDictionary ( JFrame jFrame, RiversideDB_DMI dmi )
 {
 	String routine = __class + ".createHTMLDataDictionary";
 
@@ -209,7 +155,7 @@ public static void createHTMLDataDictionary (
 	
 // REVISIT [LT] 2004-12-21 - SAM's comments from the first review.
 //				"Split into separated methods?"
-// 	The implementation of this spliting goes well with the 'new Class"
+// 	The implementation of this splitting goes well with the 'new Class"
 //	approach suggested above.	
 	refTables[i++] = "DataDimension";
 	refTables[i++] = "DataSource";
@@ -224,13 +170,13 @@ public static void createHTMLDataDictionary (
 	refTables[i++] = "SHEFType";
 	refTables[i++] = "TableLayout";
 
-	String lastDirectorySelected  = JGUIUtil.getLastFileDialogDirectory();
+	String lastDirectorySelected = JGUIUtil.getLastFileDialogDirectory();
 
 	JFileChooser fc = null;
  	if (lastDirectorySelected != null) {
-  		fc = JFileChooserFactory.createJFileChooser(
-  			lastDirectorySelected);
- 	} else {
+  		fc = JFileChooserFactory.createJFileChooser(lastDirectorySelected);
+ 	}
+ 	else {
   		fc = JFileChooserFactory.createJFileChooser();
  	}
 
@@ -259,16 +205,13 @@ public static void createHTMLDataDictionary (
  	String fileName = currDir + s + fc.getSelectedFile().getName();
 
 	try {
-		Message.printStatus( 1, routine,
-			"Creating data dictionary \"" + fileName + "\"." );
+		Message.printStatus( 1, routine,"Creating data dictionary \"" + fileName + "\"." );
 
-		DMIUtil.createHTMLDataDictionary(
-			dmi, fileName, refTables, null );
+		DMIUtil.createHTMLDataDictionary(dmi, fileName, refTables, null );
 	}
 	catch ( Exception e ) {
 		Message.printWarning( 2, routine, e);
-		Message.printWarning( 1, routine,
-			"Error writing data dictionary to " + fileName );
+		Message.printWarning( 1, routine, "Error writing data dictionary to " + fileName );
 	}
 	
  	JGUIUtil.setWaitCursor( jFrame, false );
@@ -293,15 +236,13 @@ public static void createHTMLTimeseriesList ( JFrame jFrame,
 	
 	// Check DMI. 
 	if ( dmi == null ) {
-		Message.printWarning( 1, routine, 
-			"Cannot create list because the DMI is null!" );
+		Message.printWarning( 1, routine, "Cannot create list because the DMI is null!" );
 		return;
 	}
 	
 	// Application title.
 	String appTitle = applicationTitle;
-	if ( applicationTitle==null || applicationTitle.length()<=0 )
-	{
+	if ( applicationTitle==null || applicationTitle.length()<=0 ) {
 		appTitle = "RiversideDB";
 	}
 
@@ -312,55 +253,58 @@ public static void createHTMLTimeseriesList ( JFrame jFrame,
 	} 
 	
 	// Re-read database to get latest list
-	List allTS_vect = new Vector();
+	List<RiversideDB_MeasType> allTS_vect = new Vector();
 	try {
 		allTS_vect = dmi.readMeasTypeListByLocation();
-	} catch ( Exception e ) {
+	}
+	catch ( Exception e ) {
 		Message.printWarning( 2, routine, e );
 		allTS_vect = new Vector();
 	}
 	int tsCount = allTS_vect.size();
 
 	StringBuffer b = new StringBuffer();
-	b.append( "<HTML><HEAD><TITLE>Time Series List</TITLE> "
-		+ "</HEAD><BODY><TABLE border=\"1\">" );
+	b.append( "<HTML><HEAD><TITLE>Time Series List</TITLE> </HEAD><BODY><TABLE border=\"1\">" );
 	if ( projName == "" ) {
 		b.append( "<tr><th colspan=\"5\"><h2 align=\"left\">"
-			+ "<A NAME=\"tstitle\"> "
-			+ "Time Series </A></h2></th></tr>" );
-	} else {		
+			+ "<A NAME=\"tstitle\"> Time Series </A></h2></th></tr>" );
+	}
+	else {		
 		b.append( "<tr><th colspan=\"5\"><h2 align=\"left\">"
-			+ projName + "<A NAME=\"tstitle\"> "
-			+ "- Time Series </A></h2></th></tr>" );
+			+ projName + "<A NAME=\"tstitle\"> - Time Series </A></h2></th></tr>" );
 	}
 			
-	TSIdent tsid            = null;
+	TSIdent tsid = null;
 	RiversideDB_MeasType mt = null;
 	for( int i = 0; i < tsCount; i++ ) {
 		
-		// First time around. Add collumn titles.
+		// First time around. Add column titles.
 		if ( i == 0 ) {
-			b.append( "<tr><th>Location</th><th>Source</th>"
-				+ "<th>data type</th><th>Interval</th>" );
+			b.append( "<tr><th>Location</th><th>Source</th><th>data type</th><th>Interval</th>" );
 		}
 		
 		// RiversideDB_MeasType
-		mt = (RiversideDB_MeasType) allTS_vect.get(i);
-		if ( mt == null ) continue;
+		mt = allTS_vect.get(i);
+		if ( mt == null ) {
+		    continue;
+		}
 		
 		// TSIdent
 		try {
 			tsid = mt.toTSIdent();
-		} catch ( Exception e ) {
+		}
+		catch ( Exception e ) {
 			continue;
 		}
-		if ( tsid == null ) continue;
+		if ( tsid == null ) {
+		    continue;
+		}
 
 		// Populate row for this TS 
 		b.append( "<tr>" );
 		b.append( "<td>" + tsid.getLocation() + "</td>" );
-		b.append( "<td>" + tsid.getSource()   + "</td>" );
-		b.append( "<td>" + tsid.getType()     + "</td>" );
+		b.append( "<td>" + tsid.getSource() + "</td>" );
+		b.append( "<td>" + tsid.getType() + "</td>" );
 		b.append( "<td>" + tsid.getInterval() + "</td>" );
 		b.append( "</tr>" );
 
@@ -374,19 +318,16 @@ public static void createHTMLTimeseriesList ( JFrame jFrame,
 	editor.scrollToReference("tstitle");
 	editor.setCaretPosition(0);
 	JScrollPane editorPane = new JScrollPane( editor);
-	editorPane.setVerticalScrollBarPolicy(
-		JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+	editorPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 	editorPane.setPreferredSize( new Dimension( 300, 400) );
 	JGUIUtil.center( editor);
 
 	JFrame frame = new JFrame();
 	if ( projName == "" ) {
-		frame.setTitle( appTitle
-			      + " - Time Series List" );
-	} else {	
-		frame.setTitle( appTitle  + " - "
-			      + projName
-			      + " - Time Series List" );
+		frame.setTitle( appTitle + " - Time Series List" );
+	}
+	else {	
+		frame.setTitle( appTitle  + " - " + projName + " - Time Series List" );
 	}
 	
 	JGUIUtil.setIcon( frame, JGUIUtil.getIconImage() );
@@ -398,11 +339,11 @@ public static void createHTMLTimeseriesList ( JFrame jFrame,
 }
 
 /**
-Returns a Vector of the product groups in the database, in the form:<br>
+Returns a list of the product group strings from the database, in the form:<br>
 [ProductGroup_num] - [ProductGroup Identifier] - [ProductGroup Name]
-@return a Vector of the product groups in the database.
+@return a list of the product groups in the database.
 */
-protected static List getProductGroupsChoices(RiversideDB_DMI dmi) 
+protected static List<String> getProductGroupsChoices(RiversideDB_DMI dmi) 
 throws Exception {
 /*
 JTS - 2005-08-24
@@ -419,20 +360,18 @@ See comment below.
 	int groupNum = dbuser.getPrimaryDBGroup_num();
 */
 
-	List groups = new Vector();
+	List<String> groups = new Vector();
 
-	List v = dmi.readProductGroupList();
+	List<RiversideDB_ProductGroup> v = dmi.readProductGroupList();
 	
 	int size = v.size();
 	RiversideDB_ProductGroup pg = null;
 	for (int i = 0; i < size; i++) {
-		pg = (RiversideDB_ProductGroup)v.get(i);
+		pg = v.get(i);
 		//pgGroupNum = pg.getDBGroup_num();
 		//pgUserNum = pg.getDBUser_num();
 
-		groups.add("" + pg.getProductGroup_num()
-			+ " - " + pg.getIdentifier() + " - "
-			+ pg.getName());
+		groups.add("" + pg.getProductGroup_num() + " - " + pg.getIdentifier() + " - " + pg.getName());
 
 /*
 JTS - 2005-08-24
@@ -495,4 +434,3 @@ somehow:
 }
 
 }
-//------------------------------------------------------------------------------

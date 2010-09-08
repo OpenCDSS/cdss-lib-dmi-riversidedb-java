@@ -1,15 +1,3 @@
-// ----------------------------------------------------------------------------
-// RiversideDB_TSProductManager_JFrame - A JFrame for managing products 
-//	stored in RiversideDBDMIs.
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-// 2005-08-24	J. Thomas Sapienza, RTi	Initial version.
-// 2005-08-25	JTS, RTi		All exceptions are now printed at 
-//					warning level 3.
-// ----------------------------------------------------------------------------
-
 package RTi.DMI.RiversideDB_DMI;
 
 import java.awt.FlowLayout;
@@ -78,12 +66,12 @@ public final String CLASS = "RiversideDB_TSProductManager_JFrame";
 Labels for buttons and menu items.
 */
 private final String 
-	__BUTTON_CLOSE = 	"Close",
-	__BUTTON_DELETE = 	"Delete",
-	__BUTTON_OPEN = 	"Open",
-	__BUTTON_RENAME = 	"Rename",
-	__MENU_PERMISSIONS = 	"Change Permissions",
-	__MENU_PRODUCTGROUP = 	"Change Product Group";
+	__BUTTON_CLOSE = "Close",
+	__BUTTON_DELETE = "Delete",
+	__BUTTON_OPEN = "Open",
+	__BUTTON_RENAME = "Rename",
+	__MENU_PERMISSIONS = "Change Permissions",
+	__MENU_PRODUCTGROUP = "Change Product Group";
 
 /**
 GUI buttons.
@@ -114,29 +102,28 @@ The menu item for changing a product's product group.
 private SimpleJMenuItem __productGroupMenuItem = null;
 
 /**
-A Vector of all the TSProduct objects read from databases, in the order they
-appear in the list.
+A list of all the TSProduct objects read from databases, in the order they appear in the list.
 */
-private List __allTSPs = null;
+private List<RiversideDB_TSProduct> __allTSPs = null;
 
 /**
-The Vector of DMIs passed into the constructor.
+The list of DMIs passed into the constructor.
 */
-private List __dmis = null;
+private List<TSProductDMI> __dmis = null;
 
 /**
-A Vector wherein each element corresponds to one of the rows in the list, and
+A list wherein each element corresponds to one of the rows in the list, and
 contains the DMI used to query that TSProduct.
 */
-private List __rowDMIs = null;
+private List<TSProductDMI> __rowDMIs = null;
 
 /**
-The Vector of data that appears in the list.
+The list of data that appears in the list.
 */
-private List __listData = null;
+private List<String> __listData = null;
 
 /**
-Private to avoid use.
+Private to avoid instantiation.
 */
 private RiversideDB_TSProductManager_JFrame() {}
 
@@ -144,17 +131,17 @@ private RiversideDB_TSProductManager_JFrame() {}
 Constructor.
 @param dmis a Vector of TSProductDMIs to query TSProducts from.
 */
-public RiversideDB_TSProductManager_JFrame(List dmis) {
+public RiversideDB_TSProductManager_JFrame(List<TSProductDMI> dmis) {
 	this(dmis, "");
 }
 
 /**
 Constructor.
-@param dmis a Vector of TSProductDMIs to query TSProducts from.
+@param dmis a list of TSProductDMIs to query TSProducts from.
 @param dmiInUse the default DMI to select from the combo box at the top 
 of the dialog.  If null, the default DMI will be the first one in the list.
 */
-public RiversideDB_TSProductManager_JFrame(List dmis, String dmiInUse) {
+public RiversideDB_TSProductManager_JFrame ( List<TSProductDMI> dmis, String dmiInUse ) {
 	super();
 
 	__dmis = dmis;
@@ -206,24 +193,20 @@ public void actionPerformed(ActionEvent event) {
 }
 
 /**
-Checks to see if the user can change the product group of the product in the
-currently-selected row.
+Checks to see if the user can change the product group of the product in the currently-selected row.
 @return true if the user can change the group, false if not.
 */
 private boolean canChangeCurrentRowProductGroup(RiversideDB_DMI dmi) {
 	String routine = CLASS + ".canChangeCurrentRowProductGroup()";
 
-	List choices = null;
+	List<String> choices = null;
 
 	try {
 		choices = RiversideDB_Util.getProductGroupsChoices(dmi);
 	}
 	catch (Exception e) {
-		Message.printWarning(2, routine,	
-			"Could not determine product "
-				+ "groups for currently-logged in user "
-				+ " (\"" + dmi.getDBUser()
-				.getLogin() + "\").");
+		Message.printWarning(2, routine, "Could not determine product groups for currently-logged in user "
+				+ " (\"" + dmi.getDBUser().getLogin() + "\").");
 		Message.printWarning(3, routine, e);
 		return false;
 	}
@@ -238,8 +221,7 @@ private boolean canChangeCurrentRowProductGroup(RiversideDB_DMI dmi) {
 /**
 Checks to see whether the currently-logged in user has permissions to update
 the TSProduct currently selected in the list.
-@return true if the user has sufficient permissions to update the row,
-false if not.
+@return true if the user has sufficient permissions to update the row, false if not.
 */
 private boolean canUpdateCurrentRow(boolean isPopup) {
 	String routine = CLASS + ".canUpdateCurrentRow()";
@@ -250,13 +232,12 @@ private boolean canUpdateCurrentRow(boolean isPopup) {
 		return false;
 	}
 
-	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)
-		__allTSPs.get(row);
+	RiversideDB_TSProduct tsp = __allTSPs.get(row);
 	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 	RiversideDB_DBUser user = dmi.getDBUser();
 
 	if (isPopup) {
-		// check to see if the user is in the other group, in which cas 
+		// check to see if the user is in the other group, in which case 
 		// they cannot change permissions
 		if (user.getLogin().equals("root")) {
 			// root can do anything
@@ -270,16 +251,14 @@ private boolean canUpdateCurrentRow(boolean isPopup) {
 	boolean canUpdate = false;
 
 	try {
-		if (dmi.canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(),
-	             tsp.getDBPermissions())) {
+		if (dmi.canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(), tsp.getDBPermissions())) {
 			canUpdate = true;
 		}
 	}
 	catch (Exception e) {
 		Message.printWarning(2, routine,
 			"An error occurred in checking whether you have "
-			+ "permissions to update the current time series "
-			+ "product's permissions.");
+			+ "permissions to update the current time series product's permissions.");
 		Message.printWarning(3, routine, e);
 	}
 
@@ -295,13 +274,11 @@ private boolean canUpdateCurrentRow(boolean isPopup) {
 		return true;
 	}
 	if (user.getDBUser_num() == tsp.getDBUser_num()) {
-		// if the user owns the record, they can always change the
-		// permissions
+		// if the user owns the record, they can always change the permissions
 		return true;
 	}
 	if (user.getPrimaryDBGroup_num() == tsp.getDBGroup_num()) {
-		// if the user is in the group, they can change the record's
-		// permission
+		// if the user is in the group, they can change the record's permission
 		return true;
 	}
 
@@ -321,8 +298,7 @@ private void changePermissions() {
 		return;
 	}
 
-	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)
-		__allTSPs.get(row);
+	RiversideDB_TSProduct tsp = __allTSPs.get(row);
 	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 	RiversideDB_DBUser user = dmi.getDBUser();
 
@@ -338,16 +314,14 @@ private void changePermissions() {
 
 	try {
 		String permissions = tsp.getDBPermissions();
-		permissions = (new RiversideDB_Permissions_JDialog(
-			this, permissions, isUser, isGroup)).response();
+		permissions = (new RiversideDB_Permissions_JDialog(this, permissions, isUser, isGroup)).response();
 
 		if (permissions == null) {
 			// cancel was pressed
 			return;
 		}
 
-		dmi.updateTSProductDBPermissionsForTSProduct_num(
-			tsp.getTSProduct_num(), permissions);
+		dmi.updateTSProductDBPermissionsForTSProduct_num(tsp.getTSProduct_num(), permissions);
 		tsp.setDBPermissions(permissions);
 		__allTSPs.set(row, tsp);
 	}
@@ -366,40 +340,33 @@ private void changeProductGroup() {
 
 	int row = __productJList.getSelectedIndex();
 
-	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)
-		__allTSPs.get(row);
+	RiversideDB_TSProduct tsp = __allTSPs.get(row);
 	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 
 	try {
-		List choices = null;
+		List<String> choices = null;
 		try {
 			choices = RiversideDB_Util.getProductGroupsChoices(dmi);
 		}
 		catch (Exception e) {
 			Message.printWarning(2, routine,	
-				"Could not determine product "
-					+ "groups for currently-logged in user "
-					+ " (\"" + dmi.getDBUser()
-					.getLogin() + "\").");
+				"Could not determine product groups for currently-logged in user "
+					+ " (\"" + dmi.getDBUser().getLogin() + "\").");
 			Message.printWarning(3, routine, e);
 			return;
 		}
 
 		String group = (new JComboBoxResponseJDialog(
 			this, "Select Product Group",
-			"Select the Product Group for which to "
-			+ "save the TSProduct.",
-			choices, 
-			ResponseJDialog.OK | ResponseJDialog.CANCEL))
-			.response();
+			"Select the Product Group for which to save the TSProduct.",
+			choices, ResponseJDialog.OK | ResponseJDialog.CANCEL)).response();
 		if (group == null) {
 			return;
 		}
 
 		group = StringUtil.getToken(group, "-", 0, 0);
 
-		dmi.updateTSProductProductGroup_numForTSProduct_num(
-			tsp.getTSProduct_num(), StringUtil.atoi(group));
+		dmi.updateTSProductProductGroup_numForTSProduct_num(tsp.getTSProduct_num(), StringUtil.atoi(group));
 		tsp.setProductGroup_num(StringUtil.atoi(group));
 		__allTSPs.set(row,tsp);
 	}
@@ -414,7 +381,7 @@ private void changeProductGroup() {
 Closes the GUI.
 */
 private void closeClicked() {
-        setVisible(false);
+    setVisible(false);
 	dispose();
 }
 
@@ -443,21 +410,17 @@ Deletes a TSProduct.
 private void deleteTSProduct(int row) {
 	String routine = CLASS + ".processTSPVectorForList";
 
-	RiversideDB_TSProduct tsp 
-		= (RiversideDB_TSProduct)__allTSPs.get(row);
+	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)__allTSPs.get(row);
 
 	try {
 
 		RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
-		if (dmi.canDelete(tsp.getDBUser_num(), tsp.getDBGroup_num(),
-			tsp.getDBPermissions())) {
-			dmi.deleteTSProductForTSProduct_num(
-				tsp.getTSProduct_num());
+		if (dmi.canDelete(tsp.getDBUser_num(), tsp.getDBGroup_num(),tsp.getDBPermissions())) {
+			dmi.deleteTSProductForTSProduct_num(tsp.getTSProduct_num());
 		}
 		else {
 			new ResponseJDialog(this, "Invalid Permissions",
-				"You do not have adequate permissions to delete"
-				+ " this TSProduct.", 
+				"You do not have adequate permissions to delete this TSProduct.", 
 				ResponseJDialog.OK);
 			return;
 		}
@@ -471,8 +434,7 @@ private void deleteTSProduct(int row) {
 	catch (Exception e) {
 		Message.printWarning(2, routine, 
 			"An error occurred in deleting the time series product "
-			+ "with identifier: \"" + tsp.getIdentifier() 
-			+ "\" from the database.");
+			+ "with identifier: \"" + tsp.getIdentifier() + "\" from the database.");
 		Message.printWarning(3, routine, e);
 	}
 }
@@ -501,10 +463,9 @@ unique through the entire table, not just on a per-user basis.
 @param dmi the dmi to use for reading from the database.
 @param baseIdentifier the original identifier when the method is called.
 @param group_num the product group num of the product being changed.
-@return a valid identifier or null if the user cancelled the action.
+@return a valid identifier or null if the user canceled the action.
 */
-private String getValidIdentifier(DMI dmi, String baseIdentifier,
-int group_num) {
+private String getValidIdentifier(DMI dmi, String baseIdentifier, int group_num) {
 	String routine = CLASS + ".getValidIdentifier";
 	String identifier = new String(baseIdentifier);
 	// count is a count of the number of times the following loop has gone
@@ -518,8 +479,7 @@ int group_num) {
 		if (count > 0) {
 			new ResponseJDialog(this, "Invalid Identifier",
 				"Identifiers cannot contain spaces, apostrophes"
-				+ " or dashes, must be at least one "
-				+ "character long and cannot already exist "
+				+ " or dashes, must be at least one character long and cannot already exist "
 				+ "in the database.",
 				ResponseJDialog.OK);
 		}
@@ -527,8 +487,7 @@ int group_num) {
 		identifier = new TextResponseJDialog(this, 
 			"Enter Time Series Product Identifier",
 			"Enter a unique identifier for the time series product."
-			+ "\nThe identifier must not exist in the database "
-			+ "and \n"
+			+ "\nThe identifier must not exist in the database and \n"
 			+ "cannot contain spaces, apostrophes or dashes, and "
 			+ "\nmust be at least one character long.", identifier,
 			ResponseJDialog.OK | ResponseJDialog.CANCEL).response();
@@ -542,8 +501,7 @@ int group_num) {
 
 		inDB = false;
 		try {
-			if (((RiversideDB_DMI)dmi)
-			    .readTSProductForIdentifier(identifier) != null) {
+			if (((RiversideDB_DMI)dmi).readTSProductForIdentifier(identifier) != null) {
 			    	inDB = true;
 			}
 		}
@@ -566,8 +524,7 @@ int group_num) {
 }
 
 /**
-Responds when the list is double-clicked, and opens the corresponding
-TSProduct.
+Responds when the list is double-clicked, and opens the corresponding TSProduct.
 @param event the MouseEvent that happened.
 */
 public void mouseClicked(MouseEvent event) {
@@ -606,15 +563,13 @@ public void mousePressed(MouseEvent event) {
 	}
 
 	if (__popup.isPopupTrigger(event)) {
-		if (canChangeCurrentRowProductGroup(
-		    (RiversideDB_DMI)__rowDMIs.get(row))) {
+		if (canChangeCurrentRowProductGroup( (RiversideDB_DMI)__rowDMIs.get(row))) {
 			__productGroupMenuItem.setEnabled(true);
 		}
 		else {
 			__productGroupMenuItem.setEnabled(false);
 		}
-		__popup.show(event.getComponent(), event.getX(), 
-			event.getY());
+		__popup.show(event.getComponent(), event.getX(), event.getY());
 	}
 }
 
@@ -634,44 +589,37 @@ public void mouseReleased(MouseEvent event) {
 	}
 
 	if (__popup.isPopupTrigger(event)) {
-		if (canChangeCurrentRowProductGroup(
-		    (RiversideDB_DMI)__rowDMIs.get(row))) {
+		if (canChangeCurrentRowProductGroup( (RiversideDB_DMI)__rowDMIs.get(row))) {
 			__productGroupMenuItem.setEnabled(true);
 		}
 		else {
 			__productGroupMenuItem.setEnabled(false);
 		}	
-		__popup.show(event.getComponent(), event.getX(), 
-			event.getY());
+		__popup.show(event.getComponent(), event.getX(), event.getY());
 	}
 }
 
 /**
 Opens the TSProduct from the database for the specified identifier 
-string and belonging to the currently-logged-in user.  Identifier should
-already exist.  
+string and belonging to the currently-logged-in user.  Identifier should already exist.  
 @param row the row in the list of the product being opened.
 */
 private void openTSProduct(int row) {
 	String routine = CLASS + ".openRiversideTSProduct";
 
 	List dbProps = null;
-	RiversideDB_TSProduct tsp 
-		= (RiversideDB_TSProduct)__allTSPs.get(row);
+	RiversideDB_TSProduct tsp = __allTSPs.get(row);
 	String identifier = tsp.getIdentifier();
 	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);	
 	Message.printStatus(1, "", "Open product: " + identifier);
 	try {
-		// read all the properties for that TSProduct from the 
-		// database.
-		dbProps = dmi.readTSProductPropsListForTSProduct_num(
-			tsp.getTSProduct_num());
+		// read all the properties for that TSProduct from the database.
+		dbProps = dmi.readTSProductPropsListForTSProduct_num(tsp.getTSProduct_num());
 	}
 	catch (Exception e) {
 		Message.printWarning(2, routine,
 			"An error occurred in trying to read product properties"
-			+ " for TSProduct \"" + identifier + "\" from the "
-			+ "database.");
+			+ " for TSProduct \"" + identifier + "\" from the database.");
 		Message.printWarning(3, routine, e);
 		return;
 	}
@@ -679,7 +627,7 @@ private void openTSProduct(int row) {
 	PropList props = new PropList("TSProduct");
 	props.setHowSet(Prop.SET_FROM_PERSISTENT);
 	int size = dbProps.size();
-	List tsids = new Vector();
+	List<String> tsids = new Vector();
 	RiversideDB_TSProductProps tspp = null;
 
 	// Loops through all the properties and adds them to an actual proplist.
@@ -688,17 +636,14 @@ private void openTSProduct(int row) {
 	for (int i = 0; i < size; i++) {
 		tspp = (RiversideDB_TSProductProps)dbProps.get(i);
 		try {
-			props.set(tspp.getProperty() + "="
-				+ tspp.getVal());
-			if (StringUtil.endsWithIgnoreCase(tspp.getProperty(), 
-				"TSID")) {
+			props.set(tspp.getProperty() + "=" + tspp.getVal());
+			if (StringUtil.endsWithIgnoreCase(tspp.getProperty(), "TSID")) {
 				tsids.add(tspp.getVal());
 			}
 		}
 		catch (Exception e) {
 			Message.printWarning(2, routine, 
-				"An error occurred in setting the following "	
-				+ "property: \"" + tspp.getProperty() 
+				"An error occurred in setting the following property: \"" + tspp.getProperty() 
 				+ "\"=\"" + tspp.getVal() + "\".");
 			Message.printWarning(3, routine, e);
 		}
@@ -707,8 +652,7 @@ private void openTSProduct(int row) {
 	TSProduct product = null;
 	try {
 		if (props.getValue("InitialView") != null) {
-			props.set("InitialView", 
-				props.getValue("InitialView"));
+			props.set("InitialView", props.getValue("InitialView"));
 		}
 		else {
 			props.set("InitialView", "Graph");		
@@ -716,11 +660,11 @@ private void openTSProduct(int row) {
 		props.set("ProductIDOriginal", identifier);
 		product = new TSProduct(props, null);
 		TS ts = null;
-		List tsList = new Vector();
+		List<TS> tsList = new Vector();
 		String s = null;
 		size = tsids.size();
 		for (int i = 0; i < size; i++) {
-			s = (String)tsids.get(i);
+			s = tsids.get(i);
 			ts = dmi.readTimeSeries(s, null, null, null, true);
 			tsList.add(ts);
 		}
@@ -729,10 +673,9 @@ private void openTSProduct(int row) {
 
 		TSViewJFrame view = new TSViewJFrame(product);
 	
-		tsp = (RiversideDB_TSProduct)__allTSPs.get(row);
+		tsp = __allTSPs.get(row);
 
-		if (dmi.canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(),
-			tsp.getDBPermissions())) {		
+		if (dmi.canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(), tsp.getDBPermissions())) {		
 			view.addTSProductDMI(dmi);
 		}
 	}
@@ -745,13 +688,11 @@ private void openTSProduct(int row) {
 }
 
 /**
-Processes a Vector of TSPs in the __tspVector[] array and sets up other Vectors
-to be used internally.
+Processes a list of TSPs in the __tspVector[] array and sets up other lists to be used internally.
 @param dmi the dmi that corresponds to the tsps being processed.
-@param tspVector the Vector of time series products to process.  Cannot be 
-null.
+@param tspVector the Vector of time series products to process.  Cannot be null.
 */
-private void processTSPVectorForList(DMI dmi, List tspVector) {
+private void processTSPVectorForList(TSProductDMI dmi, List<RiversideDB_TSProduct> tspVector) {
 
 	int size = tspVector.size();
 
@@ -759,7 +700,7 @@ private void processTSPVectorForList(DMI dmi, List tspVector) {
 
 	for (int i = 0; i < size; i++) {
 		__rowDMIs.add(dmi);
-		tsp = (RiversideDB_TSProduct)tspVector.get(i);
+		tsp = tspVector.get(i);
 		__allTSPs.add(tsp);
 		__listData.add(tsp.getIdentifier() + " - " + tsp.getName());
 	}
@@ -772,48 +713,38 @@ private void renameClicked() {
 	String routine = CLASS + ".renameClicked";
 	int row = __productJList.getSelectedIndex();
 
-	RiversideDB_TSProduct tsp = (RiversideDB_TSProduct)
-		__allTSPs.get(row);
+	RiversideDB_TSProduct tsp = __allTSPs.get(row);
 	RiversideDB_DMI dmi = (RiversideDB_DMI)__rowDMIs.get(row);
 	String currentID = tsp.getIdentifier();
 	int tsproduct_num = tsp.getTSProduct_num();
 
 	try {
-		if (!dmi.canUpdate(tsp.getDBUser_num(), 
-		    tsp.getDBGroup_num(),
-	             tsp.getDBPermissions())) {
-		 	new ResponseJDialog(this, 
-				"Invalid Permissions",
-				"You do not have adequate "
-				+ "permissions to change"
-				+ " this TSProduct.", 
+		if (!dmi.canUpdate(tsp.getDBUser_num(), tsp.getDBGroup_num(), tsp.getDBPermissions())) {
+		 	new ResponseJDialog(this, "Invalid Permissions",
+				"You do not have adequate permissions to change this TSProduct.", 
 				ResponseJDialog.OK);
 			return;
 		}
 	}
 	catch (Exception e) {
-		Message.printWarning(2, routine, 
-			"Unable to check DB permissions.");
+		Message.printWarning(2, routine, "Unable to check DB permissions.");
 		Message.printWarning(3, routine, e);
 		return;
 	}
 	
-	String id = getValidIdentifier(dmi, currentID, 
-		tsp.getProductGroup_num());
+	String id = getValidIdentifier(dmi, currentID, tsp.getProductGroup_num());
 	if (id == null) {	
 		return;
 	}
 
 	try {
-		dmi.updateTSProductIdentifierForTSProduct_num(
-			tsproduct_num, id);
+		dmi.updateTSProductIdentifierForTSProduct_num(tsproduct_num, id);
 		tsp.setIdentifier(id);
 		__allTSPs.set(row,tsp);
 		__listData.set(row,tsp.getIdentifier() + " - " + tsp.getName());
 	}
 	catch (Exception e) {
-		Message.printWarning(2, routine, 
-			"Error writing to database.");
+		Message.printWarning(2, routine, "Error writing to database.");
 		Message.printWarning(3, routine, e);
 	}		
 
@@ -831,20 +762,18 @@ private void setupGUI(String dmiInUse) {
 		appName = "";
 	}
 
-        JPanel northJPanel = new JPanel();
-        northJPanel.setLayout(new GridBagLayout());
-        getContentPane().add("North", northJPanel);
+    JPanel northJPanel = new JPanel();
+    northJPanel.setLayout(new GridBagLayout());
+    getContentPane().add("North", northJPanel);
 
 	int y = 0;
 	JGUIUtil.addComponent(northJPanel, 
-		new JLabel(
-		"Time series plots are managed as \"time series products\"" +
+		new JLabel("Time series plots are managed as \"time series products\"" +
 		" (TSProducts), which have an identifier and name."),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	JGUIUtil.addComponent(northJPanel,
-		new JLabel(
-		"To manage an existing product, select it and press OK."),
+		new JLabel("To manage an existing product, select it and press OK."),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	/*
@@ -856,40 +785,33 @@ private void setupGUI(String dmiInUse) {
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	*/
 	JGUIUtil.addComponent(northJPanel, 
-		new JLabel(
-		"Time series products are saved using the current login."),
+		new JLabel("Time series products are saved using the current login."),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	JGUIUtil.addComponent(northJPanel, 
-		new JLabel(
-		"To modify the permissions or product group for a time series "
+		new JLabel( "To modify the permissions or product group for a time series "
 		+ "product, right click on the product in the list"),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	JGUIUtil.addComponent(northJPanel, 
-		new JLabel(
-		"to bring up a menu from which both can be modified."),
+		new JLabel("to bring up a menu from which both can be modified."),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	JGUIUtil.addComponent(northJPanel, 
-		new JLabel(
-		"Depending on the permissions you have for the selected "
+		new JLabel("Depending on the permissions you have for the selected "
 		+ "product you may see some of the following behavior:"),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	JGUIUtil.addComponent(northJPanel, 
-		new JLabel(
-		"- the popup menu will not appear for some products"),
+		new JLabel("- the popup menu will not appear for some products"),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	JGUIUtil.addComponent(northJPanel, 
-		new JLabel(
-		"- popup menu items may be disabled"),
+		new JLabel("- popup menu items may be disabled"),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 	JGUIUtil.addComponent(northJPanel, 
-		new JLabel(
-		"- GUI buttons may be disabled"),
+		new JLabel("- GUI buttons may be disabled"),
 		0, y++, 5, 1, 1, 0, 
 		GridBagConstraints.BOTH, GridBagConstraints.NORTHWEST);		
 
@@ -913,8 +835,7 @@ private void setupGUI(String dmiInUse) {
 
 	if (v.size() > 1) {
 		JGUIUtil.addComponent(northJPanel, 
-			new JLabel("Select the database instance for which "
-			+ "to manage TSProducts: "),
+			new JLabel("Select the database instance for which to manage TSProducts: "),
 			0, y, 1, 1, 0, 0, 
 			GridBagConstraints.NONE, GridBagConstraints.WEST);
 		JGUIUtil.addComponent(northJPanel,
@@ -952,23 +873,19 @@ private void setupGUI(String dmiInUse) {
 	__deleteButton.addActionListener(this);
 	southJPanel.add(__deleteButton);
 	__deleteButton.setEnabled(false);
-	__deleteButton.setToolTipText("<html>"
-		+ "This button will delete the selected<br>TSProduct from the "
-		+ "database.</html>");
+	__deleteButton.setToolTipText("<html>Delete the selected<br>TSProduct from the database.</html>");
 
 	__renameButton = new JButton(__BUTTON_RENAME);
 	__renameButton.addActionListener(this);
 	southJPanel.add(__renameButton);
 	__renameButton.setEnabled(false);
-	__renameButton.setToolTipText("<html>Open a "
-		+ "dialog to change the TSProduct's identifier.</html>");
+	__renameButton.setToolTipText("<html>Open a dialog to change the TSProduct's identifier.</html>");
 
 	__openButton = new JButton(__BUTTON_OPEN);
 	__openButton.addActionListener(this);
 	southJPanel.add(__openButton);
 	__openButton.setEnabled(false);
-	__openButton.setToolTipText("<html>Reads the TSProduct and opens it in "
-		+ "a graph window.</html>");
+	__openButton.setToolTipText("<html>Reads the TSProduct and opens it in a graph window.</html>");
 
 	JButton cancelButton = new JButton(__BUTTON_CLOSE);
 	cancelButton.addActionListener(this);
@@ -994,7 +911,7 @@ private void setupGUI(String dmiInUse) {
 	pack();
 	setSize(getWidth() + 100, 400);
 	setVisible(true);
-        JGUIUtil.center(this);
+    JGUIUtil.center(this);
 }
 
 /**
@@ -1017,16 +934,14 @@ private void showProducts(String inputName) {
 			continue;
 		}
 
-		tspd = (TSProductDMI)__dmis.get(i);
+		tspd = __dmis.get(i);
 		
 		try {
-			processTSPVectorForList((DMI)__dmis.get(i), 
-				tspd.readTSProductDMITSProductList(false));
+			processTSPVectorForList(__dmis.get(i), tspd.readTSProductDMITSProductList(false));
 		}
 		catch (Exception e) {
 			String routine = CLASS + ".constructor";
-			Message.printWarning(2, routine,
-				"Error reading from database for TSProductDMI:"
+			Message.printWarning(2, routine, "Error reading from database for TSProductDMI:"
 				+ " '" + tspd.getDMIName() + "'.");
 			Message.printWarning(3, routine, e);
 		}
@@ -1063,12 +978,11 @@ Responds to the window closing event.
 @param event the window event that happened.
 */
 public void windowClosing(WindowEvent event) {
-        closeClicked();
+    closeClicked();
 }
 
 /**
-Responds to the window activated event. Updates the list of products in
-the database.
+Responds to the window activated event. Updates the list of products in the database.
 @param event the window event that happened.
 */
 public void windowActivated(WindowEvent event) {

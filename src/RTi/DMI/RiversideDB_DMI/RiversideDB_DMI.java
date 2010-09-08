@@ -4156,8 +4156,8 @@ of an output file - NOT IMPLEMENTED; 1 for very concise output (e.g.,
 the database name and version, for use in a product footer) - 
 <b>NOT IMPLEMENTED</b>.
 */
-public List getDatabaseProperties ( int level )
-{	List v = new Vector ();
+public List<String> getDatabaseProperties ( int level )
+{	List<String> v = new Vector ();
 	v.add ( "Database Engine:  " + getDatabaseEngine() );
 	if ( getDatabaseName() == null ) {
 		v.add ( "Connect Method:  ODBC DSN" );
@@ -6258,10 +6258,10 @@ where clause may set Data_type, Time_step_base, Identifier, Scenario, and/or Sou
 set in various where clauses
 will have its own separate time series.
 @param sortField the field to sort on
-@return a vector of RiversideDB_MeasType objects filled with rows from the resultSet
+@return a list of RiversideDB_MeasType objects filled with rows from the resultSet
 @throws Exception if an error occurs
 */
-public List readMeasTypeListForTSIdent(String tsIdent, String sortField) 
+public List<RiversideDB_MeasType> readMeasTypeListForTSIdent(String tsIdent, String sortField)
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL ( q, _S_MEASTYPE );
@@ -6319,7 +6319,7 @@ throws Exception {
 	}
 
 	ResultSet rs = dmiSelect(q);
-	List v = toMeasTypeList (rs);
+	List<RiversideDB_MeasType> v = toMeasTypeList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -6332,7 +6332,8 @@ Read MeasTypeMeasLocGeoloc records for distinct data types, ordered by MeasLoc.i
 @param ifp An InputFilter_JPanel instance from which to retrieve where clause information.
 @throws Exception if an error occurs
 */
-public List readMeasTypeMeasLocGeolocList ( String dataType, String timeStep, InputFilter_JPanel ifp ) 
+public List<RiversideDB_MeasTypeMeasLocGeoloc> readMeasTypeMeasLocGeolocList (
+    String dataType, String timeStep, InputFilter_JPanel ifp ) 
 throws Exception
 {
     DMISelectStatement q = new DMISelectStatement ( this );
@@ -6357,7 +6358,7 @@ throws Exception
     }
     // Add where clauses for the input filter
     if ( ifp != null ) {
-        List whereClauses = DMIUtil.getWhereClausesFromInputFilter(this, ifp);       
+        List<String> whereClauses = DMIUtil.getWhereClausesFromInputFilter(this, ifp);       
         // Add additional where clauses...
         if (whereClauses != null) {
             q.addWhereClauses(whereClauses);
@@ -6368,7 +6369,7 @@ throws Exception
     q.addOrderByClause ( "MeasType.data_type" );
     q.addOrderByClause ( "MeasType.sub_type" );
     ResultSet rs = dmiSelect(q);
-    List v = toMeasTypeMeasLocGeolocList (rs);
+    List<RiversideDB_MeasTypeMeasLocGeoloc> v = toMeasTypeMeasLocGeolocList (rs);
     closeResultSet(rs);
     return v;
 }
@@ -9375,13 +9376,13 @@ throws Exception {
 }
 
 /**
-Convert a ResultSet to a Vector of RiversideDB_MeasType.
+Convert a ResultSet to a list of RiversideDB_MeasType.
 @param rs ResultSet from a MeasType/MeasLoc table query.
 @throws Exception if an error occurs
 */
-private List toMeasTypeList ( ResultSet rs ) 
+private List<RiversideDB_MeasType> toMeasTypeList ( ResultSet rs ) 
 throws Exception {
-	List v = new Vector();
+	List<RiversideDB_MeasType> v = new Vector();
 	int index = 1;
 	String s;
 	double d;

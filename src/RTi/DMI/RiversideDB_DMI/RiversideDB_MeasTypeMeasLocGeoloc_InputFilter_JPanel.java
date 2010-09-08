@@ -15,10 +15,18 @@ public class RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel
 extends InputFilter_JPanel {
 
 /**
-Constructor.
-@param dmi the dmi to use to connect to the database.  Cannot be null.
+Data store corresponding to the input filter panel.
 */
-public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDB_DMI dmi) {
+private RiversideDBDataStore __dataStore = null;
+
+/**
+Constructor.
+@param dataStore the DataStore to use to connect to the database.  Cannot be null.
+*/
+public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore dataStore)
+{
+    __dataStore = dataStore;
+    RiversideDB_DMI dmi = (RiversideDB_DMI)dataStore.getDMI();
 	String rd = dmi.getRightIdDelim();
 	String ld = dmi.getLeftIdDelim();
 
@@ -90,6 +98,15 @@ public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDB_DMI dmi)
 		
 	setToolTipText("<html>RiversideDB queries can be filtered based on station and time series metadata.</html>");
 	setInputFilters(filters, 3, 15);
+}
+
+/**
+Return the data store corresponding to this input filter panel.
+@return the data store corresponding to this input filter panel.
+*/
+public RiversideDBDataStore getDataStore ( )
+{
+    return __dataStore;
 }
 
 }
