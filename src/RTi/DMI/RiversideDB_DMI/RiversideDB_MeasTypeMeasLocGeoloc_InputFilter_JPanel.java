@@ -30,7 +30,7 @@ public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore
 	String rd = dmi.getRightIdDelim();
 	String ld = dmi.getLeftIdDelim();
 
-	List filters = new Vector();
+	List<InputFilter> filters = new Vector();
 
 	String geolocTableName = "Geoloc." + ld;
 	String measLocTableName = "MeasLoc." + ld;
