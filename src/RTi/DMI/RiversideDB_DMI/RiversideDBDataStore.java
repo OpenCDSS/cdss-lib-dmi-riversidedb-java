@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import RTi.DMI.AbstractDatabaseDataStore;
 import RTi.DMI.DMI;
+import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 
 /**
@@ -38,14 +39,17 @@ throws IOException, Exception
     PropList props = new PropList ("");
     props.setPersistentName ( filename );
     props.readPersistent ( false );
-    String name = props.getValue("Name");
-    String description = props.getValue("Description");
-    String databaseEngine = props.getValue("DatabaseEngine");
-    String databaseServer = props.getValue("DatabaseServer");
-    String databaseName = props.getValue("DatabaseName");
+    String name = IOUtil.expandPropertyForEnvironment(props.getValue("Name"));
+    String description = IOUtil.expandPropertyForEnvironment(props.getValue("Description"));
+    String databaseEngine = IOUtil.expandPropertyForEnvironment(props.getValue("DatabaseEngine"));
+    String databaseServer = IOUtil.expandPropertyForEnvironment(props.getValue("DatabaseServer"));
+    String databaseName = IOUtil.expandPropertyForEnvironment(props.getValue("DatabaseName"));
+    String systemLogin = IOUtil.expandPropertyForEnvironment(props.getValue("SystemLogin"));
+    String systemPassword = IOUtil.expandPropertyForEnvironment(props.getValue("SystemPassword"));
     
     // Get the properties and create an instance
-    RiversideDB_DMI dmi = new RiversideDB_DMI( databaseEngine, databaseServer, databaseName, -1, null, null );
+    RiversideDB_DMI dmi = new RiversideDB_DMI( databaseEngine, databaseServer,
+        databaseName, -1, systemLogin, systemPassword );
     dmi.open();
     RiversideDBDataStore ds = new RiversideDBDataStore( name, description, dmi );
     return ds;
