@@ -32,6 +32,7 @@ private RiversideDB_ReferenceTable_Abstract_TableModel __tableModel;
 /**
 Constructor.  Private so that it cannot be called.
 */
+@SuppressWarnings("unused")
 private RiversideDB_ReferenceTable_CellRenderer() {}
 
 /**

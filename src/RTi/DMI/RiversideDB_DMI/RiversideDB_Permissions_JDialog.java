@@ -113,6 +113,7 @@ private JCheckBox[]
 /**
 Constructor.  This is private to prevent developers from calling it.
 */
+@SuppressWarnings("unused")
 private RiversideDB_Permissions_JDialog() {}
 
 /**

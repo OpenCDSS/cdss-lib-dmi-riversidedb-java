@@ -125,6 +125,7 @@ private List<String> __listData = null;
 /**
 Private to avoid instantiation.
 */
+@SuppressWarnings("unused")
 private RiversideDB_TSProductManager_JFrame() {}
 
 /**
