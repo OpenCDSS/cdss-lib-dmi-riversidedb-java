@@ -22,10 +22,14 @@ private RiversideDBDataStore __dataStore = null;
 /**
 Constructor.
 @param dataStore the DataStore to use to connect to the database.  Cannot be null.
+@param numFilterGroups the number of filter groups in the panel - if <= 0 the default value (6) will be used.
 */
-public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore dataStore)
+public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore dataStore, int numFilterGroups )
 {
     __dataStore = dataStore;
+    if ( numFilterGroups <= 0 ) {
+        numFilterGroups = 6; // default
+    }
     RiversideDB_DMI dmi = (RiversideDB_DMI)dataStore.getDMI();
 	String rd = dmi.getRightIdDelim();
 	String ld = dmi.getLeftIdDelim();
@@ -101,7 +105,7 @@ public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore
 	setToolTipText("<html>RiversideDB queries can be filtered based on station and time series metadata.</html>");
 	// At the request of the NCWCD, use 6 filters
 	// TODO SAM 2010-09-13 may want to make the number of filters configurable
-	setInputFilters(filters, 6, 15);
+	setInputFilters(filters, numFilterGroups, 15);
 }
 
 /**
