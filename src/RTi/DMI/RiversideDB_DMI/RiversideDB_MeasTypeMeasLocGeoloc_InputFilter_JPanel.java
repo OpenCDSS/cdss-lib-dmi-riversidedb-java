@@ -103,8 +103,8 @@ public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore
         StringUtil.TYPE_DOUBLE, null, null, true));
 		
 	setToolTipText("<html>RiversideDB queries can be filtered based on station and time series metadata.</html>");
-	
-        // At the request of the NCWCD, make 6 filters the default.
+	// At the request of the NCWCD, use 6 filters
+	// TODO SAM 2010-09-13 may want to make the number of filters configurable
 	setInputFilters(filters, numFilterGroups, 15);
 }
 
