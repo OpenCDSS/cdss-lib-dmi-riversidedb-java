@@ -5626,11 +5626,11 @@ throws Exception {
 
 /**
 Read MeasType records for distinct data types, ordered by Data_type.
-@return a vector of objects of type RiversideDB_MeasType, with only the
-Data_type field filled in.
+@return a list of objects of type RiversideDB_MeasType, with only the Data_type field filled in,
+guaranteed to be non-null
 @throws Exception if an error occurs
 */
-public List readMeasTypeListForDistinctData_type () 
+public List<RiversideDB_MeasType> readMeasTypeListForDistinctData_type () 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	// Select from a join of MeasType and MeasLoc
@@ -5640,7 +5640,7 @@ throws Exception {
 	q.addOrderByClause("MeasType.Data_type");
 	ResultSet rs = dmiSelect ( q );
 	// Transfer here...
-	List v = new Vector();
+	List<RiversideDB_MeasType> v = new Vector();
 	int index = 1;
 	String s;
 	RiversideDB_MeasType data = null;
@@ -8517,6 +8517,7 @@ throws Exception {
 
 /**
 Convert a ResultSet to a list of RiversideDB_MeasType.
+@return the list of RiversideDB_MeasType from the resultset, guaranteed to be non-null.
 @param rs ResultSet from a MeasType/MeasLoc table query.
 @throws Exception if an error occurs
 */
@@ -11472,6 +11473,111 @@ throws Exception {
 	else {
 		dmiWrite(w, DMI.INSERT);
 	}
+}
+
+/**
+Write a time seris to the database.  The parameters indicate which time series in the database is to be
+matched for the write.
+@param ts time series to write
+@param locationID the location identifier in MeasType
+@param dataSource the data source abbreviation in MeasType
+@param dataType the data type abbreviation in MeasType
+@param dataSubType the data subtype in MeasType
+@param interval the data interval in MeasType
+@param scenario the scenario in MeasType
+@param sequenceNumber the sequence number in MeasType
+@param writeDataFlags indicate whether data flags should be written (if in the time series)
+@param outputStart the period to start writing
+@param outptuEnd the period to end writing
+*/
+public void writeTimeSeries ( TS ts, String locationID, String dataSource, String dataType,
+    String dataSubType, TimeInterval interval, String scenario, String sequenceNumber,
+    boolean writeDataFlags, DateTime outputStart, DateTime outputEnd )
+throws Exception
+{   String routine = getClass().getName() + ".writeTimeSeries", message;
+    // Get the MeasType of interest.  This uses a TSIdent
+    StringBuffer tsid = new StringBuffer();
+    if ( locationID == null ) {
+        locationID = "";
+    }
+    if ( dataSource == null ) {
+        dataSource = "";
+    }
+    if ( dataType == null ) {
+        dataType = "";
+    }
+    if ( dataSubType == null ) {
+        dataSubType = "";
+    }
+    if ( scenario == null ) {
+        scenario = "";
+    }
+    if ( sequenceNumber == null ) {
+        sequenceNumber = "";
+    }
+    tsid.append( locationID + "." );
+    tsid.append( dataSource + "." );
+    if ( dataSubType.equals("") ) {
+        tsid.append( "" + dataType + "." );
+    }
+    else {
+        tsid.append( "" + dataType + "-" + dataSubType + "." );
+    }
+    tsid.append( "" + interval + "." );
+    if ( !scenario.equals("") ) {
+        tsid.append( scenario + "." );
+    }
+    if ( !sequenceNumber.equals("") ) {
+        tsid.append( "[" + sequenceNumber + "]" );
+    }
+    RiversideDB_MeasType measType = readMeasTypeForTSIdent(tsid.toString());
+    if ( measType == null ) {
+        // Did not find the matching time series to write
+        throw new IllegalArgumentException("Unable to find matching time series for TSID=\"" + tsid + "\"" );
+    }
+    // Figure out the table to write to
+    // Determine the table and format to read from...
+    int pos = RiversideDB_Tables.indexOf ( _RiversideDB_Tables_Vector, measType.getTable_num1() );
+
+    if ( pos < 0 ) {
+        message = "Unable to read time series:  no Tables record for table number " + measType.getTable_num1();
+        Message.printWarning ( 3, routine, message );
+        throw new IllegalArgumentException(message);
+    }
+    // Based on the table format, call the appropriate write method...
+    RiversideDB_Tables t = (RiversideDB_Tables)_RiversideDB_Tables_Vector.get(pos);
+    long tableLayout = t.getTableLayout_num();
+    Message.printStatus(3,routine,"Table layout is " + tableLayout );
+    /*
+    if ( mt._Time_step_base.equalsIgnoreCase("Min") || mt._Time_step_base.equalsIgnoreCase("Minute") ) {
+        ts = new MinuteTS ();
+        ts.setDataInterval ( TimeInterval.MINUTE,(int)mt.getTime_step_mult());
+    }
+    else if ( mt._Time_step_base.equalsIgnoreCase("Hour") ) {
+        ts = new HourTS ();
+        ts.setDataInterval ( TimeInterval.HOUR,(int)mt.getTime_step_mult());
+    }
+    else if ( mt._Time_step_base.equalsIgnoreCase("Day") ) {
+        ts = new DayTS ();
+        ts.setDataInterval ( TimeInterval.DAY,(int)mt.getTime_step_mult());
+    }
+    else if ( mt._Time_step_base.equalsIgnoreCase("Month") || mt._Time_step_base.equalsIgnoreCase("Mon") ) {
+        ts = new MonthTS ();
+        ts.setDataInterval ( TimeInterval.MONTH,(int)mt.getTime_step_mult());
+    }
+    else if ( mt._Time_step_base.equalsIgnoreCase("Year") ) {
+        ts = new YearTS ();
+        ts.setDataInterval ( TimeInterval.YEAR,(int)mt.getTime_step_mult());
+    }
+    else if (mt._Time_step_base.equalsIgnoreCase("Irreg") || mt._Time_step_base.equalsIgnoreCase("Irregular") ) {
+        ts = new IrregularTS ();
+    }
+    else {
+        message = "Time step " + interval + " is not supported.";
+        Message.printWarning ( 3, routine, message );
+        throw new IllegalArgumentException ( message );
+    }
+    */
 }
 
 /**
