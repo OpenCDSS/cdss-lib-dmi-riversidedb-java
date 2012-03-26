@@ -11476,7 +11476,7 @@ throws Exception {
 }
 
 /**
-Write a time seris to the database.  The parameters indicate which time series in the database is to be
+Write a time series to the database.  The parameters indicate which time series in the database is to be
 matched for the write.
 @param ts time series to write
 @param locationID the location identifier in MeasType
