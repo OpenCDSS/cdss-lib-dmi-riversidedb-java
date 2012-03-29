@@ -22,6 +22,7 @@ protected String _Time_step_base = DMIUtil.MISSING_STRING;
 protected long _Time_step_mult = DMIUtil.MISSING_LONG;
 protected String _Source_abbrev = DMIUtil.MISSING_STRING;
 protected String _Scenario = DMIUtil.MISSING_STRING;
+protected int _Sequence_num = DMIUtil.MISSING_INT; // Added 2012-03 - not sure of RiversideDB version (SAM)
 protected long _Table_num1 = DMIUtil.MISSING_LONG;
 protected long _Dbload_method1 = DMIUtil.MISSING_LONG;
 protected long _Table_num2 = DMIUtil.MISSING_LONG;
@@ -59,6 +60,7 @@ public RiversideDB_MeasTypeMeasLoc(RiversideDB_MeasTypeMeasLoc m) {
 	setTime_step_mult  (           m.getTime_step_mult  () );
 	setSource_abbrev   (new String(m.getSource_abbrev   ()));
 	setScenario        (new String(m.getScenario        ()));
+	setSequence_num(m.getSequence_num());
 	setTable_num1      (           m.getTable_num1      () );
 	setDbload_method1  (           m.getDbload_method1  () );
 	setTable_num2      (           m.getTable_num2      () );
@@ -247,6 +249,14 @@ Returns _Scenario
 */
 public String getScenario() {
 	return _Scenario;
+}
+
+/**
+Returns _Sequence_num
+@return _Sequence_num
+*/
+public int getSequence_num() {
+    return _Sequence_num;
 }
 
 /**
@@ -506,6 +516,14 @@ public void setScenario(String Scenario) {
 }
 
 /**
+Sets _Sequence_num
+@param Sequence_num value to put in _Sequence_num
+*/
+public void setSequence_num(int Sequence_num) {
+    _Sequence_num = Sequence_num;
+}
+
+/**
 Sets _Source_abbrev
 @param Source_abbrev value to put in _Source_abbrev
 */
@@ -627,6 +645,7 @@ public String toString() {
 		"Time_step_mult:    "+ _Time_step_mult	+ " \n" +
 		"Source_abbrev:    '"+ _Source_abbrev	+ "'\n" + 
 		"Scenario:         '"+ _Scenario	+ "'\n" +
+	    "Sequence_num:      "+ _Sequence_num  + "\n" +
 		"Table_num1:        "+ _Table_num1	+ " \n" + 
 		"Dbload_method1:    "+ _Dbload_method1	+ " \n" + 
 		"Table_num2:        "+ _Table_num2	+ " \n" +
@@ -665,7 +684,11 @@ throws Exception {
 	if ( !DMIUtil.isMissing(_Time_step_mult) ) {
 		timestep = "" + _Time_step_mult + _Time_step_base;
 	}
-	return new TSIdent ( _Identifier, _Source_abbrev, data_type, timestep, _Scenario );
+	TSIdent tsident = new TSIdent ( _Identifier, _Source_abbrev, data_type, timestep, _Scenario );
+    if ( !DMIUtil.isMissing(_Sequence_num) ) {
+        tsident.setSequenceNumber(_Sequence_num);
+    }
+	return tsident;
 }
 
 }

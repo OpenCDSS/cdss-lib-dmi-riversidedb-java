@@ -51,37 +51,38 @@ public class RiversideDB_MeasType extends DMIDataObject
 {
 
 // From table MeasLoc
-protected String _Identifier       = DMIUtil.MISSING_STRING;
-protected String _MeasLoc_name     = DMIUtil.MISSING_STRING;
+protected String _Identifier = DMIUtil.MISSING_STRING;
+protected String _MeasLoc_name = DMIUtil.MISSING_STRING;
 
 // From table MeasType
-protected long   _MeasType_num     = DMIUtil.MISSING_LONG;
-protected long   _MeasLoc_num      = DMIUtil.MISSING_LONG;
-protected String _Data_type        = DMIUtil.MISSING_STRING;
-protected String _Sub_type         = DMIUtil.MISSING_STRING;
-protected String _Time_step_base   = DMIUtil.MISSING_STRING;
-protected long   _Time_step_mult   = DMIUtil.MISSING_LONG;
-protected String _Source_abbrev    = DMIUtil.MISSING_STRING;
-protected String _Scenario         = DMIUtil.MISSING_STRING;
-protected long   _Table_num1       = DMIUtil.MISSING_LONG;
-protected long   _Dbload_method1   = DMIUtil.MISSING_LONG;
-protected long   _Table_num2       = DMIUtil.MISSING_LONG;
-protected long   _Dbload_method2   = DMIUtil.MISSING_LONG;
-protected String _Description      = DMIUtil.MISSING_STRING;
-protected String _Units_abbrev     = DMIUtil.MISSING_STRING;
-protected String _Create_method    = DMIUtil.MISSING_STRING;
+protected long _MeasType_num = DMIUtil.MISSING_LONG;
+protected long _MeasLoc_num = DMIUtil.MISSING_LONG;
+protected String _Data_type = DMIUtil.MISSING_STRING;
+protected String _Sub_type = DMIUtil.MISSING_STRING;
+protected String _Time_step_base = DMIUtil.MISSING_STRING;
+protected long _Time_step_mult = DMIUtil.MISSING_LONG;
+protected String _Source_abbrev = DMIUtil.MISSING_STRING;
+protected String _Scenario = DMIUtil.MISSING_STRING;
+protected int _Sequence_num = DMIUtil.MISSING_INT; // Added 2012-03 - not sure of RiversideDB version (SAM)
+protected long _Table_num1 = DMIUtil.MISSING_LONG;
+protected long _Dbload_method1 = DMIUtil.MISSING_LONG;
+protected long _Table_num2 = DMIUtil.MISSING_LONG;
+protected long _Dbload_method2 = DMIUtil.MISSING_LONG;
+protected String _Description = DMIUtil.MISSING_STRING;
+protected String _Units_abbrev = DMIUtil.MISSING_STRING;
+protected String _Create_method = DMIUtil.MISSING_STRING;
 protected String _TransmitProtocol = DMIUtil.MISSING_STRING;
-protected String _Status           = DMIUtil.MISSING_STRING;
-protected double _Min_check        = DMIUtil.MISSING_DOUBLE;
-protected double _Max_check        = DMIUtil.MISSING_DOUBLE;
-protected String _Editable         = DMIUtil.MISSING_STRING;     // pre 03.00.00
-protected String _IsEditable       = DMIUtil.MISSING_STRING;     //     03.00.00
-protected String _IsVisible        = DMIUtil.MISSING_STRING;
-protected int    _DBUser_num       = DMIUtil.MISSING_INT;
-protected int    _DBGroup_num      = DMIUtil.MISSING_INT;
-protected String _DBPermissions    = DMIUtil.MISSING_STRING;
-protected int    _TS_DBUser_num    = DMIUtil.MISSING_INT;
-protected int    _TS_DBGroup_num   = DMIUtil.MISSING_INT;
+protected String _Status = DMIUtil.MISSING_STRING;
+protected double _Min_check = DMIUtil.MISSING_DOUBLE;
+protected double _Max_check = DMIUtil.MISSING_DOUBLE;
+protected String _Editable = DMIUtil.MISSING_STRING; // pre 03.00.00
+protected String _IsEditable = DMIUtil.MISSING_STRING; // 03.00.00
+protected String _IsVisible = DMIUtil.MISSING_STRING;
+protected int _DBUser_num = DMIUtil.MISSING_INT;
+protected int _DBGroup_num = DMIUtil.MISSING_INT;
+protected String _DBPermissions = DMIUtil.MISSING_STRING;
+protected int _TS_DBUser_num = DMIUtil.MISSING_INT;
+protected int _TS_DBGroup_num = DMIUtil.MISSING_INT;
 protected String _TS_DBPermissions = DMIUtil.MISSING_STRING;
 
 /**
@@ -89,36 +90,37 @@ Copy constructor.
 */
 public RiversideDB_MeasType(RiversideDB_MeasType m) {
 	super();
-	setIdentifier      (new String(m.getIdentifier      ()));
-	setMeasLoc_name    (new String(m.getMeasLoc_name    ()));
-	setMeasType_num    (           m.getMeasType_num    () );
-	setMeasLoc_num     (           m.getMeasLoc_num     () );
-	setData_type       (new String(m.getData_type       ()));
-	setSub_type        (new String(m.getSub_type        ()));
-	setTime_step_base  (new String(m.getTime_step_base  ()));
-	setTime_step_mult  (           m.getTime_step_mult  () );
-	setSource_abbrev   (new String(m.getSource_abbrev   ()));
-	setScenario        (new String(m.getScenario        ()));
-	setTable_num1      (           m.getTable_num1      () );
-	setDbload_method1  (           m.getDbload_method1  () );
-	setTable_num2      (           m.getTable_num2      () );
-	setDbload_method2  (           m.getDbload_method2  () );
-	setDescription     (new String(m.getDescription     ()));
-	setUnits_abbrev    (new String(m.getUnits_abbrev    ()));
-	setCreate_method   (new String(m.getCreate_method   ()));
-	setTransmitProtocol(new String(m.getTransmitProtocol()));
-	setStatus          (new String(m.getStatus          ()));
-	setMin_check       (           m.getMin_check       () );
-	setMax_check       (           m.getMax_check       () );
-	setEditable        (new String(m.getEditable        ()));//pre 03.00.00
-	setIsEditable      (new String(m.getIsEditable      ()));//    03.00.00
-	setIsVisible       (new String(m.getIsVisible       ()));
-	setDBUser_num      (           m.getDBUser_num      () );
-	setDBGroup_num     (           m.getDBGroup_num     () );
-	setDBPermissions   (new String(m.getDBPermissions   ()));	
-	setTS_DBUser_num   (           m.getTS_DBUser_num   () );
-	setTS_DBGroup_num  (           m.getTS_DBGroup_num  () );
-	setTS_DBPermissions(new String(m.getTS_DBPermissions()));
+	setIdentifier(m.getIdentifier());
+	setMeasLoc_name(m.getMeasLoc_name());
+	setMeasType_num(m.getMeasType_num());
+	setMeasLoc_num(m.getMeasLoc_num());
+	setData_type(m.getData_type());
+	setSub_type(m.getSub_type());
+	setTime_step_base(m.getTime_step_base());
+	setTime_step_mult(m.getTime_step_mult());
+	setSource_abbrev(m.getSource_abbrev());
+	setScenario(m.getScenario());
+	setSequence_num(m.getSequence_num());
+	setTable_num1(m.getTable_num1());
+	setDbload_method1(m.getDbload_method1());
+	setTable_num2(m.getTable_num2());
+	setDbload_method2(m.getDbload_method2());
+	setDescription(m.getDescription());
+	setUnits_abbrev(m.getUnits_abbrev());
+	setCreate_method(m.getCreate_method());
+	setTransmitProtocol(m.getTransmitProtocol());
+	setStatus(m.getStatus());
+	setMin_check(m.getMin_check());
+	setMax_check(m.getMax_check());
+	setEditable(m.getEditable()); //pre 03.00.00
+	setIsEditable(m.getIsEditable()); // 03.00.00
+	setIsVisible(m.getIsVisible());
+	setDBUser_num(m.getDBUser_num());
+	setDBGroup_num(m.getDBGroup_num());
+	setDBPermissions(m.getDBPermissions());	
+	setTS_DBUser_num(m.getTS_DBUser_num());
+	setTS_DBGroup_num(m.getTS_DBGroup_num());
+	setTS_DBPermissions(m.getTS_DBPermissions());
 			
 	setDirty(m.isDirty());
 }
@@ -307,6 +309,14 @@ Returns _Scenario
 */
 public String getScenario() {
 	return _Scenario;
+}
+
+/**
+Returns _Sequence_num
+@return _Sequence_num
+*/
+public int getSequence_num() {
+    return _Sequence_num;
 }
 
 /**
@@ -566,6 +576,14 @@ public void setScenario(String Scenario) {
 }
 
 /**
+Sets _Sequence_num
+@param Sequence_num value to put in _Sequence_num
+*/
+public void setSequence_num(int Sequence_num) {
+    _Sequence_num = Sequence_num;
+}
+
+/**
 Sets _Source_abbrev
 @param Source_abbrev value to put in _Source_abbrev
 */
@@ -687,6 +705,7 @@ public String toString() {
 		"Time_step_mult:    "+ _Time_step_mult	+ " \n" +
 		"Source_abbrev:    '"+ _Source_abbrev	+ "'\n" + 
 		"Scenario:         '"+ _Scenario	+ "'\n" +
+		"Sequence_num:      "+ _Sequence_num  + "\n" +
 		"Table_num1:        "+ _Table_num1	+ " \n" + 
 		"Dbload_method1:    "+ _Dbload_method1	+ " \n" + 
 		"Table_num2:        "+ _Table_num2	+ " \n" +
@@ -716,7 +735,8 @@ Create and return a TSIdent instance for the MeasType.
 @return a TSIdent instance for the MeasType.
 */
 public TSIdent toTSIdent()
-throws Exception {
+throws Exception
+{
 	String data_type = _Data_type;
 	if ( !_Sub_type.equals("") ) {
 		data_type = _Data_type + "-" + _Sub_type;
@@ -725,8 +745,11 @@ throws Exception {
 	if ( !DMIUtil.isMissing(_Time_step_mult) ) {
 		timestep = "" + _Time_step_mult + _Time_step_base;
 	}
-	return new TSIdent ( _Identifier, _Source_abbrev, data_type,
-		timestep, _Scenario );
+	TSIdent tsident = new TSIdent ( _Identifier, _Source_abbrev, data_type, timestep, _Scenario );
+	if ( !DMIUtil.isMissing(_Sequence_num) ) {
+	    tsident.setSequenceNumber(_Sequence_num);
+	}
+	return tsident;
 }
 
 }

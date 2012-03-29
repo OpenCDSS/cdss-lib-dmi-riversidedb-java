@@ -469,6 +469,12 @@ following design elements:
 */
 protected final static long _VERSION_020601_20020625 = 2060120020625L;
 
+// TODO SAM 2012-03-27 See comment in determineDatabaseVersion().
+/**
+Indicate whether MeasType table includes Sequence_num.
+*/
+private boolean __measTypeHasSequenceNum = false;
+
 /**
 Table layout having fields MeasType_num, Date_Time, Revision_num, Val, Quality_flag, for second precision
 time series.
@@ -1767,6 +1773,9 @@ throws Exception {
 			select.addField ( "MeasType.Time_step_mult" );
 			select.addField ( "MeasType.Source_abbrev" );
 			select.addField ( "MeasType.Scenario" );
+			if ( getMeasTypeHasSequenceNum() ) {
+			    select.addField ( "MeasType.Sequence_num" );
+			}
 			select.addField ( "MeasType.Table_num1" );
 			select.addField ( "MeasType.Dbload_method1" );
 			select.addField ( "MeasType.Table_num2" );
@@ -1813,6 +1822,9 @@ throws Exception {
             select.addField ( "MeasType.Time_step_mult" );
             select.addField ( "MeasType.Source_abbrev" );
             select.addField ( "MeasType.Scenario" );
+            if ( getMeasTypeHasSequenceNum() ) {
+                select.addField ( "MeasType.Sequence_num" );
+            }
             select.addField ( "MeasType.Table_num1" );
             select.addField ( "MeasType.Dbload_method1" );
             select.addField ( "MeasType.Table_num2" );
@@ -3731,7 +3743,7 @@ throws Exception {
 Determine the database version by examining the table structure for the
 database.  The following versions are known for RiversideDB:
 <ul>
-<li>	03000020041001 - Latest version</li>
+<li> 03000020041001 - Latest version</li>
 	<ol>
 	<li>New table 'Operation'</li>
 	<li>New table 'OperationStateRelation'</li>
@@ -3739,12 +3751,14 @@ database.  The following versions are known for RiversideDB:
 	<li>State table added fields 'OperationStateRelation_num', 'Sequence',
 	and 'ValueStr'</li>
 	</ol>
-<li>	02080020030422
+<li> 02080020030422
 	<ol>
 	<li>Tables table has IsReference</li>
 	<li>Tables table has IsTSTemplate</li>
 	</ol>
 </ul>
+There is also a check for whether MeasType includes the Sequence_num column.  This has not been synchronized
+with respect to the formal database versioning and so a separate data member is set.
 */
 public void determineDatabaseVersion() {
 	// Default until more checks are added...
@@ -3758,13 +3772,11 @@ public void determineDatabaseVersion() {
 	}
 	catch (Exception e) {
 		// Ignore ...
-		Message.printWarning(2, routine, e);
+		Message.printWarning(3, routine, e);
 	}
     try {
-        // The above check works for full RiversideDB
-        // the minimized version (based off of the 03 series)
-        // does not have this table, but does have the IsEditable
-        // column in MeasType. -IWS
+        // The above check works for full RiversideDB the minimized version (based off of the 03 series)
+        // does not have this table, but does have the IsEditable column in MeasType. -IWS
         if (!version_found && DMIUtil.databaseTableHasColumn(this, "MeasType", "IsEditable")) {
 			setDatabaseVersion(_VERSION_030000_20041001);
 			version_found = true;
@@ -3787,6 +3799,21 @@ public void determineDatabaseVersion() {
 			Message.printWarning ( 2, routine, e );
 		}
 	}
+	// TODO SAM 2012-03-27 Need to fold this back into the standard versioning checks above
+	// when Michael Thiemann and others provide assurance that database version information in databases
+	// are updated
+    try {
+        if (DMIUtil.databaseTableHasColumn(this, "MeasType", "Sequence_num")) {
+            setMeasTypeHasSequenceNum(true);
+        }
+        else {
+            setMeasTypeHasSequenceNum(false);
+        }
+    }
+    catch (Exception e) {
+        // Ignore ...
+        Message.printWarning(3, routine, e);
+    }
 
 	if (!version_found) {
 		// Assume this...
@@ -4051,6 +4078,14 @@ was opened.
 public List<String> getMeasTypeDataTypeList()
 {
     return __RiversideDB_MeasTypeDataTypeList;
+}
+
+/**
+Return whether the MeasType table has the Sequence_num column.
+*/
+public boolean getMeasTypeHasSequenceNum ()
+{
+    return __measTypeHasSequenceNum;
 }
 
 /**
@@ -5566,7 +5601,7 @@ Read the MeasType table for the record that matches the given tsident string.
 */
 public RiversideDB_MeasType readMeasTypeForTSIdent ( String tsident_string ) 
 throws Exception {
-	List v = readMeasTypeListForTSIdent ( tsident_string );
+	List<RiversideDB_MeasType> v = readMeasTypeListForTSIdent ( tsident_string );
 	// Only interested in the first one...
 	if ( (v == null) || (v.size() == 0) ) {
 		return null;
@@ -5677,10 +5712,10 @@ throws Exception {
 Reads all the records from MeasType that match the given tsident string.
 @param tsIdent a ts identifier string that will be split up and its values
 set in various where clauses
-@return a vector of RiversideDB_MeasType that match the tsident string.
+@return a list of RiversideDB_MeasType that match the tsident string.
 @throws Exception if an error occurs
 */
-public List readMeasTypeListForTSIdent ( String tsIdent ) 
+public List<RiversideDB_MeasType> readMeasTypeListForTSIdent ( String tsIdent ) 
 throws Exception {
 	return readMeasTypeListForTSIdent(tsIdent,  null);
 }
@@ -5690,10 +5725,10 @@ Reads all the records from MeasType that match the given tsident string,
 ordered by MeasLoc.Identifier.
 @param tsIdent a ts identifier string that will be split up and its values
 set in various where clauses
-@return a Vector of RiversideDB_MeasType objects that match the tsident String.
+@return a list of RiversideDB_MeasType objects that match the tsident String.
 @throws Exception if an error occurs
 */
-public List readMeasTypeListForTSIdentByLocation(String tsIdent)
+public List<RiversideDB_MeasType> readMeasTypeListForTSIdentByLocation(String tsIdent)
 throws Exception {
 	return readMeasTypeListForTSIdent(tsIdent, "MeasLoc.Identifier");
 }
@@ -5761,6 +5796,9 @@ throws Exception {
 	}
 	if (source.length() > 0) {
 		q.addWhereClause("MeasType.Source_abbrev = '" + escape(source) + "'");
+	}
+	if ( getMeasTypeHasSequenceNum() && (id.getSequenceNumber() > 0) ) {
+	    q.addWhereClause("MeasType.Sequence_num = " + id.getSequenceNumber() );
 	}
 	if (sortField != null) {
 		q.addOrderByClause(sortField);
@@ -6958,6 +6996,16 @@ throws Exception {
 		Message.printWarning(1, routine, message);
 		throw new Exception(message);
 	}
+}
+
+// TODO SAM 2012-03-27 See comment in determineDatabaseVersion()
+/**
+Set whether the MeasType table has the Sequence_num column
+@param measTypeHasSequenceNum indicate whether the MeasType table has the Sequence_num column
+*/
+private void setMeasTypeHasSequenceNum ( boolean measTypeHasSequenceNum )
+{
+    __measTypeHasSequenceNum = measTypeHasSequenceNum;
 }
 
 // T FUNCTIONS
@@ -8530,6 +8578,7 @@ throws Exception {
 	long l;
 	int i;
 	RiversideDB_MeasType data = null;
+	boolean measTypeHasSequenceNum = getMeasTypeHasSequenceNum();
 	while ( rs.next() ) {
 		data = new RiversideDB_MeasType();
 		index = 1;
@@ -8564,6 +8613,12 @@ throws Exception {
 		s = rs.getString ( index++ );
 		if ( !rs.wasNull() ) {
 			data.setScenario ( s.trim() );
+		}
+		if ( measTypeHasSequenceNum ) {
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setSequence_num(i);
+            }
 		}
 		l = rs.getLong ( index++ );
 		if ( !rs.wasNull() ) {
@@ -8675,6 +8730,7 @@ throws Exception {
     long l;
     int i;
     RiversideDB_MeasTypeMeasLocGeoloc data = null;
+    boolean measTypeHasSequenceNum = getMeasTypeHasSequenceNum();
     while ( rs.next() ) {
         data = new RiversideDB_MeasTypeMeasLocGeoloc();
         index = 1;
@@ -8710,6 +8766,12 @@ throws Exception {
         s = rs.getString ( index++ );
         if ( !rs.wasNull() ) {
             data.setScenario ( s.trim() );
+        }
+        if ( measTypeHasSequenceNum ) {
+            i = rs.getInt(index++);
+            if (!rs.wasNull()) {
+                data.setSequence_num(i);
+            }
         }
         l = rs.getLong ( index++ );
         if ( !rs.wasNull() ) {
