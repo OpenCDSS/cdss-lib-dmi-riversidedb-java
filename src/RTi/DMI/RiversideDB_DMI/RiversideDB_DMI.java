@@ -846,8 +846,8 @@ throws Exception {
 		setSystemPassword("rivertrak");
 	}
 	setEditable(true);
-	setSecure  (false);
-	_dbuser  = new RiversideDB_DBUser();
+	setSecure(true);
+	_dbuser = new RiversideDB_DBUser();
 	_dbgroup = new RiversideDB_DBGroup();
 }
 
@@ -876,9 +876,9 @@ throws Exception {
 		setSystemPassword("rivertrak");
 	}
 	setEditable(true);
-	setSecure  (false);
+	setSecure(true);
 
-	_dbuser  = new RiversideDB_DBUser();
+	_dbuser = new RiversideDB_DBUser();
 	_dbgroup = new RiversideDB_DBGroup();
 }
 
@@ -3902,6 +3902,82 @@ protected void finalize() throws Throwable {
 	super.finalize();
 }
 
+/**
+Find an instance of RiversideDB_MeasType given values that form the unique TSID.  This method is useful
+when matching the MeasType from a list of user-selected choices.
+@param measTypeList list of RiversideDB_MeasType to search
+@param measLocNum the MeasLoc_num to match or -1 to not check
+@param dataSource the data source to check, or null to not check
+@param dataType the data type to check, or null to not check
+@param dataSubType the data sub-type to check, or null to not check
+@param dataInterval the data interval to check, or null to not check
+@param scenario the scenario to check, or null to not check
+@param sequenceNumber the sequence number to check, or null to not check
+@return the list of matching items (a non-null list is guaranteed)
+*/
+public List<RiversideDB_MeasType> findMeasType( List<RiversideDB_MeasType> measTypeList,
+    long measLocNum, String dataSource, String dataType, String dataSubType, String dataInterval, String scenario,
+    String sequenceNumber )
+{
+    List<RiversideDB_MeasType> foundList = new Vector();
+    int sequenceNumber2 = -1;
+    if ( (sequenceNumber != null) && StringUtil.isInteger(sequenceNumber) ) {
+        sequenceNumber2 = Integer.parseInt(sequenceNumber);
+    }
+    TimeInterval interval = null;
+    if ( (dataInterval != null) && !dataInterval.equals("") ) {
+        try {
+            interval = TimeInterval.parseInterval(dataInterval);
+        }
+        catch ( Exception e ) {
+            interval = null;
+        }
+    }
+    //Message.printStatus(2, "", "Searching " + measTypeList.size() + " measType");
+    for ( RiversideDB_MeasType measType: measTypeList ) {
+        if ( (measLocNum >= 0) && (measType.getMeasLoc_num() != measLocNum) ) {
+            // Location to match was specified but did not match
+            //Message.printStatus(2, "", "Location " + measLocNum + "!=" + measType.getMeasLoc_num() );
+            continue;
+        }
+        if ( (dataSource != null) && !measType.getSource_abbrev().equalsIgnoreCase(dataSource) ) {
+            // Data source to match was specified but did not match
+            //Message.printStatus(2, "", "Data source not matched");
+            continue;
+        }
+        if ( (dataType != null) && !measType.getData_type().equalsIgnoreCase(dataType) ) {
+            // Data type to match was specified but did not match
+            //Message.printStatus(2, "", "Data type not matched");
+            continue;
+        }
+        if ( (dataSubType != null) && !measType.getSub_type().equalsIgnoreCase(dataSubType) ) {
+            // Data sub-type to match was specified but did not match
+            //Message.printStatus(2, "", "Data subtype not matched");
+            continue;
+        }
+        if ( (interval != null) && !measType.getTime_step_base().equalsIgnoreCase(interval.getBaseString()) &&
+            (measType.getTime_step_mult() != interval.getMultiplier()) ) {
+            // Scenario to match was specified but did not match
+            //Message.printStatus(2, "", "Interval not matched");
+            continue;
+        }
+        if ( (scenario != null) && !measType.getScenario().equalsIgnoreCase(scenario) ) {
+            // Scenario to match was specified but did not match
+            //Message.printStatus(2, "", "Scenario not matched");
+            continue;
+        }
+        if ( (sequenceNumber2 >= 0) && (measType.getSequence_num() == sequenceNumber2) ) {
+            // Sequence number to match was specified but did not match
+            //Message.printStatus(2, "", "Sequence number not matched");
+            continue;
+        }
+        // If here OK to add to the list.
+        //Message.printStatus(2, "", "Matched MeasType:" + measType );
+        foundList.add ( measType );
+    }
+    return foundList;
+}
+
 // G FUNCTIONS
 
 /**
@@ -5734,7 +5810,7 @@ throws Exception {
 }
 
 /**
-executes a query on table MeasType, limiting values to a series of things,
+Executes a query on table MeasType, limiting values to a series of things,
 should any of them be set in the string passed in to the method.  The 
 where clause may set Data_type, Time_step_base, Identifier, Scenario, and/or Source_abbrev.
 @param tsIdent a ts identifier string that will be split up and its values
