@@ -316,8 +316,12 @@
 
 package RTi.DMI.RiversideDB_DMI;
 
+import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import java.util.Date;
 import java.util.List;
@@ -341,7 +345,9 @@ import RTi.TS.IrregularTS;
 import RTi.TS.MinuteTS;
 import RTi.TS.MonthTS;
 import RTi.TS.TS;
+import RTi.TS.TSData;
 import RTi.TS.TSIdent;
+import RTi.TS.TSIterator;
 import RTi.TS.TSSupplier;
 import RTi.TS.YearTS;
 
@@ -3668,6 +3674,46 @@ throws Exception {
 }
 
 /**
+Delete time series records.  This is used, for example, in some cases prior to writing time series.
+A single delete statement is performed (individual values are not checked)
+@param tsTable the name of the table containing time series information
+@param tableLayoutNum the layout number for the table
+@param deleteStart the start of deleting or null to delete all
+@param deleteEnd the end of deleting or null to delete all
+@param measTypeNum the MeasType_num to indicate the time series
+*/
+private int deleteTimeSeriesRecords ( String tsTable, long tableLayoutNum, DateTime deleteStart, DateTime deleteEnd,
+    long measTypeNum )
+throws Exception
+{   String routine = getClass().getName() + ".deleteTimeSeriesRecords";
+    if ( (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_SECOND) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_HOUR) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MONTH) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_YEAR) ) {
+        DMIDeleteStatement d = new DMIDeleteStatement ( this );
+        d.addTable ( tsTable );
+        // MeasType_num is the primary key
+        d.addWhereClause ( tsTable + ".MeasType_num=" + measTypeNum );
+        // Also may have start and end
+        if ( deleteStart != null ) {
+            d.addWhereClause ( tsTable + ".Date_Time >= " + DMIUtil.formatDateTime( this, deleteStart) );
+        }
+        if ( deleteEnd != null ) {
+            d.addWhereClause ( tsTable + ".Date_Time <= " + DMIUtil.formatDateTime( this, deleteEnd) );
+        }
+        Message.printStatus(2, routine, "SQL:  " + d);
+        return dmiDelete(d);
+    }
+    else {
+        throw new IllegalArgumentException("Table layout " + tableLayoutNum +
+            " is not supported in deleteTimeSeriesRecords()." );
+    }
+}
+
+/**
 Deletes records from the TSProduct and TSProductProps tables for the TSProduct
 with the specified identifier.<p>  Permissions are not checked in this method 
 as to whether the user has permission to delete. 
@@ -6637,8 +6683,57 @@ throws Exception {
 	return (RiversideDB_TableLayout)v.get(0);
 }
 
+// TODO SAM 2012-04-03 In the future may allow more parameters to filter the query.
 /**
-Read a time series matching a time series identifier.
+Read the list of time series data records.
+@return list of time series data records, guaranteed to be non-null
+*/
+public List<RiversideDB_TSDateValueRecord> readTimeSeriesData ( String tsTableName, long measTypeNum,
+    DateTime readStart, DateTime readEnd, boolean hasDuration, boolean hasCreationTime, boolean hasRevisionNum )
+throws Exception
+{
+    List<RiversideDB_TSDateValueRecord> tsdataList = new Vector();
+    DMISelectStatement q = new DMISelectStatement ( this );
+    q.addTable ( tsTableName );
+    q.addField ( tsTableName + ".MeasType_num" );
+    q.addField ( tsTableName + ".Date_Time" );
+    q.addField ( tsTableName + ".Val" );
+    q.addField ( tsTableName + ".Quality_flag" );
+    if ( hasDuration ) {
+        q.addField ( tsTableName + ".Duration" );
+    }
+    // Always sort by date/time of the data.
+    q.addOrderByClause ( tsTableName + ".Date_Time" );
+    if ( hasRevisionNum ) {
+        // Order by revision number so that the latest values are visible in the time series,
+        // but won't include revision number in the final time series results (not built into TS class design)
+        q.addField ( tsTableName + ".Revision_num" );
+        q.addOrderByClause ( tsTableName + ".Revision_num" );
+    }
+    else if ( hasCreationTime ) {
+        // Newer alternative to revision number - sort by the creation time so latest value is used
+        // in final result
+        q.addField ( tsTableName + ".Creation_Time" );
+        q.addOrderByClause ( tsTableName + ".Creation_Time" );
+    }
+    if ( readStart != null ) {
+        q.addWhereClause ( tsTableName + ".Date_Time >= " + DMIUtil.formatDateTime( this, readStart));
+    }
+    if ( readEnd != null ) {
+        q.addWhereClause ( tsTableName + ".Date_Time <= " + DMIUtil.formatDateTime( this, readEnd));
+    }
+
+    // Submit the query...
+    ResultSet rs = dmiSelect ( q );
+    // Convert the data to a list of records...
+    tsdataList = toTSDateValueRecordList ( hasDuration, hasCreationTime, hasRevisionNum, rs );
+    closeResultSet(rs);
+    return tsdataList;
+}
+
+/**
+Read a time series matching a time series identifier, and use the default missing value
+(-999 for historical reasons).
 @return a time series or null if the time series is not defined in the database.
 If no data records are available within the requested period, a call to
 hasData() on the returned time series will return false.
@@ -6656,7 +6751,34 @@ only read header information).
 @exception if there is an error reading the time series.
 */
 public TS readTimeSeries (String tsident_string, DateTime req_date1,
-			  DateTime req_date2, String req_units, boolean readData )
+    DateTime req_date2, String req_units, boolean readData )
+throws Exception
+{   // Use the default missing value...
+    return readTimeSeries ( tsident_string, req_date1, req_date2, req_units, null, readData );
+}
+
+/**
+Read a time series matching a time series identifier.
+@return a time series or null if the time series is not defined in the database.
+If no data records are available within the requested period, a call to
+hasData() on the returned time series will return false.
+@param tsident_string TSIdent string identifying the time series.  
+Alternately, this can be a String representation of a Long value, in which
+case it is the MeasType_num of the time series to read.
+@param req_date1 Optional date to specify the start of the query (specify 
+null to read the entire time series).
+@param req_date2 Optional date to specify the end of the query (specify 
+null to read the entire time series).
+@param req_units requested data units (specify null or blank string to 
+return units from the database).
+@param missingValue the value to use for missing data - default is -999 for historical reasons but
+NaN is recommended and can be specified with this parameter (at some point NaN may become the default)
+@param readData Indicates whether data should be read (specify false to 
+only read header information).
+@exception if there is an error reading the time series.
+*/
+public TS readTimeSeries (String tsident_string, DateTime req_date1,
+	DateTime req_date2, String req_units, Double missingValue, boolean readData )
 throws Exception
 {	// Read a time series from the database.
 	// IMPORTANT - BECAUSE WE CAN'T GET THE LAST RECORD FROM A ResultSet
@@ -6699,7 +6821,7 @@ throws Exception
 	}
 	// Based on the table format, call the appropriate read method...
 	RiversideDB_Tables t = (RiversideDB_Tables)_RiversideDB_Tables_Vector.get(pos);
-	long table_layout = t.getTableLayout_num();
+	long tableLayoutNum = t.getTableLayout_num();
 	// First define the time series to be returned, based on the MeasType interval base and multiplier...
 	TS ts = null;
 	if ( mt._Time_step_base.equalsIgnoreCase("Min") || mt._Time_step_base.equalsIgnoreCase("Minute") ) {
@@ -6757,6 +6879,11 @@ throws Exception
 	if ( req_date2 != null ) {
 		ts.setDate2 ( req_date2 );
 	}
+    if ( missingValue != null ) {
+        // TODO SAM 2012-04-04 Would be great to convert default to NaN but continue using -999
+        // until impacts can be evaluated
+        ts.setMissing(missingValue);
+    }
 	// TODO - problem here - in order to read the header and get the
 	// dates, we really need to get the dates from somewhere.  Currently
 	// RiversideDB does not store the most current period dates in the
@@ -6774,39 +6901,23 @@ throws Exception
 	// Most time series tables have similar layout, with some having a few more columns.
 	// Put all of the recognized formats in the following and let unknown formats fall through
 	boolean monthRecord = false;   // True for 12-values per record
-	if ( (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) ||
-        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) ||
-        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION) ||
-        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_HOUR) ||
-        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ||
-        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MONTH) ||
-        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_YEAR) ||
-        (table_layout == TABLE_LAYOUT_1MONTH) ) {
+	if ( (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_HOUR) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MONTH) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_YEAR) ||
+        (tableLayoutNum == TABLE_LAYOUT_1MONTH) ) {
 	    // Set booleans to indicate which optional fields are used.
 	    boolean hasFlag = true; // Default is they all do
-	    boolean hasDuration = false;
-	    if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
-	        hasDuration = true;
-	    }
+	    boolean hasDuration = tableLayoutHasDuration ( tableLayoutNum );
 	    // Table formats indicate revisions to data using either a revision number (sequential integer)
 	    // or creation time (date/time).  The records will need to be ordered by one of these to ensure
 	    // that the latest values are evident in the results.
-	    boolean hasRevisionNum = false;
-	    if ( (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) ||
-            (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) ||
-	        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_HOUR) ||
-	        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ||
-	        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MONTH) ||
-	        (table_layout == TABLE_LAYOUT_DATE_VALUE_TO_YEAR) ||
-	        (table_layout == TABLE_LAYOUT_1MONTH) ) {
-	        hasRevisionNum = true;
-	    }
-	    boolean hasCreationTime = false;
-        if ( table_layout == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
-            // No duration but has creation time
-            hasCreationTime = true;
-        }
-        if ( table_layout == TABLE_LAYOUT_1MONTH ) {
+	    boolean hasRevisionNum = tableLayoutHasRevisionNum ( tableLayoutNum );
+	    boolean hasCreationTime = tableLayoutHasCreationTime ( tableLayoutNum );
+        if ( tableLayoutNum == TABLE_LAYOUT_1MONTH ) {
             // 12 values per record, requires special handling in query and transfer of result set
             monthRecord = true;
         }
@@ -6832,6 +6943,7 @@ throws Exception
         }
         else {
             // More common date/value table layout
+            q.addField ( ts_table + ".MeasType_num" );
             q.addField ( ts_table + ".Date_Time" );
             q.addField ( ts_table + ".Val" );
             q.addField ( ts_table + ".Quality_flag" );
@@ -6842,7 +6954,7 @@ throws Exception
             q.addOrderByClause ( ts_table + ".Date_Time" );
             if ( hasRevisionNum ) {
                 // Order by revision number so that the latest values are visible in the time series,
-                // but won't include revision number in the final time series results
+                // but won't include revision number in the final time series results (not built into TS class design)
                 q.addField ( ts_table + ".Revision_num" );
                 q.addOrderByClause ( ts_table + ".Revision_num" );
             }
@@ -6862,12 +6974,12 @@ throws Exception
 		// Submit the query...
 		ResultSet rs = dmiSelect ( q );
 		// Convert the data to a Vector of records so we can get the first and last dates to allocate memory...
-		List v = null;
+		List<RiversideDB_TSDateValueRecord> v = null;
 		if ( monthRecord ) {
 		    v = toTSDateValueRecordListFromMonthData ( rs );
 		}
 		else {
-		    v = toTSDateValueRecordList ( hasDuration, hasCreationTime, rs );
+		    v = toTSDateValueRecordList ( hasDuration, hasCreationTime, hasRevisionNum, rs );
 		}
 		closeResultSet(rs);
 		int size = 0;
@@ -6899,23 +7011,23 @@ throws Exception
 			    // FIXME SAM 2008-11-19 Need precision of dates for irregular data in database
 			    // Set the precision to minute since it is unlikely that data values need
 			    // to be recorded to the second
-			    ts.setDate1(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
-			    ts.setDate1Original(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
+			    ts.setDate1(new DateTime(data.getDate_Time(), DateTime.PRECISION_MINUTE));
+			    ts.setDate1Original(new DateTime(data.getDate_Time(), DateTime.PRECISION_MINUTE));
 			}
 			else {
 			    // Precision will be set consistent with the time series interval when dates are set.
-			    ts.setDate1(data._Date_Time);
-			    ts.setDate1Original(data._Date_Time);
+			    ts.setDate1(data.getDate_Time());
+			    ts.setDate1Original(data.getDate_Time());
 			}
 
 			data = (RiversideDB_TSDateValueRecord)v.get(size - 1);
 			if ( ts instanceof IrregularTS ) {
-			    ts.setDate2(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
-			    ts.setDate2Original(new DateTime(data._Date_Time, DateTime.PRECISION_MINUTE));
+			    ts.setDate2(new DateTime(data.getDate_Time(), DateTime.PRECISION_MINUTE));
+			    ts.setDate2Original(new DateTime(data.getDate_Time(), DateTime.PRECISION_MINUTE));
 			}
 			else {
-	            ts.setDate2(data._Date_Time);
-	            ts.setDate2Original(data._Date_Time);
+	            ts.setDate2(data.getDate_Time());
+	            ts.setDate2Original(data.getDate_Time());
 			}
 			// All the minute data has flags.
 			if ( hasFlag ) {
@@ -6923,24 +7035,37 @@ throws Exception
 			}
 			ts.allocateDataSpace();
 		}
+		// If true missing values are transferred.
+		// On 2012-04-04 the code was changed so that missing values are read.
+		// This allows flags on missing values to be managed.
+		boolean transferMissing = true;
+		double value;
+		boolean isMissing;
+		double tsMissingValue = ts.getMissing();
 		for ( int i = 0; i < size; i++ ) {
 			// Loop through and assign the data...
 			data = (RiversideDB_TSDateValueRecord)v.get(i);
-			// For now ignore the revision number because the newer creation date is easier to deal with...
-			if ( !DMIUtil.isMissing(data._Val) ) {
+			value = data.getVal();
+			isMissing = DMIUtil.isMissing(value);
+			// The records are sorted so that the last revision or creation date is used...
+			if ( transferMissing || !isMissing ) {
+			    if ( isMissing ) {
+			        // Set to the requested data value...
+			        value = tsMissingValue;
+			    }
                 if ( hasFlag && hasDuration ) {
                     // Need to set the duration and quality flag...
-                    ts.setDataValue ( data._Date_Time, data._Val, data._Quality_flag, data._Duration );
+                    ts.setDataValue ( data.getDate_Time(), value, data.getQuality_flag(), data.getDuration() );
                 }
                 else if ( hasFlag ) {
                     // Has flag but no duration.
-                    ts.setDataValue ( data._Date_Time, data._Val, data._Quality_flag, 0 );
+                    ts.setDataValue ( data.getDate_Time(), value, data.getQuality_flag(), 0 );
                 }
             }
 		}
 	}
 	else {
-        String message = "RiversideDB TableLayout " + table_layout + " is not supported.";
+        String message = "RiversideDB TableLayout " + tableLayoutNum + " is not supported.";
         Message.printWarning ( 2, routine, message );
         throw new Exception ( message );
         // FIXME SAM 2007-12-21 Need to look up the table number from the table format table and not hard-code numbers.
@@ -7085,6 +7210,49 @@ private void setMeasTypeHasSequenceNum ( boolean measTypeHasSequenceNum )
 }
 
 // T FUNCTIONS
+
+/**
+Indicate whether a table layout has a creation time.
+*/
+private boolean tableLayoutHasCreationTime ( long tableLayoutNum )
+{
+    boolean hasCreationTime = false;
+    if ( tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION ) {
+        // No duration but has creation time
+        hasCreationTime = true;
+    }
+    return hasCreationTime;
+}
+
+/**
+Indicate whether a table layout has a duration field.
+*/
+private boolean tableLayoutHasDuration ( long tableLayoutNum )
+{
+    boolean hasDuration = false;
+    if ( tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION ) {
+        hasDuration = true;
+    }
+    return hasDuration;
+}
+
+/**
+Indicate whether a table layout has revision number field.
+*/
+private boolean tableLayoutHasRevisionNum ( long tableLayoutNum )
+{
+    boolean hasRevisionNum = false;
+    if ( (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_HOUR) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_DAY) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_MONTH) ||
+        (tableLayoutNum == TABLE_LAYOUT_DATE_VALUE_TO_YEAR) ||
+        (tableLayoutNum == TABLE_LAYOUT_1MONTH) ) {
+        hasRevisionNum = true;
+    }
+    return hasRevisionNum;
+}
 
 /**
 Convert a ResultSet to a Vector of RiversideDB_Area.
@@ -9886,59 +10054,74 @@ throws Exception {
 }
 
 /**
-Convert a ResultSet to a Vector of RiversideDB_Tables.  The result set must have been
-queried with MeasType_num, dateTime, value, quality flag, [duration], [creationTime]
+Convert a ResultSet to a list of RiversideDB_TSDateValueRecord.  The result set must have been
+queried to return MeasType_num, dateTime, value, quality flag, [duration], [creationTime | revisionNumber]
+@return a list of RiversideDB_TSDateValueRecord, guaranteed to be non-null
 @param tableHasDuration Indicate that the table has duration.
 @param tableHasCreationTime Indicate that the table has creation time.
 @param rs ResultSet from a Tables table query.
 @throws Exception if an error occurs
 */
-private List toTSDateValueRecordList ( boolean tableHasDuration, boolean tableHasCreationTime, ResultSet rs ) 
+private List<RiversideDB_TSDateValueRecord> toTSDateValueRecordList ( boolean tableHasDuration,
+    boolean tableHasCreationTime, boolean tableHasRevisionNumber, ResultSet rs ) 
 throws Exception {
+    List<RiversideDB_TSDateValueRecord> v = new Vector();
     if ( rs == null ) {
-        return null;
+        return v;
     }
-    List v = new Vector();
     int index = 1;
     Date dt;
     double d;
     String s;
     int i;
+    long l;
     RiversideDB_TSDateValueRecord data = null;
     while ( rs.next() ) {
         data = new RiversideDB_TSDateValueRecord();
-        // Skip MeasType_num
         index = 1;
+        // MeasType_num.
+        l = rs.getLong ( index++ );
+        if ( !rs.wasNull() ) {
+            data.setMeasType_num(l);
+        }
         dt = rs.getTimestamp ( index++ );
         if ( rs.wasNull() ) {
             // Skip the record since won't be able to set information
             continue;
         }
         else {
-            data._Date_Time = new DateTime(dt);
+            data.setDate_Time(new DateTime(dt));
         }
         d = rs.getDouble ( index++ );
         if ( !rs.wasNull() ) {
-            data._Val = d;
+            data.setVal(d);
         }
         s = rs.getString ( index++ );
         if ( !rs.wasNull() ) {
-            data._Quality_flag = s;
+            data.setQuality_flag(s);
         }
         else {
-            data._Quality_flag = "";
+            data.setQuality_flag("");
         }
         if ( tableHasDuration ) {
             i = rs.getInt ( index++ );
             if ( !rs.wasNull() ) {
-                data._Duration = i;
+                data.setDuration(i);
+            }
+        }
+        // The query will return either revision number or creation time
+        if ( tableHasRevisionNumber ) {
+            // Add the revision number.
+            l = rs.getLong ( index++ );
+            if ( !rs.wasNull() ) {
+                data.setRevision_num(l);
             }
         }
         if ( tableHasCreationTime ) {
             // Add the creation time.
             dt = rs.getTimestamp ( index++ );
             if ( !rs.wasNull() ) {
-                data._Creation_Time = new DateTime(dt);
+                data.setCreation_Time(new DateTime(dt));
             }
         }
         v.add(data);
@@ -9947,17 +10130,17 @@ throws Exception {
 }
 
 /**
-Convert a ResultSet to a Vector of RiversideDB_Tables.  The result set must have been
+Convert a ResultSet to a list of RiversideDB_TSDateValueRecord.  The result set must have been
 queried with MeasType_num, dateTime, 12 values, revision_num (ignored) in transfer.
 @param rs ResultSet from a Tables table query.
 @throws Exception if an error occurs
 */
-private List toTSDateValueRecordListFromMonthData ( ResultSet rs ) 
+private List<RiversideDB_TSDateValueRecord> toTSDateValueRecordListFromMonthData ( ResultSet rs ) 
 throws Exception {
+    List<RiversideDB_TSDateValueRecord> v = new Vector();
     if ( rs == null ) {
-        return null;
+        return v;
     }
-    List v = new Vector();
     int index = 1;
     double d;
     int calYear = 0;
@@ -9978,8 +10161,8 @@ throws Exception {
                 DateTime dt = new DateTime ( DateTime.PRECISION_MONTH);
                 dt.setYear( calYear );
                 dt.setMonth ( imon );
-                data._Val = d;
-                data._Date_Time = dt;
+                data.setVal(d);
+                data.setDate_Time(dt);
                 v.add(data);
             }
         }
@@ -9988,7 +10171,7 @@ throws Exception {
 }
 
 /**
-Convert a ResultSet to a Vector of RiversideDB_TSProduct.
+Convert a ResultSet to a list of RiversideDB_TSProduct.
 @param rs ResultSet from a TSProduct table query.
 @throws Exception if an error occurs
 */
@@ -11625,12 +11808,13 @@ matched for the write.
 @param scenario the scenario in MeasType
 @param sequenceNumber the sequence number in MeasType
 @param writeDataFlags indicate whether data flags should be written (if in the time series)
-@param outputStart the period to start writing
-@param outptuEnd the period to end writing
+@param outputStartReq the requested period to start writing
+@param outptuEndReq the requested period to end writing
 */
 public void writeTimeSeries ( TS ts, String locationID, String dataSource, String dataType,
     String dataSubType, TimeInterval interval, String scenario, String sequenceNumber,
-    boolean writeDataFlags, DateTime outputStart, DateTime outputEnd )
+    boolean writeDataFlags, DateTime outputStartReq, DateTime outputEndReq, RiversideDB_WriteMethodType writeMethod,
+    String protectedFlag )
 throws Exception
 {   String routine = getClass().getName() + ".writeTimeSeries", message;
     // Get the MeasType of interest.  This uses a TSIdent
@@ -11668,11 +11852,15 @@ throws Exception
     if ( !sequenceNumber.equals("") ) {
         tsid.append( "[" + sequenceNumber + "]" );
     }
+    if ( writeMethod == null ) {
+        throw new IllegalArgumentException("Write method has not been specified for TSID=\"" + tsid + "\"" );
+    }
     RiversideDB_MeasType measType = readMeasTypeForTSIdent(tsid.toString());
     if ( measType == null ) {
         // Did not find the matching time series to write
         throw new IllegalArgumentException("Unable to find matching time series for TSID=\"" + tsid + "\"" );
     }
+    long measTypeNum = measType.getMeasType_num();
     // Figure out the table to write to
     // Determine the table and format to read from...
     int pos = RiversideDB_Tables.indexOf ( _RiversideDB_Tables_Vector, measType.getTable_num1() );
@@ -11683,39 +11871,188 @@ throws Exception
         throw new IllegalArgumentException(message);
     }
     // Based on the table format, call the appropriate write method...
-    RiversideDB_Tables t = (RiversideDB_Tables)_RiversideDB_Tables_Vector.get(pos);
-    long tableLayout = t.getTableLayout_num();
-    Message.printStatus(3,routine,"Table layout is " + tableLayout );
-    /*
-    if ( mt._Time_step_base.equalsIgnoreCase("Min") || mt._Time_step_base.equalsIgnoreCase("Minute") ) {
-        ts = new MinuteTS ();
-        ts.setDataInterval ( TimeInterval.MINUTE,(int)mt.getTime_step_mult());
+    RiversideDB_Tables tsTable = (RiversideDB_Tables)_RiversideDB_Tables_Vector.get(pos);
+    long tableLayoutNum = tsTable.getTableLayout_num();
+    Message.printStatus(3,routine,"Table layout for table \"" + tsTable + " is " + tableLayoutNum );
+    // Only support some layouts.  Do the check here to catch early on before other processing
+    if ( (tableLayoutNum != TABLE_LAYOUT_DATE_VALUE_TO_MINUTE) &&
+        (tableLayoutNum != TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_WITH_DURATION) &&
+        (tableLayoutNum != TABLE_LAYOUT_DATE_VALUE_TO_MINUTE_CREATION) &&
+        (tableLayoutNum != TABLE_LAYOUT_DATE_VALUE_TO_HOUR) &&
+        (tableLayoutNum != TABLE_LAYOUT_DATE_VALUE_TO_DAY) &&
+        (tableLayoutNum != TABLE_LAYOUT_DATE_VALUE_TO_MONTH) &&
+        (tableLayoutNum != TABLE_LAYOUT_DATE_VALUE_TO_YEAR) ) {
+        throw new IllegalArgumentException("Table layout number " + tableLayoutNum +
+            " is not supported for TSID=\"" + tsid + "\"" );
     }
-    else if ( mt._Time_step_base.equalsIgnoreCase("Hour") ) {
-        ts = new HourTS ();
-        ts.setDataInterval ( TimeInterval.HOUR,(int)mt.getTime_step_mult());
+    // Initialize the iterator...
+    DateTime outputStart = null;
+    if ( outputStartReq != null ) {
+        outputStart = new DateTime(outputStartReq);
     }
-    else if ( mt._Time_step_base.equalsIgnoreCase("Day") ) {
-        ts = new DayTS ();
-        ts.setDataInterval ( TimeInterval.DAY,(int)mt.getTime_step_mult());
+    else if ( (ts != null) && (ts.getDate1() != null) ) {
+        outputStart = new DateTime(ts.getDate1());
     }
-    else if ( mt._Time_step_base.equalsIgnoreCase("Month") || mt._Time_step_base.equalsIgnoreCase("Mon") ) {
-        ts = new MonthTS ();
-        ts.setDataInterval ( TimeInterval.MONTH,(int)mt.getTime_step_mult());
+    DateTime outputEnd = null;
+    if ( outputEndReq != null ) {
+        outputEnd = new DateTime(outputEndReq);
     }
-    else if ( mt._Time_step_base.equalsIgnoreCase("Year") ) {
-        ts = new YearTS ();
-        ts.setDataInterval ( TimeInterval.YEAR,(int)mt.getTime_step_mult());
+    else if ( (ts != null) && (ts.getDate2() != null) ) {
+        outputEnd = new DateTime(ts.getDate2());
     }
-    else if (mt._Time_step_base.equalsIgnoreCase("Irreg") || mt._Time_step_base.equalsIgnoreCase("Irregular") ) {
-        ts = new IrregularTS ();
+    // If requested, delete the data before writing data (no time series parameter is needed since not writing in this step)...
+    if ( (writeMethod == RiversideDB_WriteMethodType.DELETE) || (writeMethod == RiversideDB_WriteMethodType.DELETE_INSERT) ) {
+        int deleteCount = deleteTimeSeriesRecords (
+            tsTable.getTable_name(), tableLayoutNum, outputStart, outputEnd, measType.getMeasType_num() );
+        Message.printStatus(2, routine, "Deleted " + deleteCount + " time series records.");
     }
-    else {
-        message = "Time step " + interval + " is not supported.";
-        Message.printWarning ( 3, routine, message );
-        throw new IllegalArgumentException ( message );
+    if ( writeMethod == RiversideDB_WriteMethodType.DELETE ) {
+        // Only deleting data so return
+        return;
     }
-    */
+    // Initialize the iterator for the time series, given the period
+    TSIterator tsi = null;
+    try {
+        tsi = ts.iterator(outputStart,outputEnd);
+    }
+    catch ( Exception e ) {
+        throw new RuntimeException("Unable to initialize iterator for period " + outputStart + " to " + outputEnd );
+    }
+    boolean hasDuration = tableLayoutHasDuration(tableLayoutNum);
+    boolean hasCreationTime = tableLayoutHasCreationTime(tableLayoutNum);
+    boolean hasRevisionNum = tableLayoutHasRevisionNum(tableLayoutNum);
+    boolean compareWithOldData = false; // This is used with TRACK_
+    if ( writeMethod == RiversideDB_WriteMethodType.TRACK_REVISIONS ) {
+        compareWithOldData = true;
+    }
+    boolean readInBulk = true; // Read all data up front and process, vs. read and process each value (likely slower)
+    if ( writeMethod == RiversideDB_WriteMethodType.DELETE_INSERT ) {
+        // Data records will have been deleted so just need to insert all new values (no revisions)
+        PreparedStatement writeStatement = getConnection().prepareStatement ( "INSERT INTO " + tsTable.getTable_name() +
+            " (MeasType_num, Date_Time, Val, Revision_num, Quality_flag) VALUES (?,?,?,?,?)");
+        TSData tsdata = null;
+        DateTime dt = null;
+        String flag = null;
+        double value;
+        int iVal;
+        int errorCount = 0;
+        while ( (tsdata = tsi.next()) != null ) {
+            // Set the information in the write statement
+            dt = tsdata.getDate();
+            value = tsdata.getDataValue();
+            flag = tsdata.getDataFlag();
+            //if ( ts.isDataMissing(value) ) {
+            //    // TODO SAM 2012-03-27 Evaluate whether should have option to write
+            //    continue;
+            //}
+            try {
+                iVal = 1; // JDBC code is 1-based (use argument 1 for return value if used)
+                writeStatement.setLong(iVal++, measTypeNum );
+                writeStatement.setTimestamp(iVal++, new Timestamp(dt.getDate().getTime()) );
+                if ( ts.isDataMissing(value) ) {
+                    writeStatement.setNull(iVal++,java.sql.Types.DOUBLE);
+                }
+                else {
+                    writeStatement.setDouble(iVal++, value);
+                }
+                writeStatement.setInt(iVal++, 1 ); // Revision always 1
+                if ( flag == null ) {
+                    writeStatement.setNull(iVal++,java.sql.Types.VARCHAR);
+                }
+                else {
+                    writeStatement.setString(iVal++, flag );
+                }
+                writeStatement.addBatch();
+            }
+            catch ( Exception e ) {
+                Message.printWarning ( 3, routine, "Error constructing batch write call at " + dt + " (" + e + " )" );
+                ++errorCount;
+                if ( errorCount <= 10 ) {
+                    // Log the exception, but only for the first 10 errors
+                    Message.printWarning(3,routine,e);
+                }
+            }
+        }
+        // Now execute the batch insert
+        try {
+            // TODO SAM 2012-03-28 Figure out how to use to compare values updated with expected number
+            int [] updateCounts = writeStatement.executeBatch();
+            writeStatement.close();
+        }
+        catch (BatchUpdateException e) {
+            // Will happen if any of the batch commands fail.
+            Message.printWarning(3,routine,e);
+            throw new RuntimeException ( "Error executing write prepared statement.", e );
+        }
+        catch (SQLException e) {
+            Message.printWarning(3,routine,e);
+            throw new RuntimeException ( "Error executing write prepared statement.", e );
+        }
+    }
+    if ( writeMethod == RiversideDB_WriteMethodType.TRACK_REVISIONS ) {
+        /*
+        if ( readInBulk ) {
+            // First read all the data in the requested period...
+            List<RiversideDB_TSDateValueRecord> tsdataList = null;
+            if ( compareWithOldData ) {
+                // Will be comparing with old data
+                tsdataList = readTimeSeriesData (
+                    tsTable.getTable_name(), measType.getMeasType_num(), outputStart, outputEnd,
+                    hasDuration, hasCreationTime, hasRevisionNum );
+            }
+            // Now process each of the values in the time series being written, using the list of previous values to check
+            // First create a prepared statement
+            PreparedStatement writeStatement = getConnection().prepareStatement ( "" );
+            TSData tsdata;
+            DateTime dt;
+            int errorCount = 0;
+            int writeTryCount = 0;
+            double value;
+            int iParam;
+            int timeOffset = 0;
+            // Process each value independently
+            while ( (tsdata = tsi.next()) != null ) {
+                // Set the information in the write statement
+                dt = tsdata.getDate();
+                value = tsdata.getDataValue();
+                if ( ts.isDataMissing(value) ) {
+                    // TODO SAM 2012-03-27 Evaluate whether should have option to write
+                    continue;
+                }
+                try {
+                    iParam = 1; // JDBC code is 1-based (use argument 1 for return value if used)
+                    ++writeTryCount;
+                }
+                catch ( Exception e ) {
+                    Message.printWarning ( 3, routine, "Error constructing batch write call at " + dt + " (" + e + " )" );
+                    ++errorCount;
+                    if ( errorCount <= 10 ) {
+                        // Log the exception, but only for the first 10 errors
+                        Message.printWarning(3,routine,e);
+                    }
+                }
+                try {
+                    // TODO SAM 2012-03-28 Figure out how to use to compare values updated with expected number
+                    int [] updateCounts = writeStatement.executeBatch();
+                    writeStatement.close();
+                }
+                catch (BatchUpdateException e) {
+                    // Will happen if any of the batch commands fail.
+                    Message.printWarning(3,routine,e);
+                    throw new RuntimeException ( "Error executing write callable statement.", e );
+                }
+                catch (SQLException e) {
+                    Message.printWarning(3,routine,e);
+                    throw new RuntimeException ( "Error executing write callable statement.", e );
+                }
+            }
+            if ( errorCount > 0 ) {
+                throw new RuntimeException ( "Had " + errorCount + " errors out of total of " + writeTryCount + " attempts." );
+            }
+            Message.printStatus(2,routine,"Wrote " + writeTryCount + " values to RiversideDB.");
+        }
+        */
+    }
 }
 
 /**
