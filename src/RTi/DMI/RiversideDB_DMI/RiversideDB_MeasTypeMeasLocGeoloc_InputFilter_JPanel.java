@@ -31,6 +31,7 @@ public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore
         numFilterGroups = 6; // default
     }
     RiversideDB_DMI dmi = (RiversideDB_DMI)dataStore.getDMI();
+    boolean measTypeHasSequenceNum = dmi.getMeasTypeHasSequenceNum();
 	String rd = dmi.getRightIdDelim();
 	String ld = dmi.getLeftIdDelim();
 
@@ -101,11 +102,18 @@ public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore
     filters.add(new InputFilter("Station Y",
         geolocTableName + "y" + rd, "y",
         StringUtil.TYPE_DOUBLE, null, null, true));
+    int choiceLen = 15;
+    if ( measTypeHasSequenceNum ) {
+        ++choiceLen;
+        filters.add(new InputFilter("Sequence Number",
+            measTypeTableName + "Sequence_num" + rd, "sequence_num",
+            StringUtil.TYPE_INTEGER, null, null, true));
+    }
 		
 	setToolTipText("<html>RiversideDB queries can be filtered based on station and time series metadata.</html>");
 	// At the request of the NCWCD, use 6 filters
 	// TODO SAM 2010-09-13 may want to make the number of filters configurable
-	setInputFilters(filters, numFilterGroups, 15);
+	setInputFilters(filters, numFilterGroups, choiceLen);
 }
 
 /**

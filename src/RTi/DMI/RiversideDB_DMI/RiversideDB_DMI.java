@@ -3698,11 +3698,16 @@ throws Exception
         // MeasType_num is the primary key
         d.addWhereClause ( tsTable + ".MeasType_num=" + measTypeNum );
         // Also may have start and end
+        // TODO SAM 2012-04-06 Evaluate whether date/time precision is going to be an issue
+        // The dates apparently need to be formatted to minute precision to work in this situation,
+        // at least with SQL Server
         if ( deleteStart != null ) {
-            d.addWhereClause ( tsTable + ".Date_Time >= " + DMIUtil.formatDateTime( this, deleteStart) );
+            d.addWhereClause ( tsTable + ".Date_Time >= " +
+                DMIUtil.formatDateTime( this, deleteStart, true, DateTime.PRECISION_MINUTE) );
         }
         if ( deleteEnd != null ) {
-            d.addWhereClause ( tsTable + ".Date_Time <= " + DMIUtil.formatDateTime( this, deleteEnd) );
+            d.addWhereClause ( tsTable + ".Date_Time <= " +
+                DMIUtil.formatDateTime( this, deleteEnd, true, DateTime.PRECISION_MINUTE) );
         }
         Message.printStatus(2, routine, "SQL:  " + d);
         return dmiDelete(d);
@@ -11812,7 +11817,7 @@ matched for the write.
 @param outptuEndReq the requested period to end writing
 */
 public void writeTimeSeries ( TS ts, String locationID, String dataSource, String dataType,
-    String dataSubType, TimeInterval interval, String scenario, String sequenceNumber,
+    String dataSubType, TimeInterval interval, String scenario, Integer sequenceNumber,
     boolean writeDataFlags, DateTime outputStartReq, DateTime outputEndReq, RiversideDB_WriteMethodType writeMethod,
     String protectedFlag )
 throws Exception
@@ -11834,9 +11839,6 @@ throws Exception
     if ( scenario == null ) {
         scenario = "";
     }
-    if ( sequenceNumber == null ) {
-        sequenceNumber = "";
-    }
     tsid.append( locationID + "." );
     tsid.append( dataSource + "." );
     if ( dataSubType.equals("") ) {
@@ -11845,11 +11847,11 @@ throws Exception
     else {
         tsid.append( "" + dataType + "-" + dataSubType + "." );
     }
-    tsid.append( "" + interval + "." );
+    tsid.append( "" + interval );
     if ( !scenario.equals("") ) {
-        tsid.append( scenario + "." );
+        tsid.append( "." + scenario  );
     }
-    if ( !sequenceNumber.equals("") ) {
+    if ( sequenceNumber != null ) {
         tsid.append( "[" + sequenceNumber + "]" );
     }
     if ( writeMethod == null ) {
