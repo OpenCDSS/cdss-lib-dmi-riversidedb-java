@@ -32,8 +32,8 @@ public RiversideDB_MeasTypeMeasLocGeoloc_InputFilter_JPanel(RiversideDBDataStore
     }
     RiversideDB_DMI dmi = (RiversideDB_DMI)dataStore.getDMI();
     boolean measTypeHasSequenceNum = dmi.getMeasTypeHasSequenceNum();
-	String rd = dmi.getRightIdDelim();
-	String ld = dmi.getLeftIdDelim();
+	String rd = dmi.getFieldRightEscape();
+	String ld = dmi.getFieldLeftEscape();
 
 	List<InputFilter> filters = new Vector();
 
