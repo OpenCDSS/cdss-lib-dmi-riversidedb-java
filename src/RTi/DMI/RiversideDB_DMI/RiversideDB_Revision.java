@@ -80,7 +80,7 @@ public void setComment (String Comment) {
 Sets _Date_Time
 @param Date_Time value to set _Date_Time
 */
-public void SetDate_Time (Date Date_Time) {
+public void setDate_Time (Date Date_Time) {
 	_Date_Time = Date_Time;
 }
 
@@ -105,10 +105,11 @@ Returns a string representation of this object
 @return a string representation of this object
 */
 public String toString() {
-	return  "RiversideDB_Revision{" 		+ "\n" + 
-		"Revision_num:" + _Revision_num 	+ "\n" +
-		"Date_Time:   " + _Date_Time 		+ "\n" +
-		"Comment:     " + _Comment		+ "}";
+	return  "RiversideDB_Revision{\n" + 
+		"Revision_num:" + _Revision_num + "\n" +
+		"Date_Time:   " + _Date_Time + "\n" +
+		"User:        " + _Date_Time + "\n" +
+		"Comment:     " + _Comment + " }";
 }
 
 }

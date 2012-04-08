@@ -318,9 +318,11 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Timestamp;
 
 import java.util.Date;
@@ -728,7 +730,9 @@ protected final int _W_RATINGTABLE = 3050;
 protected final int _D_RATINGTABLE = 3100;
 
 // Revision
-protected final int _W_REVISION = 3150;
+protected final int _S_REVISION = 3150;
+protected final int _S_REVISION_MAX_REVISION_NUM = 3151;
+protected final int _W_REVISION = 3160;
 
 // Scenario
 protected final int _S_SCENARIO = 3200;
@@ -2150,12 +2154,27 @@ throws Exception {
 			break;			
 //////////////////////////////////////////////////////
 // Revision
-//////////////////////////////////////////////////////	
+//////////////////////////////////////////////////////       
+        case _S_REVISION:
+            select = (DMISelectStatement)statement;
+            select.addField("Revision.Revision_num");
+            select.addField("Revision.Date_Time");
+            select.addField("Revision.User");
+            select.addField("Revision.Comment");
+            select.addTable("Revision");
+            break;
+        case _S_REVISION_MAX_REVISION_NUM:
+            // Get maximum revision number
+            select = (DMISelectStatement)statement;
+            select.addField("MAX(Revision.Revision_num)");
+            select.addTable("Revision");
+            break;
 		/* AutoNum - Revision_num */		
 		case _W_REVISION:
 			write = (DMIWriteStatement)statement;
-			write.addField("Date_Time");
-			write.addField("Comment");
+			write.addField("Revision.Date_Time");
+			write.addField("Revision.User");
+			write.addField("Revision.Comment");
 			write.addTable("Revision");
 			break;
 //////////////////////////////////////////////////////
@@ -3710,7 +3729,9 @@ throws Exception
                 DMIUtil.formatDateTime( this, deleteEnd, true, DateTime.PRECISION_MINUTE) );
         }
         Message.printStatus(2, routine, "SQL:  " + d);
-        return dmiDelete(d);
+        int deleteCount = dmiDelete(d);
+        Message.printStatus(2, routine, "Deleted " + deleteCount + " time series records.");
+        return deleteCount;
     }
     else {
         throw new IllegalArgumentException("Table layout " + tableLayoutNum +
@@ -6239,6 +6260,41 @@ throws Exception {
 	List v = toRatingTableList (rs);
 	closeResultSet(rs);
 	return v;
+}
+
+/**
+Reads the revision table for the maximum Revision_num.
+@return the RiversideDB_Revision object with the maximum Revision_num, or null if no data.
+@param readFullRecord if true, read the full record corresponding to the maximum; if false, just return
+an object that has the maximum set, but other fields are missing
+@throws Exception if an error occurs
+*/
+public RiversideDB_Revision readRevisionMaxRevisionNum ( boolean readFullRecord )
+throws Exception
+{
+    DMISelectStatement q = new DMISelectStatement ( this );
+    buildSQL ( q, _S_REVISION_MAX_REVISION_NUM );
+    ResultSet rs = dmiSelect(q);
+    List<RiversideDB_Revision> v = toRevisionList (rs, true);
+    closeResultSet(rs);
+    if ( v.size() == 0 ) {
+        return null;
+    }
+    else {
+        RiversideDB_Revision rev = v.get(0);
+        if ( readFullRecord ) {
+            q = new DMISelectStatement ( this );
+            buildSQL ( q, _S_REVISION );
+            q.addWhereClause("Revision.Revision_num=" + rev.getRevision_num());
+            rs = dmiSelect(q);
+            v = toRevisionList (rs, true);
+            closeResultSet(rs);
+            return v.get(0);
+        }
+        else {
+            return rev;
+        }
+    }
 }
 
 /**
@@ -9611,13 +9667,55 @@ throws Exception {
 }
 
 /**
-Convert a ResultSet to a Vector of RiversideDB_Scenario.
+Convert a ResultSet to a list of RiversideDB_Revision.
+@return a list of RiversideDB_Revision, guaranteed to be non-null.
+@param rs ResultSet from a Revision table query.
+@param revisionNumOnly indicates that only the revision number is being read
+@throws Exception if an error occurs
+*/
+private List<RiversideDB_Revision> toRevisionList ( ResultSet rs, boolean revisionNumOnly ) 
+throws Exception {
+    List<RiversideDB_Revision> v = new Vector();
+    int index = 1;
+    String s;
+    long l;
+    Date d;
+    RiversideDB_Revision data = null;
+    while ( rs.next() ) {
+        data = new RiversideDB_Revision();
+        index = 1;
+        l = rs.getLong(index++);
+        if ( !rs.wasNull() ) {
+            data.setRevision_num(l);
+        }
+        if ( !revisionNumOnly ) {
+            d = rs.getTimestamp(index++);
+            if ( !rs.wasNull() ) {
+                data.setDate_Time(d);
+            }
+            s = rs.getString(index++);
+            if ( !rs.wasNull() ) {
+                data.setUser(s.trim());
+            }
+            s = rs.getString(index++);
+            if ( !rs.wasNull() ) {
+                data.setComment(s.trim());
+            }
+        }
+        v.add(data);
+    }
+    return v;
+}
+
+/**
+Convert a ResultSet to a list of RiversideDB_Scenario.
+@return a list of RiversideDB_Scenario, guaranteed to be non-null.
 @param rs ResultSet from a Scenario table query.
 @throws Exception if an error occurs
 */
-private List toScenarioList ( ResultSet rs ) 
+private List<RiversideDB_Scenario> toScenarioList ( ResultSet rs ) 
 throws Exception {
-	List v = new Vector();
+	List<RiversideDB_Scenario> v = new Vector();
 	int index = 1;
 	String s;
 	long l;
@@ -11466,13 +11564,15 @@ public void writeRevision(RiversideDB_Revision r) throws Exception {
 
 	buildSQL(w, _W_REVISION);
 	w.addValue(r.getDate_Time(), DateTime.PRECISION_SECOND);
+	w.addValue(r.getUser());
 	w.addValue(r.getComment());
 
 	if (!DMIUtil.isMissing(r.getRevision_num())) {
-		w.addWhereClause( "Revision_num = " + r.getRevision_num());
+		w.addWhereClause( "Revision.Revision_num = " + r.getRevision_num());
 		dmiWrite(w, DMI.UPDATE);
 	}
 	else {
+	    // Will auto number the revision
 		dmiWrite(w, DMI.INSERT);
 	}
 }
@@ -11819,7 +11919,7 @@ matched for the write.
 public void writeTimeSeries ( TS ts, String locationID, String dataSource, String dataType,
     String dataSubType, TimeInterval interval, String scenario, Integer sequenceNumber,
     boolean writeDataFlags, DateTime outputStartReq, DateTime outputEndReq, RiversideDB_WriteMethodType writeMethod,
-    String protectedFlag )
+    String protectedFlag, DateTime revisionDateTime, String revisionUser, String revisionComment )
 throws Exception
 {   String routine = getClass().getName() + ".writeTimeSeries", message;
     // Get the MeasType of interest.  This uses a TSIdent
@@ -11868,7 +11968,7 @@ throws Exception
     int pos = RiversideDB_Tables.indexOf ( _RiversideDB_Tables_Vector, measType.getTable_num1() );
 
     if ( pos < 0 ) {
-        message = "Unable to read time series:  no Tables record for table number " + measType.getTable_num1();
+        message = "No Tables record for table number " + measType.getTable_num1() + " - unable to write time series.";
         Message.printWarning ( 3, routine, message );
         throw new IllegalArgumentException(message);
     }
@@ -11902,93 +12002,217 @@ throws Exception
     else if ( (ts != null) && (ts.getDate2() != null) ) {
         outputEnd = new DateTime(ts.getDate2());
     }
-    // If requested, delete the data before writing data (no time series parameter is needed since not writing in this step)...
-    if ( (writeMethod == RiversideDB_WriteMethodType.DELETE) || (writeMethod == RiversideDB_WriteMethodType.DELETE_INSERT) ) {
-        int deleteCount = deleteTimeSeriesRecords (
-            tsTable.getTable_name(), tableLayoutNum, outputStart, outputEnd, measType.getMeasType_num() );
-        Message.printStatus(2, routine, "Deleted " + deleteCount + " time series records.");
-    }
-    if ( writeMethod == RiversideDB_WriteMethodType.DELETE ) {
-        // Only deleting data so return
-        return;
-    }
-    // Initialize the iterator for the time series, given the period
-    TSIterator tsi = null;
-    try {
-        tsi = ts.iterator(outputStart,outputEnd);
-    }
-    catch ( Exception e ) {
-        throw new RuntimeException("Unable to initialize iterator for period " + outputStart + " to " + outputEnd );
-    }
     boolean hasDuration = tableLayoutHasDuration(tableLayoutNum);
     boolean hasCreationTime = tableLayoutHasCreationTime(tableLayoutNum);
     boolean hasRevisionNum = tableLayoutHasRevisionNum(tableLayoutNum);
+    boolean hasRevisionTable = DMIUtil.databaseHasTable(this, "Revision");
     boolean compareWithOldData = false; // This is used with TRACK_
+    Connection con = getConnection();
     if ( writeMethod == RiversideDB_WriteMethodType.TRACK_REVISIONS ) {
         compareWithOldData = true;
     }
     boolean readInBulk = true; // Read all data up front and process, vs. read and process each value (likely slower)
-    if ( writeMethod == RiversideDB_WriteMethodType.DELETE_INSERT ) {
-        // Data records will have been deleted so just need to insert all new values (no revisions)
-        PreparedStatement writeStatement = getConnection().prepareStatement ( "INSERT INTO " + tsTable.getTable_name() +
-            " (MeasType_num, Date_Time, Val, Revision_num, Quality_flag) VALUES (?,?,?,?,?)");
-        TSData tsdata = null;
-        DateTime dt = null;
-        String flag = null;
-        double value;
-        int iVal;
-        int errorCount = 0;
-        while ( (tsdata = tsi.next()) != null ) {
-            // Set the information in the write statement
-            dt = tsdata.getDate();
-            value = tsdata.getDataValue();
-            flag = tsdata.getDataFlag();
-            //if ( ts.isDataMissing(value) ) {
-            //    // TODO SAM 2012-03-27 Evaluate whether should have option to write
-            //    continue;
-            //}
+    // The following major blocks of code utilize transactions to ensure that database operations are grouped and
+    //
+    if ( writeMethod == RiversideDB_WriteMethodType.DELETE ) {
+        con.setAutoCommit(false);
+        Savepoint dbSavepoint = getConnection().setSavepoint();
+        try {
+            deleteTimeSeriesRecords (
+                tsTable.getTable_name(), tableLayoutNum, outputStart, outputEnd, measType.getMeasType_num() );
+        }
+        catch ( Exception e ) {
+            // Rollback on any errors
+            con.rollback(dbSavepoint);
+            Message.printWarning(3,routine,e);
+            throw new RuntimeException ( "Error deleting data - rolling back to previous contents", e );
+        }
+        finally {
+            con.setAutoCommit(true);
             try {
-                iVal = 1; // JDBC code is 1-based (use argument 1 for return value if used)
-                writeStatement.setLong(iVal++, measTypeNum );
-                writeStatement.setTimestamp(iVal++, new Timestamp(dt.getDate().getTime()) );
-                if ( ts.isDataMissing(value) ) {
-                    writeStatement.setNull(iVal++,java.sql.Types.DOUBLE);
+                con.releaseSavepoint(dbSavepoint);
+            }
+            catch ( SQLException e ) {
+            }
+        }
+    }
+    else if ( writeMethod == RiversideDB_WriteMethodType.DELETE_INSERT ) {
+        // Make sure that there will be data records to insert before doing anything
+        TSIterator tsi = null;
+        TSData tsdata = null;
+        try {
+            tsi = ts.iterator(outputStart,outputEnd);
+        }
+        catch ( Exception e ) {
+            throw new RuntimeException("Unable to initialize iterator for period " + outputStart + " to " + outputEnd );
+        }
+        int dataCount = 0;
+        while ( (tsdata = tsi.next()) != null ) {
+            ++dataCount;
+        }
+        if ( dataCount > 0 ) {
+            con.setAutoCommit(false);
+            Savepoint dbSavepoint = getConnection().setSavepoint();
+            try {
+                // First delete the previous records...
+                deleteTimeSeriesRecords (
+                    tsTable.getTable_name(), tableLayoutNum, outputStart, outputEnd, measType.getMeasType_num() );
+                // Next insert revision information that is used in the data records so that a new revision number
+                // can be obtained for use below
+                long revisionNum = 1; // Default - indicates no revision information to insert
+                if ( hasRevisionTable && (revisionComment != null) && (revisionComment.length() > 0) ) {
+                    // Need to add a revision that has revision number one larger than the last revision number
+                    // Call the writeRevision() method with no revision number set and it will increment
+                    try {
+                        RiversideDB_Revision r = new RiversideDB_Revision();
+                        r.setDate_Time(revisionDateTime.getDate());
+                        r.setUser(revisionUser);
+                        r.setComment(revisionComment);
+                        writeRevision(r);
+                    }
+                    catch ( Exception e ) {
+                        Message.printWarning(3,routine,e);
+                        throw new RuntimeException ( "Error writing revision - not inserting data", e );
+                    }
+                }
+                // Get the revision number as the maximum from the Revisions table
+                RiversideDB_Revision revisionMax = readRevisionMaxRevisionNum ( true );
+                revisionNum = revisionMax.getRevision_num();
+                // Data records will have been deleted so just need to insert all new values (no revisions)
+                StringBuffer insertSql = new StringBuffer (
+                    "INSERT INTO " + tsTable.getTable_name() + " (MeasType_num, Date_Time, Val" );
+                if ( hasCreationTime ) {
+                    insertSql.append(", Creation_time" );
+                }
+                if ( hasRevisionTable && hasRevisionNum ) {
+                    insertSql.append(", Revision_num" );
+                }
+                if ( hasDuration ) {
+                    insertSql.append(", Duration" );
+                }
+                insertSql.append ( ", Quality_flag) VALUES (?,?,?" );
+                if ( hasCreationTime ) {
+                    insertSql.append(",?" );
+                }
+                if ( hasRevisionTable && hasRevisionNum ) {
+                    insertSql.append(",?" );
+                }
+                if ( hasDuration ) {
+                    insertSql.append(",?" );
+                }
+                insertSql.append ( ",?)" );
+                PreparedStatement writeStatement = getConnection().prepareStatement ( insertSql.toString() );
+                DateTime dt = null;
+                String flag = null;
+                double value;
+                int iVal;
+                int errorCount = 0;
+                int writeTryCount = 0;
+                // Reset iterator since used above
+                try {
+                    tsi = ts.iterator(outputStart,outputEnd);
+                }
+                catch ( Exception e ) {
+                    throw new RuntimeException("Unable to initialize iterator for period " + outputStart + " to " + outputEnd );
+                }
+                while ( (tsdata = tsi.next()) != null ) {
+                    // Set the information in the write statement
+                    dt = tsdata.getDate();
+                    value = tsdata.getDataValue();
+                    flag = tsdata.getDataFlag();
+                    //if ( ts.isDataMissing(value) ) {
+                    //    // TODO SAM 2012-03-27 Evaluate whether should have option to write
+                    //    continue;
+                    //}
+                    try {
+                        ++writeTryCount;
+                        iVal = 1; // JDBC code is 1-based (use argument 1 for return value if used)
+                        writeStatement.setLong(iVal++, measTypeNum );
+                        writeStatement.setTimestamp(iVal++, new Timestamp(dt.getDate().getTime()) );
+                        if ( ts.isDataMissing(value) ) {
+                            writeStatement.setNull(iVal++,java.sql.Types.DOUBLE);
+                        }
+                        else {
+                            writeStatement.setDouble(iVal++, value);
+                        }
+                        if ( hasCreationTime ) {
+                            writeStatement.setTimestamp(iVal++, new Timestamp(revisionDateTime.getDate().getTime()) );
+                        }
+                        if ( hasRevisionTable && hasRevisionNum ) {
+                            writeStatement.setLong(iVal++, revisionNum );
+                        }
+                        if ( hasDuration ) {
+                            writeStatement.setInt(iVal++, 0 ); // FIXME SAM 2012-04-06 Duration always 0 for now
+                        }
+                        if ( flag == null ) {
+                            writeStatement.setNull(iVal++,java.sql.Types.VARCHAR);
+                        }
+                        else {
+                            writeStatement.setString(iVal++, flag );
+                        }
+                        writeStatement.addBatch();
+                    }
+                    catch ( Exception e ) {
+                        Message.printWarning ( 3, routine,
+                            "Error constructing batch write call at " + dt + " (" + e + ") - will not attempt write." );
+                        ++errorCount;
+                        if ( errorCount <= 10 ) {
+                            // Log the exception, but only for the first 10 errors
+                            Message.printWarning(3,routine,e);
+                        }
+                    }
+                }
+                // Now execute the batch insert
+                if ( errorCount > 0 ) {
+                    throw new RuntimeException ( "Had " + errorCount + " errors out of total of " + writeTryCount +
+                        " configuring batch database insert - not writing data records." );
                 }
                 else {
-                    writeStatement.setDouble(iVal++, value);
+                    // OK to try the all the data records...
+                    int writeCount = 0;
+                    int failCount = 0;
+                    try {
+                        // TODO SAM 2012-03-28 Figure out how to use to compare values updated with expected number
+                        int [] updateCounts = writeStatement.executeBatch();
+                        for ( int i = 0; i < updateCounts.length; i++ ) {
+                            if ( updateCounts[i] == java.sql.Statement.EXECUTE_FAILED ) {
+                                ++failCount;
+                            }
+                            else if ( updateCounts[i] >= 0 ) {
+                                ++writeCount;
+                            }
+                        }
+                        writeStatement.close();
+                        Message.printStatus(2, routine, "Wrote " + writeCount + " time series values, " + failCount + " failed." );
+                    }
+                    catch (BatchUpdateException e) {
+                        // Will happen if any of the batch commands fail.
+                        Message.printWarning(3,routine,e);
+                        throw new RuntimeException ( "Error executing write prepared statement.", e );
+                    }
+                    catch (SQLException e) {
+                        Message.printWarning(3,routine,e);
+                        throw new RuntimeException ( "Error executing write prepared statement.", e );
+                    }
+                    if ( failCount > 0 ) {
+                        throw new RuntimeException ( "Error writing " + failCount + " values." );
+                    }
                 }
-                writeStatement.setInt(iVal++, 1 ); // Revision always 1
-                if ( flag == null ) {
-                    writeStatement.setNull(iVal++,java.sql.Types.VARCHAR);
-                }
-                else {
-                    writeStatement.setString(iVal++, flag );
-                }
-                writeStatement.addBatch();
             }
             catch ( Exception e ) {
-                Message.printWarning ( 3, routine, "Error constructing batch write call at " + dt + " (" + e + " )" );
-                ++errorCount;
-                if ( errorCount <= 10 ) {
-                    // Log the exception, but only for the first 10 errors
-                    Message.printWarning(3,routine,e);
+                // Rollback on any errors
+                con.rollback(dbSavepoint);
+                Message.printWarning(3,routine,e);
+                throw new RuntimeException ( "Error processing data - rolling back to previous contents", e );
+            }
+            finally {
+                con.setAutoCommit(true);
+                try {
+                    con.releaseSavepoint(dbSavepoint);
+                }
+                catch ( SQLException e ) {
                 }
             }
-        }
-        // Now execute the batch insert
-        try {
-            // TODO SAM 2012-03-28 Figure out how to use to compare values updated with expected number
-            int [] updateCounts = writeStatement.executeBatch();
-            writeStatement.close();
-        }
-        catch (BatchUpdateException e) {
-            // Will happen if any of the batch commands fail.
-            Message.printWarning(3,routine,e);
-            throw new RuntimeException ( "Error executing write prepared statement.", e );
-        }
-        catch (SQLException e) {
-            Message.printWarning(3,routine,e);
-            throw new RuntimeException ( "Error executing write prepared statement.", e );
         }
     }
     if ( writeMethod == RiversideDB_WriteMethodType.TRACK_REVISIONS ) {
