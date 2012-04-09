@@ -7145,7 +7145,7 @@ throws Exception {
 /**
 Unsupported.
 */
-public List readTimeSeriesList(String fname, DateTime date1, DateTime date2, String req_units, boolean read_data)
+public List<TS> readTimeSeriesList(String fname, DateTime date1, DateTime date2, String req_units, boolean read_data)
 throws Exception {
 	return null;
 }
@@ -7153,7 +7153,7 @@ throws Exception {
 /**
 Unsupported.
 */
-public List readTimeSeriesList(TSIdent tsident, String fname, DateTime date1, 
+public List<TS> readTimeSeriesList(TSIdent tsident, String fname, DateTime date1, 
 DateTime date2, String req_units, boolean read_data)
 throws Exception {
 	return null;
@@ -7164,12 +7164,12 @@ Read all TSProduct records.
 @return a Vector of TSProduct objects
 @throws Exception if an error occurs
 */
-public List readTSProductList() 
+public List<RiversideDB_TSProduct> readTSProductList() 
 throws Exception {
 	DMISelectStatement q = new DMISelectStatement ( this );
 	buildSQL(q, _S_TSPRODUCT);
 	ResultSet rs = dmiSelect(q);
-	List v = toTSProductList (rs);
+	List<RiversideDB_TSProduct> v = toTSProductList (rs);
 	closeResultSet(rs);
 	return v;
 }
@@ -10278,12 +10278,12 @@ Convert a ResultSet to a list of RiversideDB_TSProduct.
 @param rs ResultSet from a TSProduct table query.
 @throws Exception if an error occurs
 */
-private List toTSProductList ( ResultSet rs ) 
+private List<RiversideDB_TSProduct> toTSProductList ( ResultSet rs ) 
 throws Exception {
 	if ( rs == null ) {
 		return null;
 	}
-	List v = new Vector();
+	List<RiversideDB_TSProduct> v = new Vector();
 	int index = 1;
 	String s;
 	int i;
@@ -12011,9 +12011,7 @@ throws Exception
     if ( writeMethod == RiversideDB_WriteMethodType.TRACK_REVISIONS ) {
         compareWithOldData = true;
     }
-    boolean readInBulk = true; // Read all data up front and process, vs. read and process each value (likely slower)
     // The following major blocks of code utilize transactions to ensure that database operations are grouped and
-    //
     if ( writeMethod == RiversideDB_WriteMethodType.DELETE ) {
         con.setAutoCommit(false);
         Savepoint dbSavepoint = getConnection().setSavepoint();
@@ -12057,147 +12055,18 @@ throws Exception
                 // First delete the previous records...
                 deleteTimeSeriesRecords (
                     tsTable.getTable_name(), tableLayoutNum, outputStart, outputEnd, measType.getMeasType_num() );
-                // Next insert revision information that is used in the data records so that a new revision number
-                // can be obtained for use below
-                long revisionNum = 1; // Default - indicates no revision information to insert
-                if ( hasRevisionTable && (revisionComment != null) && (revisionComment.length() > 0) ) {
-                    // Need to add a revision that has revision number one larger than the last revision number
-                    // Call the writeRevision() method with no revision number set and it will increment
-                    try {
-                        RiversideDB_Revision r = new RiversideDB_Revision();
-                        r.setDate_Time(revisionDateTime.getDate());
-                        r.setUser(revisionUser);
-                        r.setComment(revisionComment);
-                        writeRevision(r);
-                    }
-                    catch ( Exception e ) {
-                        Message.printWarning(3,routine,e);
-                        throw new RuntimeException ( "Error writing revision - not inserting data", e );
-                    }
-                }
-                // Get the revision number as the maximum from the Revisions table
-                RiversideDB_Revision revisionMax = readRevisionMaxRevisionNum ( true );
-                revisionNum = revisionMax.getRevision_num();
-                // Data records will have been deleted so just need to insert all new values (no revisions)
-                StringBuffer insertSql = new StringBuffer (
-                    "INSERT INTO " + tsTable.getTable_name() + " (MeasType_num, Date_Time, Val" );
-                if ( hasCreationTime ) {
-                    insertSql.append(", Creation_time" );
-                }
-                if ( hasRevisionTable && hasRevisionNum ) {
-                    insertSql.append(", Revision_num" );
-                }
-                if ( hasDuration ) {
-                    insertSql.append(", Duration" );
-                }
-                insertSql.append ( ", Quality_flag) VALUES (?,?,?" );
-                if ( hasCreationTime ) {
-                    insertSql.append(",?" );
-                }
-                if ( hasRevisionTable && hasRevisionNum ) {
-                    insertSql.append(",?" );
-                }
-                if ( hasDuration ) {
-                    insertSql.append(",?" );
-                }
-                insertSql.append ( ",?)" );
-                PreparedStatement writeStatement = getConnection().prepareStatement ( insertSql.toString() );
-                DateTime dt = null;
-                String flag = null;
-                double value;
-                int iVal;
-                int errorCount = 0;
-                int writeTryCount = 0;
-                // Reset iterator since used above
-                try {
-                    tsi = ts.iterator(outputStart,outputEnd);
-                }
-                catch ( Exception e ) {
-                    throw new RuntimeException("Unable to initialize iterator for period " + outputStart + " to " + outputEnd );
-                }
-                while ( (tsdata = tsi.next()) != null ) {
-                    // Set the information in the write statement
-                    dt = tsdata.getDate();
-                    value = tsdata.getDataValue();
-                    flag = tsdata.getDataFlag();
-                    //if ( ts.isDataMissing(value) ) {
-                    //    // TODO SAM 2012-03-27 Evaluate whether should have option to write
-                    //    continue;
-                    //}
-                    try {
-                        ++writeTryCount;
-                        iVal = 1; // JDBC code is 1-based (use argument 1 for return value if used)
-                        writeStatement.setLong(iVal++, measTypeNum );
-                        writeStatement.setTimestamp(iVal++, new Timestamp(dt.getDate().getTime()) );
-                        if ( ts.isDataMissing(value) ) {
-                            writeStatement.setNull(iVal++,java.sql.Types.DOUBLE);
-                        }
-                        else {
-                            writeStatement.setDouble(iVal++, value);
-                        }
-                        if ( hasCreationTime ) {
-                            writeStatement.setTimestamp(iVal++, new Timestamp(revisionDateTime.getDate().getTime()) );
-                        }
-                        if ( hasRevisionTable && hasRevisionNum ) {
-                            writeStatement.setLong(iVal++, revisionNum );
-                        }
-                        if ( hasDuration ) {
-                            writeStatement.setInt(iVal++, 0 ); // FIXME SAM 2012-04-06 Duration always 0 for now
-                        }
-                        if ( flag == null ) {
-                            writeStatement.setNull(iVal++,java.sql.Types.VARCHAR);
-                        }
-                        else {
-                            writeStatement.setString(iVal++, flag );
-                        }
-                        writeStatement.addBatch();
-                    }
-                    catch ( Exception e ) {
-                        Message.printWarning ( 3, routine,
-                            "Error constructing batch write call at " + dt + " (" + e + ") - will not attempt write." );
-                        ++errorCount;
-                        if ( errorCount <= 10 ) {
-                            // Log the exception, but only for the first 10 errors
-                            Message.printWarning(3,routine,e);
-                        }
-                    }
-                }
-                // Now execute the batch insert
-                if ( errorCount > 0 ) {
-                    throw new RuntimeException ( "Had " + errorCount + " errors out of total of " + writeTryCount +
-                        " configuring batch database insert - not writing data records." );
-                }
-                else {
-                    // OK to try the all the data records...
-                    int writeCount = 0;
-                    int failCount = 0;
-                    try {
-                        // TODO SAM 2012-03-28 Figure out how to use to compare values updated with expected number
-                        int [] updateCounts = writeStatement.executeBatch();
-                        for ( int i = 0; i < updateCounts.length; i++ ) {
-                            if ( updateCounts[i] == java.sql.Statement.EXECUTE_FAILED ) {
-                                ++failCount;
-                            }
-                            else if ( updateCounts[i] >= 0 ) {
-                                ++writeCount;
-                            }
-                        }
-                        writeStatement.close();
-                        Message.printStatus(2, routine, "Wrote " + writeCount + " time series values, " + failCount + " failed." );
-                    }
-                    catch (BatchUpdateException e) {
-                        // Will happen if any of the batch commands fail.
-                        Message.printWarning(3,routine,e);
-                        throw new RuntimeException ( "Error executing write prepared statement.", e );
-                    }
-                    catch (SQLException e) {
-                        Message.printWarning(3,routine,e);
-                        throw new RuntimeException ( "Error executing write prepared statement.", e );
-                    }
-                    if ( failCount > 0 ) {
-                        throw new RuntimeException ( "Error writing " + failCount + " values." );
-                    }
-                }
+                // Add a revision (if enabled)
+                long revisionNum = writeTimeSeries_writeRevision ( hasRevisionTable, revisionDateTime,
+                    revisionUser, revisionComment );
+                // Create the prepared statement for inserting data records
+                PreparedStatement writeStatement = writeTimeSeries_createInsertStatement ( tsTable, hasRevisionTable,
+                    hasCreationTime, hasRevisionNum, hasDuration);
+                // Write the time series records using the prepared statement
+                writeTimeSeries_writeRecords ( ts, null, outputStart, outputEnd,
+                    writeStatement, measTypeNum,
+                    hasRevisionTable, hasRevisionNum, revisionNum, hasCreationTime, hasDuration,
+                    revisionDateTime, revisionUser, revisionComment );
+
             }
             catch ( Exception e ) {
                 // Rollback on any errors
@@ -12216,69 +12085,377 @@ throws Exception
         }
     }
     if ( writeMethod == RiversideDB_WriteMethodType.TRACK_REVISIONS ) {
-        /*
-        if ( readInBulk ) {
-            // First read all the data in the requested period...
-            List<RiversideDB_TSDateValueRecord> tsdataList = null;
-            if ( compareWithOldData ) {
-                // Will be comparing with old data
-                tsdataList = readTimeSeriesData (
-                    tsTable.getTable_name(), measType.getMeasType_num(), outputStart, outputEnd,
-                    hasDuration, hasCreationTime, hasRevisionNum );
-            }
-            // Now process each of the values in the time series being written, using the list of previous values to check
-            // First create a prepared statement
-            PreparedStatement writeStatement = getConnection().prepareStatement ( "" );
-            TSData tsdata;
-            DateTime dt;
-            int errorCount = 0;
-            int writeTryCount = 0;
-            double value;
-            int iParam;
-            int timeOffset = 0;
-            // Process each value independently
-            while ( (tsdata = tsi.next()) != null ) {
-                // Set the information in the write statement
-                dt = tsdata.getDate();
-                value = tsdata.getDataValue();
-                if ( ts.isDataMissing(value) ) {
-                    // TODO SAM 2012-03-27 Evaluate whether should have option to write
-                    continue;
-                }
+        // Read all data up front and process, vs. read and process each value or smaller subsets (likely slower)
+        boolean readInBulk = true;
+        con.setAutoCommit(false);
+        Savepoint dbSavepoint = getConnection().setSavepoint();
+        try {
+            if ( readInBulk ) {
+                // Determine how many values will need to be updated or inserted.
+                // This is done first in order to minimize the number of points to be processed, for performance reasons
+                // First read all the data in the requested period, for the latest revision...
+                List<RiversideDB_TSDateValueRecord> tsdataList = null;
+                // TODO SAM 2012-04-07 Remove code if using readTimeSeries works out.
+                // The problem with the followig is that it does not ignore older revisions
+                //tsdataList = readTimeSeriesData (
+                //    tsTable.getTable_name(), measType.getMeasType_num(), outputStart, outputEnd,
+                //    hasDuration, hasCreationTime, hasRevisionNum );
+                // The following call ensures that multiple revisions for a date/time result in the newest revision
+                // being what is present in the data to analyze.
+                TS dbts = readTimeSeries ( tsid.toString(), outputStart, outputEnd, null, Double.NaN, true );
+                // Now process each of the values in the time series being written, using the list of previous values
+                // to check according to the logic.  Because there is no guarantee that the database will already
+                // contain corresponding data values, use the time series being written as the master list of data
+                TSIterator tsi = null;
                 try {
-                    iParam = 1; // JDBC code is 1-based (use argument 1 for return value if used)
-                    ++writeTryCount;
+                    tsi = ts.iterator(outputStart,outputEnd);
                 }
                 catch ( Exception e ) {
-                    Message.printWarning ( 3, routine, "Error constructing batch write call at " + dt + " (" + e + " )" );
-                    ++errorCount;
-                    if ( errorCount <= 10 ) {
-                        // Log the exception, but only for the first 10 errors
-                        Message.printWarning(3,routine,e);
+                    throw new RuntimeException("Unable to initialize iterator for period " + outputStart + " to " + outputEnd );
+                }
+                TSData tsData;
+                TSData dbtsData = new TSData(); // Reuse the value in data requests
+                DateTime dt;
+                boolean dbHasData; // Does database have a data record at a date/time?
+                boolean valueDiffers; // Does the database and time series value differ?
+                boolean flagDiffers; // Does the database and time series flag differ?
+                boolean tsValueMissing, dbtsValueMissing;
+                double tsValue, dbtsValue = 0.0;
+                String tsValueString, dbtsValueString;
+                String tsDataFlag, dbtsDataFlag = null;
+                List<TSData> insertList = new Vector(); // Data values to be inserted in DB (with revision=1)
+                List<TSData> updateList = new Vector(); // Data values to be updated in DB (with new revision)
+                int comparePrecision = 4; // Number of digits to format data for comparison
+                String compareFormat = "%." + comparePrecision + "f";
+                while ( (tsData = tsi.next()) != null ) {
+                    dbHasData = false;
+                    tsValue = tsData.getDataValue();
+                    tsValueMissing = ts.isDataMissing(tsValue);
+                    dbtsValueMissing = false; // Checked below
+                    dt = tsData.getDate();
+                    tsDataFlag = tsData.getDataFlag();
+                    if ( tsDataFlag == null ) {
+                        // Set to blank... easier to handle below
+                        tsDataFlag = "";
+                    }
+                    // Get the same data point for the database time series
+                    // It is possible that the database time series has no data (e.g., for a new system or
+                    // when running a test where all data are first deleted).
+                    if ( (dbts == null) || !dbts.hasData() ) {
+                        dbtsData = null;
+                    }
+                    else {
+                        // Get the data value at the point.  It may come back with the missing value and blank flag.
+                        dbtsData = dbts.getDataPoint(dt, dbtsData);
+                    }
+                    // Determine if the database contents match the time series.  A check on database table records
+                    // might be more precise.  However, since a time series is being written, the comparison on time
+                    // series contents is likely sufficient because the data flows through the API (that's as precise
+                    // as it is going to get without changing the API).  For example, a missing record in the DB will
+                    // result in the API returnign missing values, which is OK to check against in foreseeable cases.
+                    if ( dbtsData == null ) {
+                        dbHasData = false;
+                    }
+                    else {
+                        // Check the database time series record to see if anything is present
+                        dbtsValue = dbtsData.getDataValue();
+                        dbtsValueMissing = dbts.isDataMissing(dbtsValue);
+                        dbtsDataFlag = dbtsData.getDataFlag();
+                        if ( dbtsDataFlag == null ) {
+                            // Set to blank...easier to check
+                            dbtsDataFlag = "";
+                        }
+                        if ( !dbtsValueMissing || !dbtsDataFlag.equals("") ) {
+                            dbHasData = true;
+                        }
+                    }
+                    if ( !dbHasData ) {
+                        // The data point does not exist in the database and needs to be inserted.
+                        // However, first check to see if the time series record also is missing.  If so then no reason
+                        // to insert.
+                        if ( ts.isDataMissing(tsData.getDataValue()) ||
+                            (tsDataFlag == null) || tsDataFlag.equals("")) {
+                            // Time series is also missing so no need to write
+                        }
+                        else {
+                            // Make a copy for the list because tsdata is volatile and gets reused when iterating
+                            insertList.add(new TSData(tsData));
+                        }
+                    }
+                    else {
+                        // The database has a data record that is not all missing so need to compare with the time
+                        // series being written.  Compare data values as strings to a precision of 4 digit.
+                        // Also compare the flags
+                        valueDiffers = false;
+                        flagDiffers = false;
+                        if ( tsValueMissing != dbtsValueMissing ) {
+                            // One is missing but the other is not
+                            valueDiffers = true;
+                        }
+                        else {
+                            // Compare values as strings...
+                            tsValueString = StringUtil.formatString(tsValue,compareFormat);
+                            dbtsValueString = StringUtil.formatString(dbtsValue,compareFormat);
+                            if ( !tsValueString.equals(dbtsValueString) ) {
+                                valueDiffers = true;
+                            }
+                            // Compare the flags...
+                            if ( !tsDataFlag.equals(dbtsDataFlag) ) {
+                                flagDiffers = true;
+                            }
+                        }
+                        if ( valueDiffers || flagDiffers ) {
+                            // The database and time series record are different.  Check the protected flag to
+                            // determine whether a record should be updated.
+                            if ( !dbtsDataFlag.equals(protectedFlag) ) {
+                                // The data flag in the existing database record is not protected so OK to update
+                                // Make a copy of the data to add 
+                                updateList.add(new TSData(tsData));
+                            }
+                        }
                     }
                 }
-                try {
-                    // TODO SAM 2012-03-28 Figure out how to use to compare values updated with expected number
-                    int [] updateCounts = writeStatement.executeBatch();
-                    writeStatement.close();
-                }
-                catch (BatchUpdateException e) {
-                    // Will happen if any of the batch commands fail.
-                    Message.printWarning(3,routine,e);
-                    throw new RuntimeException ( "Error executing write callable statement.", e );
-                }
-                catch (SQLException e) {
-                    Message.printWarning(3,routine,e);
-                    throw new RuntimeException ( "Error executing write callable statement.", e );
+                Message.printStatus(2,routine,"Number of time series records to insert (not already in database) = " +
+                    insertList.size());
+                Message.printStatus(2,routine,"Number of time series records to update (modification of database) = " +
+                    updateList.size());
+                if ( (insertList.size() + updateList.size()) > 0 ) {
+                    // Add a new revision so the incremented revision number can be used in the time series
+                    // data records
+                    long revisionNum = writeTimeSeries_writeRevision ( hasRevisionTable, revisionDateTime,
+                        revisionUser, revisionComment );
+                    if ( insertList.size() > 0 ) {
+                        // Create the prepared statement for inserting data records
+                        PreparedStatement writeStatement = writeTimeSeries_createInsertStatement ( tsTable, hasRevisionTable,
+                            hasCreationTime, hasRevisionNum, hasDuration);
+                        // Write the time series records using the prepared statement
+                        writeTimeSeries_writeRecords ( ts, insertList, outputStart, outputEnd,
+                            writeStatement, measTypeNum,
+                            hasRevisionTable, hasRevisionNum, revisionNum, hasCreationTime, hasDuration,
+                            revisionDateTime, revisionUser, revisionComment );
+                    }
+                    if ( updateList.size() > 0 ) {
+                        // Updates are actually inserts also since revisions are being tracked
+                        // Create the prepared statement for inserting data records
+                        PreparedStatement writeStatement = writeTimeSeries_createInsertStatement ( tsTable, hasRevisionTable,
+                            hasCreationTime, hasRevisionNum, hasDuration);
+                        // Write the time series records using the prepared statement
+                        writeTimeSeries_writeRecords ( null, updateList, outputStart, outputEnd,
+                            writeStatement, measTypeNum,
+                            hasRevisionTable, hasRevisionNum, revisionNum, hasCreationTime, hasDuration,
+                            revisionDateTime, revisionUser, revisionComment );
+                    }
                 }
             }
-            if ( errorCount > 0 ) {
-                throw new RuntimeException ( "Had " + errorCount + " errors out of total of " + writeTryCount + " attempts." );
-            }
-            Message.printStatus(2,routine,"Wrote " + writeTryCount + " values to RiversideDB.");
         }
-        */
+        catch ( Exception e ) {
+            // Rollback on any errors
+            con.rollback(dbSavepoint);
+            Message.printWarning(3,routine,e);
+            throw new RuntimeException ( "Error processing data - rolling back to previous contents", e );
+        }
+        finally {
+            con.setAutoCommit(true);
+            try {
+                con.releaseSavepoint(dbSavepoint);
+            }
+            catch ( SQLException e ) {
+            }
+        }
     }
+}
+
+/**
+Helper method to create a prepared statement to insert time series records.
+Exceptions are as if the code was in-lined and should be handled in the calling code.
+*/
+private PreparedStatement writeTimeSeries_createInsertStatement ( RiversideDB_Tables tsTable, boolean hasRevisionTable,
+    boolean hasCreationTime, boolean hasRevisionNum, boolean hasDuration )
+throws SQLException
+{
+    StringBuffer insertSql = new StringBuffer (
+        "INSERT INTO " + tsTable.getTable_name() + " (MeasType_num, Date_Time, Val" );
+    if ( hasCreationTime ) {
+        insertSql.append(", Creation_time" );
+    }
+    if ( hasRevisionTable && hasRevisionNum ) {
+        insertSql.append(", Revision_num" );
+    }
+    if ( hasDuration ) {
+        insertSql.append(", Duration" );
+    }
+    insertSql.append ( ", Quality_flag) VALUES (?,?,?" );
+    if ( hasCreationTime ) {
+        insertSql.append(",?" );
+    }
+    if ( hasRevisionTable && hasRevisionNum ) {
+        insertSql.append(",?" );
+    }
+    if ( hasDuration ) {
+        insertSql.append(",?" );
+    }
+    insertSql.append ( ",?)" );
+    return getConnection().prepareStatement ( insertSql.toString() );
+}
+
+/**
+Helper method to write time series records.
+Exceptions are as if the code was in-lined and should be handled in the calling code.
+@param ts if insertList is null, time series records will be written
+@param tsdataList if not null, list of data objects will be written
+*/
+private void writeTimeSeries_writeRecords ( TS ts, List<TSData> tsdataList, DateTime outputStart, DateTime outputEnd,
+    PreparedStatement writeStatement, long measTypeNum,
+    boolean hasRevisionTable, boolean hasRevisionNum, long revisionNum, boolean hasCreationTime, boolean hasDuration,
+    DateTime revisionDateTime, String revisionUser, String revisionComment )
+{   String routine = getClass().getName() + ".writeTimeSeries_writeRecords";
+    DateTime dt = null;
+    String flag = null;
+    double value;
+    int iVal;
+    int errorCount = 0;
+    int writeTryCount = 0;
+    TSIterator tsi = null;
+    if ( ts != null ) {
+        try {
+            tsi = ts.iterator(outputStart,outputEnd);
+        }
+        catch ( Exception e ) {
+            throw new RuntimeException("Unable to initialize iterator for period " + outputStart + " to " + outputEnd );
+        }
+    }
+    TSData tsdata = null;
+    int itsdata = -1;
+    while ( true ) {
+        if ( ts != null ) {
+            // Writing from time series object
+            tsdata = tsi.next();
+            if ( tsdata == null ) {
+                break;
+            }
+        }
+        else {
+            // Writing from data object list
+            ++itsdata;
+            if ( itsdata >= tsdataList.size() ) {
+                break;
+            }
+            tsdata = tsdataList.get(itsdata);
+        }
+        // Set the information in the write statement
+        dt = tsdata.getDate();
+        value = tsdata.getDataValue();
+        flag = tsdata.getDataFlag();
+        //if ( ts.isDataMissing(value) ) {
+        //    // TODO SAM 2012-03-27 Evaluate whether should have option to write
+        //    continue;
+        //}
+        try {
+            ++writeTryCount;
+            iVal = 1; // JDBC code is 1-based (use argument 1 for return value if used)
+            writeStatement.setLong(iVal++, measTypeNum );
+            writeStatement.setTimestamp(iVal++, new Timestamp(dt.getDate().getTime()) );
+            if ( ts.isDataMissing(value) ) {
+                writeStatement.setNull(iVal++,java.sql.Types.DOUBLE);
+            }
+            else {
+                writeStatement.setDouble(iVal++, value);
+            }
+            if ( hasCreationTime ) {
+                writeStatement.setTimestamp(iVal++, new Timestamp(revisionDateTime.getDate().getTime()) );
+            }
+            if ( hasRevisionTable && hasRevisionNum ) {
+                writeStatement.setLong(iVal++, revisionNum );
+            }
+            if ( hasDuration ) {
+                writeStatement.setInt(iVal++, 0 ); // FIXME SAM 2012-04-06 Duration always 0 for now
+            }
+            if ( flag == null ) {
+                writeStatement.setNull(iVal++,java.sql.Types.VARCHAR);
+            }
+            else {
+                writeStatement.setString(iVal++, flag );
+            }
+            writeStatement.addBatch();
+        }
+        catch ( Exception e ) {
+            Message.printWarning ( 3, routine,
+                "Error constructing batch write call at " + dt + " (" + e + ") - will not attempt write." );
+            ++errorCount;
+            if ( errorCount <= 10 ) {
+                // Log the exception, but only for the first 10 errors
+                Message.printWarning(3,routine,e);
+            }
+        }
+    }
+    // Now execute the batch insert
+    if ( errorCount > 0 ) {
+        throw new RuntimeException ( "Had " + errorCount + " errors out of total of " + writeTryCount +
+            " configuring batch database insert - not writing data records." );
+    }
+    else {
+        // OK to try the all the data records...
+        int writeCount = 0;
+        int failCount = 0;
+        try {
+            // TODO SAM 2012-03-28 Figure out how to use to compare values updated with expected number
+            int [] updateCounts = writeStatement.executeBatch();
+            for ( int i = 0; i < updateCounts.length; i++ ) {
+                if ( updateCounts[i] == java.sql.Statement.EXECUTE_FAILED ) {
+                    ++failCount;
+                }
+                else if ( updateCounts[i] >= 0 ) {
+                    ++writeCount;
+                }
+            }
+            writeStatement.close();
+            Message.printStatus(2, routine, "Wrote " + writeCount + " time series values, " + failCount + " failed." );
+        }
+        catch (BatchUpdateException e) {
+            // Will happen if any of the batch commands fail.
+            Message.printWarning(3,routine,e);
+            throw new RuntimeException ( "Error executing write prepared statement.", e );
+        }
+        catch (SQLException e) {
+            Message.printWarning(3,routine,e);
+            throw new RuntimeException ( "Error executing write prepared statement.", e );
+        }
+        if ( failCount > 0 ) {
+            throw new RuntimeException ( "Error writing " + failCount + " values." );
+        }
+    }
+}
+
+/**
+Helper method to write new Revision record when writing time series.
+Exceptions are as if the code was in-lined and should be handled in the calling code.
+*/
+private long writeTimeSeries_writeRevision ( boolean hasRevisionTable, DateTime revisionDateTime,
+    String revisionUser, String revisionComment )
+throws Exception
+{   String routine = getClass().getName() + ".writeTimeSeries_writeRevision";
+    // Next insert revision information that is used in the data records so that a new revision number
+    // can be obtained for use below
+    long revisionNum = 1; // Default - indicates no revision information to insert
+    if ( hasRevisionTable && (revisionComment != null) && (revisionComment.length() > 0) ) {
+        // Need to add a revision that has revision number one larger than the last revision number
+        // Call the writeRevision() method with no revision number set and it will increment the revision number
+        try {
+            RiversideDB_Revision r = new RiversideDB_Revision();
+            r.setDate_Time(revisionDateTime.getDate());
+            r.setUser(revisionUser);
+            r.setComment(revisionComment);
+            writeRevision(r);
+        }
+        catch ( Exception e ) {
+            Message.printWarning(3,routine,e);
+            throw new RuntimeException ( "Error writing revision - not inserting data", e );
+        }
+    }
+    // Get the revision number as the maximum from the Revisions table
+    RiversideDB_Revision revisionMax = readRevisionMaxRevisionNum ( true );
+    revisionNum = revisionMax.getRevision_num();
+    return revisionNum;
 }
 
 /**
