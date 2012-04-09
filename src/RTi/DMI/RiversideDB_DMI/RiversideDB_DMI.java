@@ -11914,12 +11914,12 @@ matched for the write.
 @param sequenceNumber the sequence number in MeasType
 @param writeDataFlags indicate whether data flags should be written (if in the time series)
 @param outputStartReq the requested period to start writing
-@param outptuEndReq the requested period to end writing
+@param outputEndReq the requested period to end writing
 */
 public void writeTimeSeries ( TS ts, String locationID, String dataSource, String dataType,
     String dataSubType, TimeInterval interval, String scenario, Integer sequenceNumber,
     boolean writeDataFlags, DateTime outputStartReq, DateTime outputEndReq, RiversideDB_WriteMethodType writeMethod,
-    String protectedFlag, DateTime revisionDateTime, String revisionUser, String revisionComment )
+    String protectedFlag, Integer comparePrecision, DateTime revisionDateTime, String revisionUser, String revisionComment )
 throws Exception
 {   String routine = getClass().getName() + ".writeTimeSeries", message;
     // Get the MeasType of interest.  This uses a TSIdent
@@ -12125,7 +12125,9 @@ throws Exception
                 String tsDataFlag, dbtsDataFlag = null;
                 List<TSData> insertList = new Vector(); // Data values to be inserted in DB (with revision=1)
                 List<TSData> updateList = new Vector(); // Data values to be updated in DB (with new revision)
-                int comparePrecision = 4; // Number of digits to format data for comparison
+                if ( comparePrecision == null ) {
+                    comparePrecision = 4; // Number of digits to format data for comparison
+                }
                 String compareFormat = "%." + comparePrecision + "f";
                 while ( (tsData = tsi.next()) != null ) {
                     dbHasData = false;
@@ -12184,7 +12186,8 @@ throws Exception
                     }
                     else {
                         // The database has a data record that is not all missing so need to compare with the time
-                        // series being written.  Compare data values as strings to a precision of 4 digit.
+                        // series being written.  First check to see if the value is protected.
+                        // Compare data values as strings to the specified comparison precision.
                         // Also compare the flags
                         valueDiffers = false;
                         flagDiffers = false;
@@ -12240,7 +12243,7 @@ throws Exception
                         PreparedStatement writeStatement = writeTimeSeries_createInsertStatement ( tsTable, hasRevisionTable,
                             hasCreationTime, hasRevisionNum, hasDuration);
                         // Write the time series records using the prepared statement
-                        writeTimeSeries_writeRecords ( null, updateList, outputStart, outputEnd,
+                        writeTimeSeries_writeRecords ( ts, updateList, outputStart, outputEnd,
                             writeStatement, measTypeNum,
                             hasRevisionTable, hasRevisionNum, revisionNum, hasCreationTime, hasDuration,
                             revisionDateTime, revisionUser, revisionComment );
@@ -12316,7 +12319,8 @@ private void writeTimeSeries_writeRecords ( TS ts, List<TSData> tsdataList, Date
     int errorCount = 0;
     int writeTryCount = 0;
     TSIterator tsi = null;
-    if ( ts != null ) {
+    if ( tsdataList == null ) {
+        // Will need to iterate through the time series
         try {
             tsi = ts.iterator(outputStart,outputEnd);
         }
@@ -12327,7 +12331,7 @@ private void writeTimeSeries_writeRecords ( TS ts, List<TSData> tsdataList, Date
     TSData tsdata = null;
     int itsdata = -1;
     while ( true ) {
-        if ( ts != null ) {
+        if ( tsdataList == null ) {
             // Writing from time series object
             tsdata = tsi.next();
             if ( tsdata == null ) {
