@@ -1,18 +1,3 @@
-// ----------------------------------------------------------------------------
-// RiversideDB_DataUnits
-// ----------------------------------------------------------------------------
-// Copyright:   See the COPYRIGHT file
-// ----------------------------------------------------------------------------
-// History:
-//
-// 2002-07-01	Steven A. Malers, RTi	Initial version.
-// 2002-08-20	J. Thomas Sapienza, RTi	made toString() more descriptive
-// 2003-01-03	SAM, RTi		Use DMIUtil for missing data.
-// 2004-01-26	JTS, RTi		Added copy constructor.
-// 2004-01-27	JTS, RTi		Added equals().
-// 2004-02-02	JTS, RTi		Class is now cloneable.
-// ----------------------------------------------------------------------------
-
 package RTi.DMI.RiversideDB_DMI;
 
 import RTi.DMI.DMIDataObject;
@@ -22,7 +7,7 @@ import RTi.Util.IO.DataUnits;
 import RTi.Util.String.StringUtil;
 
 /**
-class to store data from the DataUnits table
+Class to store data from the DataUnits table
 */
 public class RiversideDB_DataUnits 
 extends DMIDataObject
@@ -353,4 +338,4 @@ public DataUnits toDataUnits() throws Exception {
     return units;
 }
 
-} // End RiversideDB_DataUnits
+}

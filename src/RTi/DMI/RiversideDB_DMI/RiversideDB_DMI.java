@@ -363,6 +363,7 @@ import RTi.Util.Time.TimeInterval;
 
 import RTi.Util.IO.DataUnits;
 import RTi.Util.IO.DataDimension;
+import RTi.Util.IO.DataUnitsConversion;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.Prop;
 
@@ -794,6 +795,11 @@ List of RiversideDB_Tables, which are referenced when reading and writing time s
 private List _RiversideDB_Tables_Vector = new Vector();
 
 /**
+List of data units, useful for checks.
+*/
+private List<RiversideDB_DataUnits> __RiversideDB_DataUnitsList = new Vector();
+
+/**
 List of counties in the Geoloc table, useful for choices.
 */
 private List<String> __RiversideDB_GeolocCountyList = new Vector();
@@ -893,6 +899,55 @@ throws Exception {
 }
 
 // A FUNCTIONS
+
+/**
+Determine whether a list of units strings are compatible.
+@param unitsStrings list of units strings.
+@param requireSame Flag indicating whether the units must exactly match (no
+conversion necessary).  If true, the units must be the same, either in
+spelling or have the a conversion factor of unity.  If false, the
+units must only be in the same dimension (e.g., "CFS" and "GPM" would be compatible).
+*/
+public boolean areUnitsStringsCompatible ( List<String> unitsStrings, boolean requireSame )
+{   if ( unitsStrings == null ) {
+        // No units.  Decide later whether to throw an exception.
+        return true;
+    }
+    int size = unitsStrings.size();
+    if ( size < 2 ) {
+        // No need to compare...
+        return true;
+    }
+    String units1 = unitsStrings.get(0);
+    if ( units1 == null ) {
+        return true;
+    }
+    String units2;
+    // Allow nulls because it is assumed that later they will result in an ignored conversion...
+    DataUnitsConversion conversion = null;
+    for ( int i = 1; i < size; i++ ) {
+        units2 = unitsStrings.get(i);
+        if ( (units2 == null) || units2.equalsIgnoreCase(units1) ) {
+            continue;
+        }
+        // Get the conversions and return false if a conversion cannot be obtained...
+        try {
+            conversion = getDataUnitsConversion ( units1, units2 );
+            if ( requireSame ) {
+                // If the factors are not unity, return false.
+                // This will allow AF and ACFT to compare exactly...
+                if ( (conversion.getAddFactor() != 0.0) || (conversion.getMultFactor() != 1.0) ) {
+                    return false;
+                }
+            }
+        }
+        catch ( Exception e ) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // B FUNCTIONS
 
 /** 
@@ -3975,6 +4030,31 @@ protected void finalize() throws Throwable {
 }
 
 /**
+Return a RiversideDB_DataUnits instance, given the units abbreviation.  A copy is NOT made.
+@return A RiversideDB_DataUnits instance, given the units abbreviation.
+@param unitsString The units abbreviation to look up.
+@exception Exception If there is a problem looking up the units abbreviation.
+*/
+public RiversideDB_DataUnits findDataUnits ( List<RiversideDB_DataUnits> unitsList, String unitsString )
+throws Exception
+{   String routine = "DataUnits.lookupUnits";
+
+    // First see if the units are already in the list...
+
+    for ( RiversideDB_DataUnits pt : unitsList ) {
+        if ( Message.isDebugOn ) {
+            Message.printDebug ( 20, routine, "Comparing " + unitsString + " and " + pt.getUnits_abbrev());
+        }
+        if ( unitsString.equalsIgnoreCase(pt.getUnits_abbrev() ) ) {
+            // The requested units match something that is in the list.  Return the matching instance...
+            return pt;
+        }
+    }
+    // Throw an exception...
+    throw new Exception ( "\"" + unitsString + "\" units not found" );
+}
+
+/**
 Find an instance of RiversideDB_MeasType given values that form the unique TSID.  This method is useful
 when matching the MeasType from a list of user-selected choices.
 @param measTypeList list of RiversideDB_MeasType to search
@@ -4115,6 +4195,126 @@ public String[] getDatabaseVersionArray() {
     }
     
     return null;
+}
+
+/**
+Get the conversion from units string to another.
+@return A DataUnitsConversion instance with the conversion information from one set of units to another.
+@param u1String Original units.
+@param u2String The units after conversion.
+@exception Exception If the conversion cannot be found.
+*/
+public DataUnitsConversion getDataUnitsConversion ( String u1String, String u2String )
+throws Exception
+{   int dl = 20;
+    String routine = "DataUnits.getConversion", u1Dim, u2Dim;
+
+    if ( Message.isDebugOn ) {
+        Message.printDebug ( dl, routine,
+        "Trying to get conversion from \"" + u1String + "\" to \"" + u2String + "\"" );
+    }
+
+    // Make sure that the units strings are not NULL...
+
+    if ( ((u1String == null) || (u1String.equals(""))) && ((u2String == null) || (u2String.equals(""))) ) {
+        // Both units are unspecified so return a unit conversion...
+        DataUnitsConversion c = new DataUnitsConversion();
+        c.setMultFactor ( 1.0 );
+        c.setAddFactor ( 0.0 );
+        return c;
+    }
+
+    String message = "";
+    if ( u1String == null ) {
+        message = "Source units string is NULL";
+        Message.printWarning ( 3, routine, message );
+        throw new Exception ( message );
+    }
+    if ( u2String == null ) {
+        message = "Secondary units string is NULL";
+        Message.printWarning ( 3, routine, message );
+        throw new Exception ( message );
+    }
+
+    // Set the conversion units...
+
+    DataUnitsConversion c = new DataUnitsConversion();
+    c.setOriginalUnits ( u1String );
+    c.setNewUnits ( u2String );
+
+    // First thing we do is see if the units are the same.  If so, we are done...
+
+    if ( u1String.trim().equalsIgnoreCase(u2String.trim()) ) {
+        c.setMultFactor ( 1.0 );
+        c.setAddFactor ( 0.0 );
+        return c;
+    }
+
+    if ( u1String.length() == 0 ) {
+        message = "Source units string is empty";
+        Message.printWarning ( 3, routine, message );
+        throw new Exception ( message );
+    }
+    if ( u2String.length() == 0 ) {
+        message = "Secondary units string is empty";
+        Message.printWarning ( 3, routine, message );
+        throw new Exception ( message );
+    }
+
+    // First get the units data...
+
+    RiversideDB_DataUnits u1, u2;
+    try {
+        u1 = findDataUnits ( __RiversideDB_DataUnitsList, u1String );
+    }
+    catch ( Exception e ) {
+        message = "Unable to get units type for \"" + u1String + "\"";
+        Message.printWarning ( 3, routine, message );
+        throw new Exception ( message );
+        
+    }
+    try {
+        u2 = findDataUnits ( __RiversideDB_DataUnitsList, u2String );
+    }
+    catch ( Exception e ) {
+        message = "Unable to get units type for \"" + u2String + "\"";
+        Message.printWarning ( 3, routine, message );
+        throw new Exception ( message );
+    }
+
+    // Get the dimension for the units of interest...
+
+    u1Dim = u1.getDimension();
+    u2Dim = u2.getDimension();
+
+    if ( u1Dim.equalsIgnoreCase(u2Dim) ) {
+        // Same dimension...
+        c.setMultFactor ( u1.getMult_factor()/u2.getMult_factor() );
+        // For the add factor assume that a value over .001 indicates
+        // that an add factor should be considered.  This should only
+        // be the case for temperatures and all other dimensions should have a factor of 0.0.
+        if ( (Math.abs(u1.getAdd_factor()) > .001) || (Math.abs(u2.getAdd_factor()) > .001) ){
+            // The addition factor needs to take into account the
+            // different scales for the measurement range...
+            c.setAddFactor ( -1.0*u2.getAdd_factor()/u2.getMult_factor() + u1.getAdd_factor()/u2.getMult_factor() );
+        }
+        else {
+            c.setAddFactor ( 0.0 );
+        }
+        Message.printStatus(1, "", "Add factor is " + c.getAddFactor());
+    }
+    else {
+        message = "Dimensions are different for " + u1String + " and " + u2String;
+        Message.printWarning ( 3, routine, message );
+        throw new Exception ( message );
+    }
+
+    // Else, units groups are of different types - need to do more than
+    // one step.  These are currently special cases and do not handle a
+    // generic conversion (dimensional analysis like Unicalc)!
+    // TODO see DataUnit class code, not yet implemented at the time of this writing
+
+    return c;
 }
 
 /**
@@ -5001,8 +5201,11 @@ throws Exception {
     __RiversideDB_MeasTypeDataTypeList = readMeasTypeDataTypeList();
     // Distinct data subtypes in the MeasType table
     __RiversideDB_MeasTypeSubTypeList = readMeasTypeSubTypeList();
-    // Distinct data units in the MeasType table
+    // Distinct data units in the MeasType table, useful for choices
+    // TODO SAM 2012-04-13 Need to phase out in favor of full units
     __RiversideDB_MeasTypeUnitsList = readMeasTypeUnitsList();
+    // Data units (needed to check units when writing data)
+    __RiversideDB_DataUnitsList = readDataUnitsList();
 }
 
 /**
@@ -11963,6 +12166,20 @@ throws Exception
         throw new IllegalArgumentException("Unable to find matching time series for TSID=\"" + tsid + "\"" );
     }
     long measTypeNum = measType.getMeasType_num();
+    // Verify that the units of the time series are consistent with the units in the database
+    // Because the data are in RiversideDB, only use the RiversideDB units for the check (no internal
+    // DataUnit class checks).  This is essentially the same method as in DataUnit.
+    if ( ts != null ) {
+        List<String> unitsStrings = new Vector();
+        unitsStrings.add(ts.getDataUnits());
+        unitsStrings.add(measType.getUnits_abbrev());
+        if ( !areUnitsStringsCompatible(unitsStrings, true) ) {
+            throw new IllegalArgumentException(
+                "Time series data units \"" + ts.getDataUnits() +
+                "\" are not compatible with database time series units \"" + measType.getUnits_abbrev() +
+                "\" for TSID=\"" + tsid + "\"" );
+        }
+    }
     // Figure out the table to write to
     // Determine the table and format to read from...
     int pos = RiversideDB_Tables.indexOf ( _RiversideDB_Tables_Vector, measType.getTable_num1() );
@@ -12006,11 +12223,7 @@ throws Exception
     boolean hasCreationTime = tableLayoutHasCreationTime(tableLayoutNum);
     boolean hasRevisionNum = tableLayoutHasRevisionNum(tableLayoutNum);
     boolean hasRevisionTable = DMIUtil.databaseHasTable(this, "Revision");
-    boolean compareWithOldData = false; // This is used with TRACK_
     Connection con = getConnection();
-    if ( writeMethod == RiversideDB_WriteMethodType.TRACK_REVISIONS ) {
-        compareWithOldData = true;
-    }
     // The following major blocks of code utilize transactions to ensure that database operations are grouped and
     if ( writeMethod == RiversideDB_WriteMethodType.DELETE ) {
         con.setAutoCommit(false);
