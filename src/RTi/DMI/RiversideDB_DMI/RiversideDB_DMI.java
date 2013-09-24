@@ -6089,8 +6089,7 @@ Executes a query on table MeasType, limiting values to a series of things,
 should any of them be set in the string passed in to the method.  The 
 where clause may set Data_type, Time_step_base, Identifier, Scenario, and/or Source_abbrev.
 @param tsIdent a ts identifier string that will be split up and its values
-set in various where clauses
-will have its own separate time series.
+set in various where clauses will have its own separate time series.
 @param sortField the field to sort on
 @return a list of RiversideDB_MeasType objects filled with rows from the resultSet
 @throws Exception if an error occurs
@@ -6148,8 +6147,10 @@ throws Exception {
 	if (source.length() > 0) {
 		q.addWhereClause("MeasType.Source_abbrev = '" + escape(source) + "'");
 	}
-	if ( getMeasTypeHasSequenceNum() && (id.getSequenceNumber() > 0) ) {
-	    q.addWhereClause("MeasType.Sequence_num = " + id.getSequenceNumber() );
+	if ( getMeasTypeHasSequenceNum() && (id.getSequenceID() != null) && !id.getSequenceID().equals("") ) {
+	    // In RiversideDB the sequence number is an integer
+	    // TODO SAM 2013-09-22 Evaluate whether to change to strings in RiversideDB
+	    q.addWhereClause("MeasType.Sequence_num = " + id.getSequenceID() );
 	}
 	if (sortField != null) {
 		q.addOrderByClause(sortField);

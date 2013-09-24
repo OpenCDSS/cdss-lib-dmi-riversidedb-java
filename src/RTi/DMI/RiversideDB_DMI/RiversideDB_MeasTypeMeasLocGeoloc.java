@@ -686,7 +686,7 @@ throws Exception {
 	}
 	TSIdent tsident = new TSIdent ( _Identifier, _Source_abbrev, data_type, timestep, _Scenario );
     if ( !DMIUtil.isMissing(_Sequence_num) ) {
-        tsident.setSequenceNumber(_Sequence_num);
+        tsident.setSequenceID("" + _Sequence_num);
     }
 	return tsident;
 }
