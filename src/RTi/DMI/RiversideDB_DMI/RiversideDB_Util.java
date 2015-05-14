@@ -2,14 +2,17 @@ package RTi.DMI.RiversideDB_DMI;
 
 import java.awt.Dimension;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
 
 import RTi.DMI.DMIUtil;
+import RTi.DMI.DataDictionary;
 import RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JGUIUtil;
 import RTi.Util.GUI.SimpleFileFilter;
@@ -150,25 +153,24 @@ public static void createHTMLDataDictionary ( JFrame jFrame, RiversideDB_DMI dmi
 
 	JGUIUtil.setWaitCursor( jFrame, true );
 	
-	String[] refTables = new String[12];
-	int i = 0;
+	List<String> refTables = new ArrayList<String>(12);
 	
 // REVISIT [LT] 2004-12-21 - SAM's comments from the first review.
 //				"Split into separated methods?"
 // 	The implementation of this splitting goes well with the 'new Class"
 //	approach suggested above.	
-	refTables[i++] = "DataDimension";
-	refTables[i++] = "DataSource";
-	refTables[i++] = "DataType";
-	refTables[i++] = "DataUnits";
-	refTables[i++] = "ImportType";
-	refTables[i++] = "MeasCreateMethod";
-	refTables[i++] = "MeasQualityFlag";
-	refTables[i++] = "MeasReductionType";
-	refTables[i++] = "MeasTimeScale";
-	refTables[i++] = "MeasTransProtocol";
-	refTables[i++] = "SHEFType";
-	refTables[i++] = "TableLayout";
+	refTables.add("DataDimension");
+	refTables.add("DataSource");
+	refTables.add("DataType");
+	refTables.add("DataUnits");
+	refTables.add("ImportType");
+	refTables.add("MeasCreateMethod");
+	refTables.add("MeasQualityFlag");
+	refTables.add("MeasReductionType");
+	refTables.add("MeasTimeScale");
+	refTables.add("MeasTransProtocol");
+	refTables.add("SHEFType");
+	refTables.add("TableLayout");
 
 	String lastDirectorySelected = JGUIUtil.getLastFileDialogDirectory();
 
@@ -188,7 +190,7 @@ public static void createHTMLDataDictionary ( JFrame jFrame, RiversideDB_DMI dmi
 
  	JGUIUtil.setWaitCursor( jFrame, false);
  	
- 	// Prompty to user for a file.
+ 	// Prompt user for a file.
  	int retVal = fc.showSaveDialog( jFrame );
  	if (retVal != JFileChooser.APPROVE_OPTION) return;
  	
@@ -206,8 +208,8 @@ public static void createHTMLDataDictionary ( JFrame jFrame, RiversideDB_DMI dmi
 
 	try {
 		Message.printStatus( 1, routine,"Creating data dictionary \"" + fileName + "\"." );
-
-		DMIUtil.createHTMLDataDictionary(dmi, fileName, refTables, null );
+		DataDictionary dd = new DataDictionary();
+		dd.createHTMLDataDictionary(dmi, fileName, refTables, null );
 	}
 	catch ( Exception e ) {
 		Message.printWarning( 2, routine, e);
