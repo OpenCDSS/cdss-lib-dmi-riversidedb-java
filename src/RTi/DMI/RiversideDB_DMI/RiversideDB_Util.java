@@ -209,7 +209,7 @@ public static void createHTMLDataDictionary ( JFrame jFrame, RiversideDB_DMI dmi
 	try {
 		Message.printStatus( 1, routine,"Creating data dictionary \"" + fileName + "\"." );
 		DataDictionary dd = new DataDictionary();
-		dd.createHTMLDataDictionary(dmi, fileName, refTables, null );
+		dd.createHTMLDataDictionary(dmi, fileName, null, false, true, refTables, null );
 	}
 	catch ( Exception e ) {
 		Message.printWarning( 2, routine, e);
