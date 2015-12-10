@@ -3760,7 +3760,7 @@ public void verify_geography_tab() throws Exception {
 		gui_lat = StringUtil.atod( gui_lat_str );
 
 		//Values in the GUI -see if they match values from database
-		if ( db_lat == DMIUtil.MISSING_DOUBLE ) {
+		if ( DMIUtil.isMissing(db_lat) ) {
 			//there is a difference because we have a value in the
 			//gui and not in the database
  			__gui_RTi_GeoLoc.setDirty( true );
@@ -3814,7 +3814,8 @@ public void verify_geography_tab() throws Exception {
 	//if the lon is null in the GUI
 	if (( gui_lon_str == null ) || ( gui_lon_str.length() <=0 ) ) {
 		//if it is not null in the database, then there is a change
-		if ( db_lon != DMIUtil.MISSING_DOUBLE ) {
+		//if ( db_lon != DMIUtil.MISSING_DOUBLE ) {
+		if ( !DMIUtil.isMissing(db_lon) ) {
 			//there is a difference
  			__gui_RTi_GeoLoc.setDirty( true );
  			__dirty_vect.add(
@@ -3829,7 +3830,7 @@ public void verify_geography_tab() throws Exception {
 		gui_lon = StringUtil.atod( gui_lon_str );
 
 		//Values in the GUI -see if they match values from database
-		if ( db_lon ==  DMIUtil.MISSING_DOUBLE ) {
+		if ( DMIUtil.isMissing(db_lon) ) {
 			//there is a difference because we have a value in the
 			//gui and not in the database
  			__gui_RTi_GeoLoc.setDirty( true );
@@ -3899,7 +3900,7 @@ public void verify_geography_tab() throws Exception {
 		gui_x = StringUtil.atod( gui_x_str );
 
 		//Values in the GUI -see if they match values from database
-		if ( db_x == DMIUtil.MISSING_DOUBLE ) {
+		if ( DMIUtil.isMissing(db_x) ) {
 			//there is a difference because we have a value in the
 			//gui and not in the database
  			__gui_RTi_GeoLoc.setDirty( true );
