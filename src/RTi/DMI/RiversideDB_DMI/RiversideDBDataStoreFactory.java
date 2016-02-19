@@ -34,7 +34,9 @@ public DataStore create ( PropList props )
         systemLogin, // OK if null - use read-only guest
         systemPassword ); // OK if null - use read-only guest
         rdmi.open();
-        return new RiversideDBDataStore ( name, description, rdmi );
+        RiversideDBDataStore ds = new RiversideDBDataStore ( name, description, rdmi );
+        ds.setProperties(props);
+        return ds;
     }
     catch ( Exception e ) {
         // TODO SAM 2010-09-02 Wrap the exception because need to move from default Exception
