@@ -324,7 +324,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Timestamp;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -337,10 +336,8 @@ import RTi.DMI.DMISelectStatement;
 import RTi.DMI.DMIWriteStatement;
 import RTi.DMI.DMIStatement;
 import RTi.DMI.DMIUtil;
-
 import RTi.GRTS.TSProduct;
 import RTi.GRTS.TSProductDMI;
-
 import RTi.TS.DayTS;
 import RTi.TS.HourTS;
 import RTi.TS.IrregularTS;
@@ -352,23 +349,19 @@ import RTi.TS.TSIdent;
 import RTi.TS.TSIterator;
 import RTi.TS.TSSupplier;
 import RTi.TS.YearTS;
-
 import RTi.Util.GUI.InputFilter_JPanel;
 import RTi.Util.GUI.JComboBoxResponseJDialog;
 import RTi.Util.GUI.ResponseJDialog;
-
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.Time.TimeInterval;
-
+import RTi.Util.Time.TimeZoneDefaultType;
 import RTi.Util.IO.DataUnits;
 import RTi.Util.IO.DataDimension;
 import RTi.Util.IO.DataUnitsConversion;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.Prop;
-
 import RTi.Util.String.StringUtil;
-
 import RTi.Util.Time.DateTime;
 
 /**
@@ -12572,7 +12565,8 @@ private void writeTimeSeries_writeRecords ( TS ts, List<TSData> tsdataList, Date
             ++writeTryCount;
             iVal = 1; // JDBC code is 1-based (use argument 1 for return value if used)
             writeStatement.setLong(iVal++, measTypeNum );
-            writeStatement.setTimestamp(iVal++, new Timestamp(dt.getDate().getTime()) );
+            // TODO SAM 2016-03-10 Use local for getting date because that is what legacy code used but might need local standard
+            writeStatement.setTimestamp(iVal++, new Timestamp(dt.getDate(TimeZoneDefaultType.LOCAL).getTime()) );
             if ( ts.isDataMissing(value) ) {
                 writeStatement.setNull(iVal++,java.sql.Types.DOUBLE);
             }
@@ -12580,7 +12574,8 @@ private void writeTimeSeries_writeRecords ( TS ts, List<TSData> tsdataList, Date
                 writeStatement.setDouble(iVal++, value);
             }
             if ( hasCreationTime ) {
-                writeStatement.setTimestamp(iVal++, new Timestamp(revisionDateTime.getDate().getTime()) );
+            	// TODO SAM 2016-03-10 Use local for getting date because that is what legacy code used but might need local standard
+                writeStatement.setTimestamp(iVal++, new Timestamp(revisionDateTime.getDate(TimeZoneDefaultType.LOCAL).getTime()) );
             }
             if ( hasRevisionTable && hasRevisionNum ) {
                 writeStatement.setLong(iVal++, revisionNum );
@@ -12660,7 +12655,8 @@ throws Exception
         // Call the writeRevision() method with no revision number set and it will increment the revision number
         try {
             RiversideDB_Revision r = new RiversideDB_Revision();
-            r.setDate_Time(revisionDateTime.getDate());
+            // TODO SAM 2016-03-10 Use local for getting date because that is what is traditionally used but might need local standard
+            r.setDate_Time(revisionDateTime.getDate(TimeZoneDefaultType.LOCAL));
             r.setUser(revisionUser);
             r.setComment(revisionComment);
             writeRevision(r);

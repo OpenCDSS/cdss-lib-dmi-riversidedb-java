@@ -69,6 +69,7 @@ package RTi.DMI.RiversideDB_DMI;
 import java.util.List;
 
 import RTi.Util.Time.DateTime;
+import RTi.Util.Time.TimeZoneDefaultType;
 import RTi.DMI.DMIUtil;
 
 /**
@@ -306,8 +307,8 @@ protected Object setTableValueAt( Object value, int row, int column )
 			value = s;
 			try {
 				DateTime dt = DateTime.parse(s);
-				if (!dt.getDate().equals(m.getDate_Time())) {
-					m.setDate_Time(dt.getDate());
+				if (!dt.getDate(TimeZoneDefaultType.LOCAL).equals(m.getDate_Time())) {
+					m.setDate_Time(dt.getDate(TimeZoneDefaultType.LOCAL));
 					checkTableDirty(m, m0);
 					valueChanged(row, column, value);
 				}

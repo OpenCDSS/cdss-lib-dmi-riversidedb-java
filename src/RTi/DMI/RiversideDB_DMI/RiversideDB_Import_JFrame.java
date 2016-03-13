@@ -178,6 +178,7 @@ import  java.io.File;
 import  java.util.Date;
 import  java.util.List;
 import  java.util.Vector;
+
 import 	javax.swing.BorderFactory;
 import 	javax.swing.border.Border;
 import 	javax.swing.border.TitledBorder;
@@ -197,9 +198,7 @@ import 	javax.swing.JTextField;
 import 	javax.swing.ListSelectionModel;
 
 import 	RTi.Util.GUI.JFileChooserFactory;
-
 import  RTi.TS.TSIdent;
-
 import  RTi.Util.GUI.JGUIUtil;
 import  RTi.Util.GUI.JWorksheet;
 import  RTi.Util.GUI.ResponseJDialog;
@@ -212,7 +211,7 @@ import  RTi.Util.String.StringUtil;
 import  RTi.Util.Time.DateTime;
 import  RTi.Util.Time.TimeInterval;
 import  RTi.Util.Time.TimeUtil;
-
+import RTi.Util.Time.TimeZoneDefaultType;
 import 	RTi.DMI.DMIUtil;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
@@ -6281,7 +6280,7 @@ public void verify_properties_tab() throws Exception {
 	
 			//update database
  			__gui_RTi_ImportProduct.setNext_import_date( 
-			gui_next_DateTime.getDate() );
+			gui_next_DateTime.getDate(TimeZoneDefaultType.LOCAL) );
 		}
 	}
 	else {

@@ -150,7 +150,7 @@ import	RTi.Util.Message.Message;
 import  RTi.Util.String.StringUtil;
 import  RTi.Util.Time.DateTime;
 import  RTi.Util.Time.TimeUtil;
-
+import RTi.Util.Time.TimeZoneDefaultType;
 import 	RTi.DMI.DMIUtil;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DataSource;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
@@ -3271,11 +3271,12 @@ String end_str ) throws Exception {
 	//set Dates
 	DateTime start_dt = DateTime.parse(
 	start_str, DateTime.FORMAT_YYYY_MM_DD_HH_mm );
-	sdr.setStart_Date( start_dt.getDate() );
+	// Use LOCAL to match legacy behavior
+	sdr.setStart_Date( start_dt.getDate(TimeZoneDefaultType.LOCAL) );
 	start_dt = null;
 	DateTime end_dt = DateTime.parse(
 	end_str, DateTime.FORMAT_YYYY_MM_DD_HH_mm );
-	sdr.setEnd_Date( end_dt.getDate() );
+	sdr.setEnd_Date( end_dt.getDate(TimeZoneDefaultType.LOCAL) );
 	end_dt = null;
 
 	//set Numeric fields to 0
@@ -3386,7 +3387,7 @@ String end_str ) throws Exception {
 		new_end_date.addMinute( -1) ;
 
 		//set this as end date in object
-		sdr_old.setEnd_Date( new_end_date.getDate() );
+		sdr_old.setEnd_Date( new_end_date.getDate(TimeZoneDefaultType.LOCAL) );
 		//update vectors
  		__stageDischargeRating_vect.remove(0);
  		__stageDischargeRating_vect.add(0,sdr_old);

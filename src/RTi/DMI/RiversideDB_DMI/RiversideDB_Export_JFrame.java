@@ -153,7 +153,6 @@ import 	javax.swing.JTextField;
 import 	javax.swing.ListSelectionModel;
 
 import  RTi.TS.TSIdent;
-
 import  RTi.Util.GUI.JFileChooserFactory;
 import RTi.Util.GUI.JComboBoxResponseJDialog;
 import  RTi.Util.GUI.JGUIUtil;
@@ -166,7 +165,7 @@ import	RTi.Util.Message.Message;
 import  RTi.Util.String.StringUtil;
 import  RTi.Util.Time.DateTime;
 import  RTi.Util.Time.TimeUtil;
-
+import RTi.Util.Time.TimeZoneDefaultType;
 import 	RTi.DMI.DMIUtil;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DMI;
 import 	RTi.DMI.RiversideDB_DMI.RiversideDB_DBUser;
@@ -6099,7 +6098,7 @@ public void verify_properties_tab() throws Exception {
 
 			//update database
  			__gui_RTi_ExportProduct.setNext_export_date(
-			gui_next_DateTime.getDate() );
+			gui_next_DateTime.getDate(TimeZoneDefaultType.LOCAL) );
 		}
 	}
 	else {
