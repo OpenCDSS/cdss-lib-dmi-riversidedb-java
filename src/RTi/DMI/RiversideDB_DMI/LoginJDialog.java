@@ -37,6 +37,7 @@ To instantiate a LoginJDialog, use:
 int x= new LoginJDialog( JFrame parent, String title, RiversideDB_DMI datbase_connection  ).response();
 </pre>
 */
+@SuppressWarnings("serial")
 public class LoginJDialog extends JDialog
 implements ActionListener, KeyListener, FocusListener, WindowListener
 {
