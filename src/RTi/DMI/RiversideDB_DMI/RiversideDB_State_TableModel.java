@@ -21,6 +21,7 @@ import RTi.Util.GUI.JWorksheet_TableModelListener;
 /**
 This table model displays state data.  
 */
+@SuppressWarnings("serial")
 public class RiversideDB_State_TableModel
 extends JWorksheet_AbstractRowTableModel {
 
@@ -379,7 +380,7 @@ public void valueChanged(int row, int col, Object value) {
 	int size = _listeners.size();
 	JWorksheet_TableModelListener tml = null;
 	for (int i = 0; i < size; i++) {
-		tml = (JWorksheet_TableModelListener)_listeners.elementAt(i);
+		tml = (JWorksheet_TableModelListener)_listeners.get(i);
 		tml.tableModelValueChanged(row, col, value);
 	}
 }
